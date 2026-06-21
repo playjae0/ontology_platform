@@ -208,6 +208,32 @@ export interface EdgeEdit {
 export const editEdge = (body: EdgeEdit) =>
   post<{ ok: boolean; warning?: string | null }>("/edges/edit", body);
 
+// ---- M11 검색 + Eval ----
+export interface RetrieveResult {
+  query: string;
+  linked_nodes: { id: string; name: string; category: string; matched: string }[];
+  traversed: string[];
+  chunks: { cid: string; text: string; section: string; doc_id: string; score: number }[];
+  gap: boolean;
+}
+export const retrieve = (q: string, k = 5) =>
+  get<RetrieveResult>(`/retrieve?q=${encodeURIComponent(q)}&k=${k}`);
+
+export interface GoldenItem {
+  id: string; question: string; query_pattern: string; gold_chunks: string[]; difficulty: string;
+}
+export const fetchGolden = () =>
+  get<{ items: GoldenItem[]; patterns?: Record<string, string> }>("/eval/golden");
+
+export interface EvalResult {
+  summary: {
+    k: number; n: number; recall_at_k: number; mrr: number;
+    by_pattern: Record<string, number>; gaps: { id: string; question: string }[];
+  };
+  items: { id: string; question: string; pattern: string; recall: number; rank: number; resolved: boolean; returned: string[]; gold: string[] }[];
+}
+export const runEval = (k = 5) => post<EvalResult>(`/eval/run?k=${k}`);
+
 // ---- M9 인입 워크스페이스 ----
 export interface BatchDoc {
   doc_id: string; name: string; index: number;

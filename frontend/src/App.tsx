@@ -7,10 +7,11 @@ import DataManage from "./views/DataManage";
 import Workbench from "./views/Workbench";
 import Dashboard from "./views/Dashboard";
 import Ingest from "./views/Ingest";
+import Eval from "./views/Eval";
 import { BackendProvider, BackendToggle } from "./backend";
 import "./App.css";
 
-type View = "explore" | "workbench" | "data" | "dashboard" | "ingest";
+type View = "explore" | "workbench" | "data" | "dashboard" | "ingest" | "eval";
 
 export default function App() {
   return (
@@ -45,6 +46,9 @@ function AppShell() {
           <button className={view === "dashboard" ? "active" : ""} onClick={() => setView("dashboard")}>
             대시보드
           </button>
+          <button className={view === "eval" ? "active" : ""} onClick={() => setView("eval")}>
+            Test/Eval
+          </button>
         </nav>
         {showToggle && <BackendToggle />}
         {status.data && (
@@ -60,6 +64,7 @@ function AppShell() {
       {view === "data" && <DataManage />}
       {view === "dashboard" && <Dashboard />}
       {view === "ingest" && <Ingest onGotoWorkbench={() => setView("workbench")} />}
+      {view === "eval" && <Eval />}
     </div>
   );
 }

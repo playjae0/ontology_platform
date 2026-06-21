@@ -122,6 +122,65 @@ def dashboard_stats(backend: str = "json"):
     return base
 
 
+@app.get("/retrieve")
+def retrieve(q: str = "", k: int = 5, backend: str = "json"):
+    """검색 — 별칭+렉시컬 링킹 → 탐색 → describes 청크 수집. 임베딩 미사용(§6.2). 읽기 전용."""
+    return pick_reader(backend).retrieve(q, k)
+
+
+@app.get("/eval/golden")
+def eval_golden():
+    import json as _json
+    p = DATA_ROOT / "golden_set.json"
+    if not p.exists():
+        return {"items": []}
+    return _json.loads(p.read_text(encoding="utf-8"))
+
+
+@app.post("/eval/run")
+def eval_run(k: int = 5, backend: str = "json"):
+    """골든셋 실행 — Recall@k / MRR / 패턴별 분해 / alias gap. 골든셋 고정·읽기 전용."""
+    import json as _json
+    rd = pick_reader(backend)
+    p = DATA_ROOT / "golden_set.json"
+    golden = _json.loads(p.read_text(encoding="utf-8")) if p.exists() else {"items": []}
+    items, gaps = [], []
+    by_pattern: dict[str, list] = {}
+    recall_sum = rr_sum = 0.0
+    for g in golden.get("items", []):
+        res = rd.retrieve(g["question"], k)
+        returned = [c["cid"] for c in res["chunks"]]
+        topk = returned[:k]
+        gold = g.get("gold_chunks", [])
+        resolved = not res["gap"]
+        if not resolved:
+            gaps.append({"id": g["id"], "question": g["question"]})
+        if gold:
+            hit = [c for c in gold if c in topk]
+            recall = len(hit) / len(gold)
+            rank = next((i + 1 for i, c in enumerate(returned) if c in gold), 0)
+        else:
+            # gap 문항(정답 청크 없음): 미해소면 정답(recall=1), 무언가 링크되면 오탐(0)
+            recall = 1.0 if not resolved else 0.0
+            rank = 0
+        rr = (1.0 / rank) if rank else 0.0
+        recall_sum += recall
+        rr_sum += rr
+        by_pattern.setdefault(g["query_pattern"], []).append(recall)
+        items.append({"id": g["id"], "question": g["question"], "pattern": g["query_pattern"],
+                      "recall": round(recall, 3), "rank": rank, "resolved": resolved,
+                      "returned": topk, "gold": gold})
+    n = len(golden.get("items", [])) or 1
+    summary = {
+        "k": k, "n": len(golden.get("items", [])),
+        "recall_at_k": round(recall_sum / n, 3),
+        "mrr": round(rr_sum / n, 3),
+        "by_pattern": {p: round(sum(v) / len(v), 3) for p, v in by_pattern.items()},
+        "gaps": gaps,
+    }
+    return {"summary": summary, "items": items}
+
+
 @app.get("/nodes/search")
 def nodes_search(q: str = "", limit: int = 20):
     """콤보박스 typeahead — name/aliases/id 매치 상위 N개. (라우트 순서: {node_id} 보다 위)"""

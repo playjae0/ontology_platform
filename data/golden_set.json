@@ -1,0 +1,37 @@
+{
+  "note": "검색 골든셋 — 확장 mock(M10) cid 기준. 표면형은 비-canonical 변형(영문·축약·동의어) 위주로 별칭+탐색 검색을 검증. 임베딩 불필요.",
+  "k_default": 5,
+  "patterns": {
+    "P1_direct": "설비/인자 직접 조회",
+    "P2_process": "공정→구성요소 펼침",
+    "P3_backtrace": "인자/사양 역추적(가중)",
+    "P4_synonym": "동의어/약어/영문 링킹"
+  },
+  "items": [
+    {"id": "G01", "question": "notching press 의 절단 사양은?", "query_pattern": "P1_direct", "gold_chunks": ["C0001"], "gold_nodes": ["N0101"], "difficulty": "easy"},
+    {"id": "G02", "question": "비전검사기는 무엇을 검사하나?", "query_pattern": "P1_direct", "gold_chunks": ["C0002"], "gold_nodes": ["N0102"], "difficulty": "easy"},
+    {"id": "G03", "question": "stacker 설비 사양", "query_pattern": "P1_direct", "gold_chunks": ["C0010"], "gold_nodes": ["N0110"], "difficulty": "easy"},
+    {"id": "G04", "question": "pouch former 성형 조건", "query_pattern": "P1_direct", "gold_chunks": ["C0014"], "gold_nodes": ["N0112"], "difficulty": "medium"},
+
+    {"id": "G05", "question": "노칭 공정의 설비와 관리 인자", "query_pattern": "P2_process", "gold_chunks": ["C0001", "C0002"], "gold_nodes": ["N0001"], "difficulty": "medium"},
+    {"id": "G06", "question": "스태킹 공정 설비와 인자 전체", "query_pattern": "P2_process", "gold_chunks": ["C0010", "C0011"], "gold_nodes": ["N0002"], "difficulty": "medium"},
+    {"id": "G07", "question": "탭용접 공정 품질 인자", "query_pattern": "P2_process", "gold_chunks": ["C0012", "C0013"], "gold_nodes": ["N0003"], "difficulty": "medium"},
+    {"id": "G08", "question": "전해액주입 공정 관련 항목", "query_pattern": "P2_process", "gold_chunks": ["C0015", "C0016"], "gold_nodes": ["N0005"], "difficulty": "hard"},
+
+    {"id": "G09", "question": "stack alignment 관리값", "query_pattern": "P3_backtrace", "gold_chunks": ["C0010"], "gold_nodes": ["N0210"], "difficulty": "medium"},
+    {"id": "G10", "question": "적층속도 목표는?", "query_pattern": "P3_backtrace", "gold_chunks": ["C0011"], "gold_nodes": ["N0211"], "difficulty": "medium"},
+    {"id": "G11", "question": "weld strength 기준", "query_pattern": "P3_backtrace", "gold_chunks": ["C0012"], "gold_nodes": ["N0212"], "difficulty": "medium"},
+    {"id": "G12", "question": "용접저항 허용 한계", "query_pattern": "P3_backtrace", "gold_chunks": ["C0013"], "gold_nodes": ["N0213"], "difficulty": "medium"},
+    {"id": "G13", "question": "forming depth 사양", "query_pattern": "P3_backtrace", "gold_chunks": ["C0014"], "gold_nodes": ["N0214"], "difficulty": "hard"},
+    {"id": "G14", "question": "fill volume 주입 기준", "query_pattern": "P3_backtrace", "gold_chunks": ["C0015"], "gold_nodes": ["N0216"], "difficulty": "medium"},
+    {"id": "G15", "question": "진공도 유지 수준", "query_pattern": "P3_backtrace", "gold_chunks": ["C0016"], "gold_nodes": ["N0217"], "difficulty": "medium"},
+    {"id": "G16", "question": "seal temp 관리", "query_pattern": "P3_backtrace", "gold_chunks": ["C0017"], "gold_nodes": ["N0218"], "difficulty": "hard"},
+
+    {"id": "G17", "question": "laser welder 로 탭 접합", "query_pattern": "P4_synonym", "gold_chunks": ["C0012"], "gold_nodes": ["N0111"], "difficulty": "easy"},
+    {"id": "G18", "question": "electrolyte filler 주액량", "query_pattern": "P4_synonym", "gold_chunks": ["C0015"], "gold_nodes": ["N0113"], "difficulty": "medium"},
+    {"id": "G19", "question": "side sealer 밀봉 조건", "query_pattern": "P4_synonym", "gold_chunks": ["C0017"], "gold_nodes": ["N0114"], "difficulty": "easy"},
+    {"id": "G20", "question": "적층기 정렬 관리", "query_pattern": "P4_synonym", "gold_chunks": ["C0010"], "gold_nodes": ["N0110"], "difficulty": "medium"},
+
+    {"id": "G21", "question": "ESD 접지 저항 규격은?", "query_pattern": "P3_backtrace", "gold_chunks": [], "gold_nodes": [], "difficulty": "gap"}
+  ]
+}

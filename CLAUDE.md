@@ -1,11 +1,12 @@
 # CLAUDE.md — 온톨로지 관리 플랫폼(관리소) 빌드 스펙 · v3
 
-> **진행 상태**: M1~M9 ✅ · **M10(mock 6공정 확장) ✅** — 첫 슬라이스 완성. 다음: Eval(골든셋).
+> **진행 상태**: M1~M10 ✅ · **M11(검색 + Eval) ✅** — 첫 슬라이스 + Eval 완성. 비범위 잔여: 거버넌스 풀세트·실 임베딩 보강.
 > **이 문서는 빌드 명세다.** §7 밀스톤 순서대로, 각 밀스톤의 **검증 게이트를 통과한 뒤** 다음으로. 한 번에 전부 만들지 말 것.
 > **§6 불변 원칙은 절대 위반 금지.** 충돌 시 멈추고 §6 우선, 그다음 사용자 확인.
 > **사용법**: 이 파일은 레포 루트에 두면 Claude Code가 자동 로드한다. 밀스톤 착수는 짧은 포인터(예: "M3 진행, §7 따라가")로 충분 — 전체 재첨부 불필요.
 
 ### 변경 이력
+- **v3.8**: M11(검색 + Eval) — `GET /retrieve`(별칭+렉시컬 링킹→part_of/has_property 탐색→describes 수집, **임베딩-free**), `golden_set.json`(21문항·4패턴), `/eval/run`(Recall@k·MRR·패턴분해·alias gap). 화면6 Test/Eval. §6.6 재확인(질문 alias 미누적). 경계: 임베딩-보강 링킹+매칭 eval = 사내 확장.
 - **v3.7**: M10(mock 6공정 확장) — 11→**26노드**(6공정 각 Unit+Property 2~3, 동의어 영문/축약), 청크 6→14·describes 4→19, 6공정 모두 커버(unlinked 0.667→0.286). 기존 노드 id(N0001/N0101/N0102/N02xx) 보존. 카운트 단언 갱신(m2/m3/m4 카운트-무관, m6 새 baseline).
 - **v3.6**: M9(인입 워크스페이스) 추가·완료 — 배치 단계별 흐름(①업로드~⑤연결), MockStage(데모)·배치 래퍼(`ingest_batch`). **§3.3 정정**(common/ 무의존) + **§6.7 승격**: platform은 `ontology_agent` 코드 의존 0, JSON 계약만 공유.
 - **v3.5**: M8(렌더-at-scale) 추가·완료 — 확장형 스코핑(ego: 포커스+이웃, ~50 유지, 클릭 확장) + 레이아웃 분기(결정적↔NVL force 워커) + WebGL config 토글. §3.5 반영, M7 M8-신호 해소.
@@ -91,6 +92,8 @@ class ExternalScriptStage:        # 나중: 사내 스크립트 subprocess
 
 **화면1 — 데이터 관리+수동 주입 · DONE ✅**: SSOT 상태/slot 테이블, 3 slot 주입 카드(검증→채택은 valid 시만), 직전 롤백·mock 리셋, 스테이지 슬롯 표시. 업로드≠승인 명시.
 
+**화면6 — Test/Eval · DONE ✅ (M11)**: 검색(retrieval) + 골든셋 평가. 골든셋 표 + [평가 실행]→문항별 Recall@k/rank + 패턴별 집계 + 미해소(alias gap) 목록 + "온톨로지에 질문하기"(검색 박스). 읽기 전용·임베딩 미사용.
+
 **화면5 — 인입 워크스페이스 · DONE ✅ (M9)**: 문서→json 통합 인입. 상단 단계 진행바(①업로드~⑤연결), 배치 테이블(행=문서, 칩=파싱/연결 + 청크·describes·orphan 수), 행 클릭→문서 청크/describes 미리보기. ③뼈대·④검수=배치 공유 밴드, ④는 검수 Workbench 핸드오프.
 
 **화면4 — 대시보드(읽기 전용) · DONE ✅**: 현 SSOT 집계 현황 — 규모(카테고리/관계별), 검수 status 분포, 공정별 커버리지(어느 공정이 비었나), 리뷰 큐 종류별+orphans, 동의어 사전 누적 alias(flywheel), 건강지표(unlinked 청크율·orphan율). 기존 read path 재사용, 쓰기 없음.
@@ -107,7 +110,7 @@ class ExternalScriptStage:        # 나중: 사내 스크립트 subprocess
 
 ## 5. API 표면
 
-**읽기(R) · DONE**: `GET /data/status` · `/graph?scope={id}`(NVL 포맷) · `/nodes/{id}`(**embedding 미포함**) · `/nodes/{id}/chunks` · `/nodes/search?q=` · `/review/queue` · `/dashboard/stats`(M6 집계). 읽기 엔드포인트는 `?backend=json|neo4j`(M7, 기본 json) 지원.
+**읽기(R) · DONE**: `GET /data/status` · `/graph?scope={id}`(NVL 포맷) · `/nodes/{id}`(**embedding 미포함**) · `/nodes/{id}/chunks` · `/nodes/search?q=` · `/review/queue` · `/dashboard/stats`(M6) · **`/retrieve?q=`(M11 검색, 임베딩-free)** · **`/eval/golden`·`POST /eval/run?k=`(M11 평가)**. 읽기 엔드포인트는 `?backend=json|neo4j`(M7, 기본 json) 지원.
 
 **Neo4j 승격(M7)**: `POST /neo4j/sync`(JSON→Neo4j 재생성·활성화) · `GET /neo4j/status` · `POST /neo4j/deactivate`. **Neo4j 직접쓰기 엔드포인트 없음(§6.3).**
 
@@ -127,7 +130,7 @@ class ExternalScriptStage:        # 나중: 사내 스크립트 subprocess
 3. **단일 원천 = JSON.** 모든 쓰기 JSON에만(store.commit). **Neo4j = JSON 에서 재생성되는 읽기 전용 파생 캐시 — 직접쓰기 절대 없음(M7 재확인).** 쓰기 = store.commit(JSON) → 그 후 `on_change`→neo4j 재생성. 이중 원천 금지.
 4. **사람 최종 승인 / 뼈대=승인경로만.** 노드·엣지 *생성·확정*은 검수 승인으로만. 스테이지/주입은 제안·로딩까지, 자동 확정 금지.
 5. **콘텐츠(Mode D) resolve-only.** 새 뼈대 노드 생성 금지.
-6. **질의/탐색 시 alias 비누적**(용어사전 오염 방지). 단, 검수 시 명시적 alias 추가/별칭 흡수는 *사람의 결정*이라 허용.
+6. **질의/탐색 시 alias 비누적**(용어사전 오염 방지). **검색(M11 `/retrieve`)도 질문 표현을 alias 에 쌓지 않는다 — 읽기 전용.** 단, 검수 시 명시적 alias 추가/별칭 흡수는 *사람의 결정*이라 허용.
 7. **계약 기반 결합 / `ontology_agent` 코드 의존 0.** platform 은 처리소(`ontology_agent`) 코드를 import 하지 않는다 — **JSON 계약(§2)만 공유**. 스테이지 구현 하드코딩 금지(Manual/External/Mock 어댑터, config 선택). 읽기 경로는 임베딩/BGE-M3 부팅 금지.
 8. **안티 오버엔지니어링.** 측정/요구가 정당화하기 전 범위(§10) 선구현 금지.
 9. **업로드 ≠ 승인.** 수동 주입은 부트스트랩/테스트 로딩. 업로드된 `proposed`는 M3 승인 대상으로 보존. 신뢰된 운영자 경로(README 명시).
@@ -219,6 +222,12 @@ class ExternalScriptStage:        # 나중: 사내 스크립트 subprocess
 - 결과 baseline: 11→26노드, 청크 6→14, describes 4→19, unlinked 0.667→0.286, alias 23. **6공정 모두 커버(대시보드 빨강 0)**.
 - ★카운트 단언 갱신: m2/m3/m4 **카운트-무관**(baseline 델타), m6 **새 baseline 상수**.
 검증 `verify_m10_mock.mjs` exit 0: ①6공정 모두 Unit·Property·청크(커버리지 빨강 0) ②unlinked 개선·동의어 검색 ③스키마·참조무결성 ④전 화면(Explore·대시보드·인입·검수) 정상 ⑤회귀 11 스위트 exit 0. 파일: `data/mock/{assembly_skeleton,contents}.json`.
+
+### M11 — 검색(retrieval) + Eval · DONE ✅
+검색 = 질문 → **①링킹(별칭 exact + 렉시컬 substring)** → **②탐색(part_of/has_property)** → **③수집(describes 청크)**. 임베딩 불필요 → mock 에서도 Recall 의미있음. 부수효과: "온톨로지에 질문하기". **읽기 전용·임베딩 미로드(§6.2)·질문 alias 미누적(§6.6)·`ontology_agent` 무의존(§6.7).**
+- `reader.retrieve(q,k)`(JsonReader 메서드 → Neo4jReader 상속): 링크 노드 describe=2·탐색 노드=1 가중 랭킹. 미해소(링크 0)=**alias gap**(임베딩 fallback 없음 — 경계: 사내 실 임베딩 확장).
+- `golden_set.json`(data root, SSOT 미복사): 21문항·4패턴(P1 direct/P2 process/P3 backtrace 가중/P4 synonym), gold_chunks=실 mock cid, 비-canonical 표면형(영문·축약·동의어). `POST /eval/run?k=`: Recall@k·MRR·패턴별 분해·gap 목록. 골든셋 고정.
+검증 `verify_m11_eval.mjs` exit 0: ①알려진 질문→gold 노드/청크(별칭+탐색만) ②Recall@5=1.0·MRR≈0.95·4패턴 분해 ③미해소→gap(임베딩 fallback 없음) ④alias 미누적·임베딩 미로드 ⑤회귀 12 스위트 exit 0. 파일: `backend/{reader,app}.py`, `data/golden_set.json`, `frontend/.../Eval.tsx`.
 
 ---
 

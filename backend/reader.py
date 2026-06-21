@@ -139,6 +139,55 @@ class JsonReader:
         ct = self._load_contents()
         return next((c for c in ct["chunks"] if c.get("cid") == cid), None)
 
+    def retrieve(self, q: str, k: int = 5) -> dict:
+        """검색(retrieval) — ①링킹(별칭 exact + 렉시컬 substring) ②탐색(part_of/has_property)
+        ③수집(describes 청크). 임베딩 미사용·미로드(§6.2). 질문 표현을 alias 에 누적하지 않음(§6.6).
+        미해소(링크 0)는 alias gap 으로 표시 — 임베딩 fallback 없음(경계: 사내 실 임베딩 확장).
+        """
+        sk = self._load_skeleton()
+        ct = self._load_contents()
+        nodes, edges = sk["nodes"], sk["edges"]
+        chunks, describes = ct["chunks"], ct["describes"]
+        ql = (q or "").lower()
+
+        # ① 링킹: 노드 표면형(canonical_name + aliases)이 질문의 부분문자열인가
+        linked: dict[str, str] = {}
+        for nid, n in nodes.items():
+            for surf in [n.get("canonical_name"), *(n.get("aliases") or [])]:
+                if surf and surf.lower() in ql:
+                    linked[nid] = surf
+                    break
+
+        # ② 탐색: 링크 노드의 서브트리(설비/인자) 따라 확장
+        visited = set(linked)
+        for nid in list(linked):
+            visited |= self._descendants(nid, edges)
+
+        # ③ 수집: describes 청크. 링크 노드 describe=2, 탐색 노드=1 가중 → 랭킹
+        tgt_cids: dict[str, set] = {}
+        for d in describes:
+            tgt_cids.setdefault(d.get("target"), set()).add(d.get("source"))
+        score: dict[str, int] = {}
+        for nid in visited:
+            w = 2 if nid in linked else 1
+            for cid in tgt_cids.get(nid, set()):
+                score[cid] = score.get(cid, 0) + w
+        by_cid = {c.get("cid"): c for c in chunks}
+        ranked = sorted(score, key=lambda c: (-score[c], c))
+        out_chunks = [{"cid": c, "text": by_cid[c].get("text"), "section": by_cid[c].get("section"),
+                       "doc_id": by_cid[c].get("doc_id"), "score": score[c]}
+                      for c in ranked if c in by_cid]
+
+        return {
+            "query": q,
+            "linked_nodes": [{"id": nid, "name": nodes[nid].get("canonical_name"),
+                              "category": nodes[nid].get("category"), "matched": surf}
+                             for nid, surf in linked.items()],
+            "traversed": sorted(visited - set(linked)),
+            "chunks": out_chunks[: max(k, 10)],
+            "gap": len(linked) == 0,
+        }
+
     def search_nodes(self, q: str, limit: int = 20) -> list:
         """노드 검색 — canonical_name + aliases + id 매치(부분/대소문자 무시).
         콤보박스 typeahead 용. 실데이터 수천 노드 대비 상위 limit 만 반환.
