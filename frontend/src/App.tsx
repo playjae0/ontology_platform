@@ -6,13 +6,23 @@ import Explore from "./views/Explore";
 import DataManage from "./views/DataManage";
 import Workbench from "./views/Workbench";
 import Dashboard from "./views/Dashboard";
+import { BackendProvider, BackendToggle } from "./backend";
 import "./App.css";
 
 type View = "explore" | "workbench" | "data" | "dashboard";
 
 export default function App() {
+  return (
+    <BackendProvider>
+      <AppShell />
+    </BackendProvider>
+  );
+}
+
+function AppShell() {
   const [view, setView] = useState<View>("explore");
   const status = useQuery({ queryKey: ["status"], queryFn: fetchStatus });
+  const showToggle = view === "explore" || view === "dashboard";
 
   return (
     <div className="app">
@@ -32,6 +42,7 @@ export default function App() {
             대시보드
           </button>
         </nav>
+        {showToggle && <BackendToggle />}
         {status.data && (
           <span className="topbar-counts">
             노드 {status.data.counts.nodes} · 엣지 {status.data.counts.edges} · 청크{" "}

@@ -6,6 +6,7 @@
 > **사용법**: 이 파일은 레포 루트에 두면 Claude Code가 자동 로드한다. 밀스톤 착수는 짧은 포인터(예: "M3 진행, §7 따라가")로 충분 — 전체 재첨부 불필요.
 
 ### 변경 이력
+- **v3.4a**: 백엔드 토글(JSON⇄Neo4j) + 응답시간 표시(진단) — Explore/대시보드 상단. `?backend=` 재사용, 읽기 전용. 미가동 시 토글 비활성+json fallback. `verify_backend_toggle.mjs`.
 - **v3.4**: M7(Neo4j 승격) 추가·완료 — `Neo4jReader`(JsonReader 상속, Cypher 백엔드), `neo4j_sync`(JSON→Neo4j 재생성, label=category), `store.on_change` 훅(SSOT 변경 시 자동 재생성), 읽기 엔드포인트 `?backend=neo4j`. §10에서 "Neo4j 승격" 제거. §9에 1000-노드 스케일 fixture. **§6.3 재확인: Neo4j=읽기 전용 파생 캐시, 직접쓰기 절대 없음.**
 - **v3.3**: M6(대시보드) 추가·완료 — 읽기 전용 현황(`GET /dashboard/stats`). §10에서 "대시보드" 제거(Eval·neo4j 등은 유지).
 - **v3.2**: M4(스테이지 슬롯) 완료. **M3 정합**: as-built(별도 `review_queue.json`·후보 materialize·거부=후보 드롭)를 정본으로 §7 M3 재정렬, "SSOT 파생 큐" 폐기. 별칭 흡수에 **근거 보존**(evidence cid → 생존노드 describes) 추가.
@@ -80,7 +81,7 @@ class ExternalScriptStage:        # 나중: 사내 스크립트 subprocess
 
 ## 4. 화면
 
-**화면2 — Explore(읽기 전용) · DONE ✅**: 3-pane(좌 스코프·필터·검색 / 중앙 NVL 캔버스 / 우 노드 상세+describes 청크 원문+출처+인접관계).
+**화면2 — Explore(읽기 전용) · DONE ✅**: 3-pane(좌 스코프·필터·검색 / 중앙 NVL 캔버스 / 우 노드 상세+describes 청크 원문+출처+인접관계). 상단 **백엔드 토글(JSON⇄Neo4j)+응답시간(ms) 표시**(진단, 대시보드도; `?backend=` 전환, 같은 데이터·차이는 속도뿐, 미가동 시 비활성+json fallback).
 
 **화면1 — 데이터 관리+수동 주입 · DONE ✅**: SSOT 상태/slot 테이블, 3 slot 주입 카드(검증→채택은 valid 시만), 직전 롤백·mock 리셋, 스테이지 슬롯 표시. 업로드≠승인 명시.
 
@@ -188,6 +189,7 @@ class ExternalScriptStage:        # 나중: 사내 스크립트 subprocess
 4. JSON 변이(`/nodes/{id}/edit`)→store.commit→`on_change` 자동 재생성→neo4j 반영 / Neo4j 직접쓰기 엔드포인트 부재(404) ✅
 5. 회귀 8 스위트 exit 0(기본 11노드 mock 유지) ✅
 파일: `backend/{neo4j_sync,reader,store,app}.py`, `data/mock/scale/gen_scale.py`. (Neo4j 5-community on docker, `neo4j` 드라이버.)
+- **진단 — 백엔드 토글**: Explore/대시보드 상단 [JSON⇄Neo4j] 토글 + 응답시간(ms). 프론트 `backend.tsx`(context+토글), 읽기 쿼리에 `?backend=` 전환. 같은 데이터→차이는 속도뿐. `verify_backend_toggle.mjs` exit 0: ①동일 렌더 ②응답시간 표시 갱신 ③Neo4j 미가동(docker stop)→토글 비활성+json 동작(neo4j 503·json 200) ④1027 시간차 가시화(JSON≈30ms vs Neo4j≈550ms) ⑤회귀.
 
 ---
 

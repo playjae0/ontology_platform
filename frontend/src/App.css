@@ -536,3 +536,21 @@
 .gauge { margin-bottom: 12px; }
 .gauge-head { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px; }
 .gauge-head strong.danger { color: #dc2626; }
+
+/* ===== 백엔드 토글(진단, M7) ===== */
+.backend-toggle { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+.bt-label { font-size: 11px; color: var(--muted); }
+.bt-seg { display: inline-flex; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+.bt-seg button {
+  border: none; background: var(--panel); padding: 4px 10px; cursor: pointer;
+  font-size: 12px; color: var(--muted);
+}
+.bt-seg button.on { background: #2563eb; color: #fff; }
+.bt-seg button.disabled, .bt-seg button:disabled { opacity: 0.5; cursor: not-allowed; }
+.bt-seg button + button { border-left: 1px solid var(--border); }
+.bt-ms {
+  font-size: 12px; font-variant-numeric: tabular-nums; min-width: 92px;
+  color: var(--text); font-weight: 500;
+}
+.bt-ms[data-backend="neo4j"] { color: #6d28d9; }
+.backend-toggle + .topbar-counts { margin-left: 16px; }

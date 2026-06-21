@@ -2,13 +2,23 @@
 import { useQuery } from "@tanstack/react-query";
 import { fetchDashboard } from "../api";
 import { categoryColor } from "../theme";
+import { useBackend } from "../backend";
 
 const REL_COLOR: Record<string, string> = {
   part_of: "#475569", precedes: "#0ea5e9", has_property: "#d97706",
 };
 
 export default function Dashboard() {
-  const q = useQuery({ queryKey: ["dashboard"], queryFn: fetchDashboard });
+  const { backend, recordMs } = useBackend();
+  const q = useQuery({
+    queryKey: ["dashboard", backend],
+    queryFn: async () => {
+      const t = performance.now();
+      const d = await fetchDashboard(backend);
+      recordMs(backend, performance.now() - t);
+      return d;
+    },
+  });
   if (q.isLoading) return <div className="dashboard"><p className="muted">집계 로딩…</p></div>;
   if (q.isError || !q.data)
     return <div className="dashboard"><p className="center-msg error">백엔드 연결 실패 (8077)</p></div>;

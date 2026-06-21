@@ -111,11 +111,13 @@ export interface DashboardStats {
   };
   review: { queue_by_kind: Record<string, number>; queue_total: number; orphans: number };
 }
-export const fetchDashboard = () => get<DashboardStats>("/dashboard/stats");
+export const fetchDashboard = (backend: string = "json") =>
+  get<DashboardStats>(`/dashboard/stats?backend=${backend}`);
 
 export const fetchStatus = () => get<DataStatus>("/data/status");
-export const fetchGraph = (scope?: string | null) =>
-  get<GraphData>(scope ? `/graph?scope=${encodeURIComponent(scope)}` : "/graph");
+export const fetchGraph = (scope?: string | null, backend: string = "json") =>
+  get<GraphData>(
+    `/graph?${scope ? `scope=${encodeURIComponent(scope)}&` : ""}backend=${backend}`);
 export const fetchNode = (id: string) => get<NodeDetail>(`/nodes/${id}`);
 export const fetchNodeChunks = (id: string) => get<Chunk[]>(`/nodes/${id}/chunks`);
 
@@ -205,3 +207,9 @@ export interface EdgeEdit {
 }
 export const editEdge = (body: EdgeEdit) =>
   post<{ ok: boolean; warning?: string | null }>("/edges/edit", body);
+
+// ---- M7 백엔드 토글(진단) ----
+export interface Neo4jStatus { active: boolean; uri: string }
+export const fetchNeo4jStatus = () => get<Neo4jStatus>("/neo4j/status");
+export const syncNeo4j = () =>
+  post<{ ok: boolean; synced: Record<string, number>; sync_ms: number }>("/neo4j/sync");

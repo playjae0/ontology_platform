@@ -175,16 +175,22 @@ def neo4j_status():
 
 @app.post("/neo4j/sync")
 def neo4j_sync_endpoint():
-    """현 SSOT(JSON) → Neo4j 재생성·활성화. 연결 실패 시 503(명확한 에러)."""
+    """현 SSOT(JSON) → Neo4j 재생성·활성화. 연결/적재 실패 시 503(명확한 에러)."""
     import time
     import neo4j_sync
     try:
         drv = _ensure_neo4j_driver()
+        t0 = time.perf_counter()
+        counts = neo4j_sync.sync_to_neo4j(drv, store.load_skeleton(), store.load_contents())
     except Exception as e:
         _neo4j["active"] = False
-        raise HTTPException(503, f"Neo4j 연결 실패: {e} (uri={NEO4J_URI}). JSON 백엔드로 계속 가능.")
-    t0 = time.perf_counter()
-    counts = neo4j_sync.sync_to_neo4j(drv, store.load_skeleton(), store.load_contents())
+        try:  # 끊긴 드라이버 폐기 → 다음 시도 시 재생성(컨테이너 재가동 대비)
+            if _neo4j["driver"]:
+                _neo4j["driver"].close()
+        except Exception:
+            pass
+        _neo4j["driver"] = None
+        raise HTTPException(503, f"Neo4j 연결/적재 실패: {e} (uri={NEO4J_URI}). JSON 백엔드로 계속 가능.")
     ms = round((time.perf_counter() - t0) * 1000, 1)
     _neo4j["reader"] = neo4j_sync.Neo4jReader(drv)
     _neo4j["active"] = True

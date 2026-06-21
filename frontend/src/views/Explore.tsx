@@ -7,8 +7,10 @@ import GraphCanvas from "../components/GraphCanvas";
 import NodePanel from "../components/NodePanel";
 import LeftPanel from "../components/LeftPanel";
 import type { Filters } from "../components/LeftPanel";
+import { useBackend } from "../backend";
 
 export default function Explore() {
+  const { backend, recordMs } = useBackend();
   const [scope, setScope] = useState<string | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
   const [filters, setFilters] = useState<Filters>({
@@ -16,10 +18,18 @@ export default function Explore() {
     statuses: new Set(["confirmed", "proposed"]),
   });
 
-  const fullGraph = useQuery({ queryKey: ["graph", null], queryFn: () => fetchGraph(null) });
+  const fullGraph = useQuery({
+    queryKey: ["graph", null, backend],
+    queryFn: () => fetchGraph(null, backend),
+  });
   const scopedGraph = useQuery({
-    queryKey: ["graph", scope],
-    queryFn: () => fetchGraph(scope),
+    queryKey: ["graph", scope, backend],
+    queryFn: async () => {
+      const t = performance.now();
+      const d = await fetchGraph(scope, backend); // 토글이 ?backend= 전환
+      recordMs(backend, performance.now() - t);
+      return d;
+    },
   });
 
   // 클라이언트 필터: 카테고리/status 로 노드 제거 + 매달린 엣지 제거
