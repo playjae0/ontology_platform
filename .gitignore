@@ -25,3 +25,5 @@ frontend/m7_scale_render.png
 frontend/m7_backend_toggle.png
 frontend/m8_ego.png
 frontend/m8_flat_force.png
+frontend/m9_ingest.png
+data/current/ingest_batch.json

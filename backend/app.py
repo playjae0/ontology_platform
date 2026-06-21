@@ -20,6 +20,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from pydantic import BaseModel
 
+import ingest_batch
 import mutations
 import stages
 from reader import JsonReader
@@ -165,6 +166,44 @@ def ingest_rollback():
 @app.post("/ingest/reset-mock")
 def ingest_reset_mock():
     return store.reset_mock()
+
+
+# ------------------------------------------- 인입 워크스페이스 배치 (M9)
+@app.get("/ingest/batch")
+def ingest_batch_get():
+    return ingest_batch.load_batch(store)
+
+
+class BatchUpload(BaseModel):
+    names: list[str]
+
+
+@app.post("/ingest/batch/upload")
+def ingest_batch_upload(body: BatchUpload):
+    return {"ok": True, "batch": ingest_batch.upload_docs(store, body.names)}
+
+
+@app.post("/ingest/batch/run/{stage}")
+def ingest_batch_run(stage: str):
+    """stage ∈ {parse, skeleton, content}. 게이트 위반 시 400. 채택은 store.commit."""
+    fn = {"parse": ingest_batch.run_parse, "skeleton": ingest_batch.run_skeleton,
+          "content": ingest_batch.run_content}.get(stage)
+    if fn is None:
+        raise HTTPException(404, f"알 수 없는 배치 스테이지 '{stage}' (parse|skeleton|content)")
+    r = fn(store)
+    if not r.get("ok"):
+        raise HTTPException(400, detail=r)
+    return r
+
+
+@app.post("/ingest/batch/reset")
+def ingest_batch_reset():
+    return ingest_batch.reset(store)
+
+
+@app.get("/ingest/batch/doc/{doc_id}")
+def ingest_batch_doc(doc_id: str):
+    return ingest_batch.doc_preview(store, doc_id)
 
 
 # ----------------------------------------------------- Neo4j 승격 (M7)

@@ -1,11 +1,12 @@
 # CLAUDE.md — 온톨로지 관리 플랫폼(관리소) 빌드 스펙 · v3
 
-> **진행 상태**: M1~M7 ✅ · **M8(렌더-at-scale) ✅** — 첫 슬라이스 완성. 남은 비범위: Eval(골든셋)만.
+> **진행 상태**: M1~M8 ✅ · **M9(인입 워크스페이스) ✅** — 첫 슬라이스 완성. 남은 비범위: Eval(골든셋)만.
 > **이 문서는 빌드 명세다.** §7 밀스톤 순서대로, 각 밀스톤의 **검증 게이트를 통과한 뒤** 다음으로. 한 번에 전부 만들지 말 것.
 > **§6 불변 원칙은 절대 위반 금지.** 충돌 시 멈추고 §6 우선, 그다음 사용자 확인.
 > **사용법**: 이 파일은 레포 루트에 두면 Claude Code가 자동 로드한다. 밀스톤 착수는 짧은 포인터(예: "M3 진행, §7 따라가")로 충분 — 전체 재첨부 불필요.
 
 ### 변경 이력
+- **v3.6**: M9(인입 워크스페이스) 추가·완료 — 배치 단계별 흐름(①업로드~⑤연결), MockStage(데모)·배치 래퍼(`ingest_batch`). **§3.3 정정**(common/ 무의존) + **§6.7 승격**: platform은 `ontology_agent` 코드 의존 0, JSON 계약만 공유.
 - **v3.5**: M8(렌더-at-scale) 추가·완료 — 확장형 스코핑(ego: 포커스+이웃, ~50 유지, 클릭 확장) + 레이아웃 분기(결정적↔NVL force 워커) + WebGL config 토글. §3.5 반영, M7 M8-신호 해소.
 - **v3.4a**: 백엔드 토글(JSON⇄Neo4j) + 응답시간 표시(진단) — Explore/대시보드 상단. `?backend=` 재사용, 읽기 전용. 미가동 시 토글 비활성+json fallback. `verify_backend_toggle.mjs`.
 - **v3.4**: M7(Neo4j 승격) 추가·완료 — `Neo4jReader`(JsonReader 상속, Cypher 백엔드), `neo4j_sync`(JSON→Neo4j 재생성, label=category), `store.on_change` 훅(SSOT 변경 시 자동 재생성), 읽기 엔드포인트 `?backend=neo4j`. §10에서 "Neo4j 승격" 제거. §9에 1000-노드 스케일 fixture. **§6.3 재확인: Neo4j=읽기 전용 파생 캐시, 직접쓰기 절대 없음.**
@@ -68,7 +69,7 @@ class ExternalScriptStage:        # 나중: 사내 스크립트 subprocess
 ```
 슬롯 `parser`/`skeleton`/`content` 기본 전부 `ManualUploadStage`. 외부 코드 도착 시 해당 슬롯만 교체. **구현 하드코딩 금지.**
 
-**3.3 백엔드(FastAPI, `platform/backend/`)**: 기존 `common/` import 재사용. **읽기 경로는 JSON 직접 파싱 경량 read-model** — `Skeleton.load()` 류 금지(임베딩 재계산해 BGE-M3 부팅). `sentence-transformers` 없이 기동(M1 준수).
+**3.3 백엔드(FastAPI, `platform/backend/`)**: **`ontology_agent` 코드 의존 0** — 초안의 "common/ import 재사용"은 폐기. 데이터 계약(§2 스키마)만 공유하고 구현은 독립(JSON 직독). **읽기 경로는 JSON 직접 파싱 경량 read-model** — `Skeleton.load()` 류 절대 금지(임베딩 재계산해 BGE-M3 부팅). `sentence-transformers` 없이 기동(M1 준수). 스테이지 어댑터: `ManualUploadStage`/`ExternalScriptStage`(M4)/`MockStage`(M9 데모).
 
 **3.4 읽기 어댑터**: `GraphReader` → `JsonReader`(기본) / `Neo4jReader`(M7, 구현됨). **Neo4jReader = JsonReader 의 데이터 소스만 Cypher 로 교체**(`_load_skeleton`/`_load_contents` override) → 집계/조회 로직 전부 상속 ⇒ JsonReader 와 동일 결과 보장. 프론트는 `GraphReader`만 본다(시그니처 불변); 읽기 엔드포인트 `?backend=json|neo4j`. **Neo4j 는 JSON 에서 재생성되는 읽기 전용 파생 캐시(§6.3)** — SSOT 변경 시 `store.on_change` 훅이 `neo4j_sync` 자동 재생성.
 
@@ -88,6 +89,8 @@ class ExternalScriptStage:        # 나중: 사내 스크립트 subprocess
 **화면2 — Explore(읽기 전용) · DONE ✅**: 3-pane(좌 스코프·필터·검색 / 중앙 NVL 캔버스 / 우 노드 상세+describes 청크 원문+출처+인접관계). 상단 **백엔드 토글(JSON⇄Neo4j)+응답시간(ms) 표시**(진단, 대시보드도; `?backend=` 전환, 같은 데이터·차이는 속도뿐, 미가동 시 비활성+json fallback).
 
 **화면1 — 데이터 관리+수동 주입 · DONE ✅**: SSOT 상태/slot 테이블, 3 slot 주입 카드(검증→채택은 valid 시만), 직전 롤백·mock 리셋, 스테이지 슬롯 표시. 업로드≠승인 명시.
+
+**화면5 — 인입 워크스페이스 · DONE ✅ (M9)**: 문서→json 통합 인입. 상단 단계 진행바(①업로드~⑤연결), 배치 테이블(행=문서, 칩=파싱/연결 + 청크·describes·orphan 수), 행 클릭→문서 청크/describes 미리보기. ③뼈대·④검수=배치 공유 밴드, ④는 검수 Workbench 핸드오프.
 
 **화면4 — 대시보드(읽기 전용) · DONE ✅**: 현 SSOT 집계 현황 — 규모(카테고리/관계별), 검수 status 분포, 공정별 커버리지(어느 공정이 비었나), 리뷰 큐 종류별+orphans, 동의어 사전 누적 alias(flywheel), 건강지표(unlinked 청크율·orphan율). 기존 read path 재사용, 쓰기 없음.
 
@@ -124,7 +127,7 @@ class ExternalScriptStage:        # 나중: 사내 스크립트 subprocess
 4. **사람 최종 승인 / 뼈대=승인경로만.** 노드·엣지 *생성·확정*은 검수 승인으로만. 스테이지/주입은 제안·로딩까지, 자동 확정 금지.
 5. **콘텐츠(Mode D) resolve-only.** 새 뼈대 노드 생성 금지.
 6. **질의/탐색 시 alias 비누적**(용어사전 오염 방지). 단, 검수 시 명시적 alias 추가/별칭 흡수는 *사람의 결정*이라 허용.
-7. **계약 기반 결합.** 스테이지 구현 하드코딩 금지.
+7. **계약 기반 결합 / `ontology_agent` 코드 의존 0.** platform 은 처리소(`ontology_agent`) 코드를 import 하지 않는다 — **JSON 계약(§2)만 공유**. 스테이지 구현 하드코딩 금지(Manual/External/Mock 어댑터, config 선택). 읽기 경로는 임베딩/BGE-M3 부팅 금지.
 8. **안티 오버엔지니어링.** 측정/요구가 정당화하기 전 범위(§10) 선구현 금지.
 9. **업로드 ≠ 승인.** 수동 주입은 부트스트랩/테스트 로딩. 업로드된 `proposed`는 M3 승인 대상으로 보존. 신뢰된 운영자 경로(README 명시).
 10. **모든 skeleton 변경은 안전쓰기 경로(M2 `store.py`) 경유.** 백업→쓰기→전체 재검증→깨지면 자동 롤백. M3·M5 쓰기 전부 포함. **엣지 변이(M5)**: part_of 재지정/삭제/추가 시 노드 `attached_to` 와 반드시 동기화(어긋나면 안 됨). 없는 노드 참조는 재검증에서 막혀 롤백. 중복 엣지(동일 source-relation-target) 금지.
@@ -201,6 +204,13 @@ class ExternalScriptStage:        # 나중: 사내 스크립트 subprocess
 - **레이아웃 분기(`GraphCanvas.layoutMode`)**: ≤임계 결정적(layout.ts/ego 방사형) ↔ flat·수백노드 NVL `forceDirected` 워커. (NVL 워커가 positions 미주입 시 정상 분산 확인.)
 - **WebGL config**: `disableWebGL` 토글(노드>300 권장 + 수동), 헤드리스 Canvas 유지. `data-renderer` 노출.
 검증 `verify_m8.mjs` exit 0 (1027-fixture): ①171 스코프→확장형 35/171(≤50)+검색클릭 확장(35→39) ②전체 평면→`force` 레이아웃 분산 렌더 ③WebGL 토글(canvas→webgl) ④소규모(11 mock) 결정적·scale-bar 없음(회귀) ⑤9 스위트 회귀 exit 0. 파일: `frontend/src/{ego.ts,views/Explore.tsx,components/GraphCanvas.tsx}`.
+
+### M9 — 인입 워크스페이스 (배치 단계별 흐름) · DONE ✅
+스테이지 슬롯(M4) 위 **UI 오케스트레이션만** — 검수(M3)·store·validate 재사용. 흐름(게이트): ①업로드(N문서)→②파싱(per-doc)→③뼈대(배치 공유, 후보→리뷰 큐)→④검수/승인(M3 공유 큐)→⑤콘텐츠 연결(per-doc, Mode D).
+- per-doc(①②⑤) / batch-shared(③④): 전 문서 청크→하나의 스켈레톤·하나의 큐·승인 1회. 게이트: ②없이 ③ 불가, ③(+검수) 없이 ⑤ 불가.
+- `ingest_batch.py`: 배치 상태(`data/current/ingest_batch.json`) + run_parse/skeleton/content. 얇은 래퍼 `/ingest/batch/run/{stage}`, 스테이지는 config 로 external 스왑(기본 `MockStage` 데모, 결정적·§2 준수).
+- 모든 채택 store.commit(백업·재검증·자동롤백). ③은 후보(proposed)까지 — **업로드≠승인(§6.9)**: 노드는 ④승인에서 materialize. ⑤ 미해소는 `orphan_chunk_link`(문서별).
+검증 `verify_m9_ingest.mjs` exit 0: ①다문서 업로드→파싱 행마다 청크수(2,2) ②뼈대→배치 후보 2 하나의 큐(from_batch) ③③승인전 ⑤차단/승인후 ⑤가능 ④연결→per-doc describes 1·orphan 1 ⑤MockStage ①~⑤ 클릭 시연(노드 11→13 ④에서) ⑥회귀 10 스위트 exit 0. 파일: `backend/{stages,ingest_batch,app}.py`, `frontend/.../Ingest.tsx`.
 
 ---
 

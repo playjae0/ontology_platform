@@ -6,10 +6,11 @@ import Explore from "./views/Explore";
 import DataManage from "./views/DataManage";
 import Workbench from "./views/Workbench";
 import Dashboard from "./views/Dashboard";
+import Ingest from "./views/Ingest";
 import { BackendProvider, BackendToggle } from "./backend";
 import "./App.css";
 
-type View = "explore" | "workbench" | "data" | "dashboard";
+type View = "explore" | "workbench" | "data" | "dashboard" | "ingest";
 
 export default function App() {
   return (
@@ -35,6 +36,9 @@ function AppShell() {
           <button className={view === "workbench" ? "active" : ""} onClick={() => setView("workbench")}>
             검수 Workbench
           </button>
+          <button className={view === "ingest" ? "active" : ""} onClick={() => setView("ingest")}>
+            인입
+          </button>
           <button className={view === "data" ? "active" : ""} onClick={() => setView("data")}>
             데이터 관리
           </button>
@@ -55,6 +59,7 @@ function AppShell() {
       {view === "workbench" && <Workbench />}
       {view === "data" && <DataManage />}
       {view === "dashboard" && <Dashboard />}
+      {view === "ingest" && <Ingest onGotoWorkbench={() => setView("workbench")} />}
     </div>
   );
 }

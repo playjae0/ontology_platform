@@ -208,6 +208,22 @@ export interface EdgeEdit {
 export const editEdge = (body: EdgeEdit) =>
   post<{ ok: boolean; warning?: string | null }>("/edges/edit", body);
 
+// ---- M9 인입 워크스페이스 ----
+export interface BatchDoc {
+  doc_id: string; name: string; index: number;
+  parse: string; chunks: number; link: string; describes: number; orphans: number;
+}
+export interface Batch { docs: BatchDoc[]; stage_skeleton: string; candidates: number }
+export const fetchBatch = () => get<Batch>("/ingest/batch");
+export const batchUpload = (names: string[]) =>
+  post<{ ok: boolean; batch: Batch }>("/ingest/batch/upload", { names });
+export const batchRun = (stage: "parse" | "skeleton" | "content") =>
+  post(`/ingest/batch/run/${stage}`);
+export const batchReset = () => post("/ingest/batch/reset");
+export const fetchBatchDoc = (docId: string) =>
+  get<{ doc_id: string; chunks: Chunk[]; describes: { source: string; target: string }[] }>(
+    `/ingest/batch/doc/${docId}`);
+
 // ---- M7 백엔드 토글(진단) ----
 export interface Neo4jStatus { active: boolean; uri: string }
 export const fetchNeo4jStatus = () => get<Neo4jStatus>("/neo4j/status");

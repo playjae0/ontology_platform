@@ -73,14 +73,78 @@ class ExternalScriptStage:
                 raise StageError(f"출력이 유효한 JSON 이 아님: {e}")
 
 
-def parse_spec(spec: str) -> Stage:
-    """config 스펙 문자열 → Stage. 'manual' | 'external:<cmd>'."""
+# ----------------------------------------------------- MockStage (M9 데모)
+# 사외 클릭 시연용 — 결정적·§2 스키마 준수 샘플 산출. 사내 도착 시 external 로 스왑.
+def _mock_parse(inp: dict) -> dict:
+    """문서 → 청크(per-doc). cid 는 9xxx 대역(mock C0001~과 비충돌)."""
+    idx = int(inp.get("index", 0))
+    doc = inp.get("doc_id", f"DOC{idx + 1:02d}")
+    base = 9000 + idx * 100
+    surf = f"인입설비{idx + 1}"
+    return {"doc_id": doc, "chunks": [
+        {"cid": f"C{base:04d}", "doc_id": doc, "section": "인입 §1",
+         "text": f"{surf}는 노칭 후 전극을 정밀 검사한다.",
+         "meta": {"surface": surf, "category": "Unit", "attach": "노칭", "role": "candidate"}},
+        {"cid": f"C{base + 1:04d}", "doc_id": doc, "section": "인입 §2",
+         "text": f"비표준설비{idx + 1}는 임시 운용되어 표준 미등록 상태다.",
+         "meta": {"surface": f"비표준설비{idx + 1}", "role": "orphan"}},
+    ]}
+
+
+def _mock_skeleton(inp: dict) -> dict:
+    """배치 청크 → 후보(Mode A/B). candidate 역할 청크의 표면형을 new_unit 후보로."""
+    cands, seen = [], set()
+    for c in inp.get("chunks", []):
+        m = c.get("meta") or {}
+        if m.get("role") == "candidate" and m.get("surface") not in seen:
+            seen.add(m["surface"])
+            cands.append({"kind": "new_unit", "surface": m["surface"],
+                          "category": m.get("category", "Unit"), "attach_name": m.get("attach", "노칭"),
+                          "spec": None, "reason": "인입 배치 후보(Mode A)",
+                          "doc_id": c.get("doc_id", ""), "evidence_cids": [c.get("cid")]})
+    return {"candidates": cands}
+
+
+def _mock_content(inp: dict) -> dict:
+    """문서 청크 → describes(해소) / orphan_chunk_link(미해소). Mode D resolve-only."""
+    names = inp.get("names", {})
+    describes, orphans = [], []
+    for c in inp.get("chunks", []):
+        m = c.get("meta") or {}
+        surf = m.get("surface")
+        nid = names.get(surf) if surf else None
+        if nid:
+            describes.append({"source": c.get("cid"), "target": nid})
+        else:
+            orphans.append({"kind": "orphan_chunk_link", "cid": c.get("cid"),
+                            "surface": surf, "doc_id": c.get("doc_id", "")})
+    return {"describes": describes, "orphans": orphans}
+
+
+class MockStage:
+    """결정적 mock 스테이지(데모). slot 별로 _mock_* 디스패치."""
+    kind = "mock"
+
+    def __init__(self, slot: str):
+        self.slot = slot
+
+    def run(self, input_data: dict) -> dict:
+        fn = {"parser": _mock_parse, "skeleton": _mock_skeleton, "content": _mock_content}.get(self.slot)
+        if fn is None:
+            raise StageError(f"MockStage: 알 수 없는 slot '{self.slot}'")
+        return fn(input_data)
+
+
+def parse_spec(spec: str, slot: str | None = None) -> Stage:
+    """config 스펙 문자열 → Stage. 'manual' | 'mock' | 'external:<cmd>'."""
     spec = (spec or "manual").strip()
     if spec == "manual":
         return ManualUploadStage()
+    if spec == "mock":
+        return MockStage(slot or "parser")
     if spec.startswith("external:"):
         cmd = shlex.split(spec[len("external:"):].strip())
         if not cmd:
             raise StageError("external 스펙에 실행 cmd 가 없습니다")
         return ExternalScriptStage(cmd)
-    raise StageError(f"알 수 없는 스테이지 스펙: {spec!r} (manual | external:<cmd>)")
+    raise StageError(f"알 수 없는 스테이지 스펙: {spec!r} (manual | mock | external:<cmd>)")
