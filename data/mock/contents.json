@@ -1,0 +1,16 @@
+{
+  "chunks": [
+    {"cid": "C0001", "doc_id": "MOCK", "section": "노칭 설비 사양서 p.3", "text": "노칭프레스는 서보 구동 방식으로 전극을 정밀 절단하며, 절단정밀도는 ±0.05mm를 만족해야 한다.", "meta": {"page": 3}},
+    {"cid": "C0002", "doc_id": "MOCK", "section": "품질 기준 p.7", "text": "노칭 후 버높이는 12㎎ 이하로 관리한다. 비전검사기로 전수 검사한다.", "meta": {"page": 7}},
+    {"cid": "C0003", "doc_id": "DOC2", "section": "신규 라인 도입 검토 p.2", "text": "신규 라인에는 레이저노칭기를 도입해 전극을 비접촉 방식으로 절단한다.", "meta": {"page": 2}},
+    {"cid": "C0004", "doc_id": "DOC2", "section": "생산성 기준 p.5", "text": "노칭 속도는 50 m/min 이상으로 운전하여 생산성을 확보한다.", "meta": {"page": 5}},
+    {"cid": "C0005", "doc_id": "DOC2", "section": "건조 공정 메모", "text": "건조 공정의 건조오븐에서 전극의 잔류 수분을 제거한다.", "meta": {}},
+    {"cid": "C0006", "doc_id": "DOC2", "section": "설비 대장 p.1", "text": "NP-2 설비는 기존 노칭프레스와 동일 사양의 서보 구동 절단기다.", "meta": {"page": 1}}
+  ],
+  "describes": [
+    {"source": "C0001", "target": "N0101"},
+    {"source": "C0001", "target": "N0201"},
+    {"source": "C0002", "target": "N0202"},
+    {"source": "C0002", "target": "N0102"}
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "items": [
+    {"rid": "R001", "kind": "new_unit", "surface": "레이저노칭기", "category": "Unit", "attach_to": "N0001", "spec": null, "reason": "노칭 공정의 신규 설비 후보", "doc_id": "DOC2", "evidence_cids": ["C0003"]},
+    {"rid": "R002", "kind": "new_factor", "surface": "노칭속도", "category": "Property", "attach_to": "N0101", "spec": "≥ 50 m/min", "reason": "노칭프레스 관리 인자 후보", "doc_id": "DOC2", "evidence_cids": ["C0004"]},
+    {"rid": "R003", "kind": "orphan_unit", "surface": "건조오븐", "category": "Unit", "attach_to": null, "spec": null, "reason": "공정태그 '건조'가 backbone에 미해소 — 부착위치 지정 필요", "doc_id": "DOC2", "evidence_cids": ["C0005"]},
+    {"rid": "R004", "kind": "new_unit", "surface": "NP-2", "category": "Unit", "attach_to": "N0001", "spec": null, "reason": "기존 노칭프레스(N0101)와 동일 사양 — 별칭 흡수 후보", "doc_id": "DOC2", "evidence_cids": ["C0006"]}
+  ]
+}

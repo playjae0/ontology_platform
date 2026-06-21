@@ -1,0 +1,32 @@
+{
+  "nodes": {
+    "N0000": {"id": "N0000", "canonical_name": "조립공정", "category": "Process", "definition": "파우치셀 조립 대공정", "aliases": ["assembly"], "attached_to": null, "spec": null, "status": "confirmed", "provenance": [], "embedding": null},
+    "N0001": {"id": "N0001", "canonical_name": "노칭", "category": "Process", "definition": "전극을 정밀 재단하는 공정", "aliases": ["notching"], "attached_to": "N0000", "spec": null, "status": "confirmed", "provenance": [], "embedding": null},
+    "N0002": {"id": "N0002", "canonical_name": "스태킹", "category": "Process", "definition": "음/양극을 적층하는 공정", "aliases": ["stacking"], "attached_to": "N0000", "spec": null, "status": "confirmed", "provenance": [], "embedding": null},
+    "N0003": {"id": "N0003", "canonical_name": "탭용접", "category": "Process", "definition": "전극 탭을 용접하는 공정", "aliases": ["tab welding"], "attached_to": "N0000", "spec": null, "status": "confirmed", "provenance": [], "embedding": null},
+    "N0004": {"id": "N0004", "canonical_name": "패키징", "category": "Process", "definition": "셀을 파우치에 포장하는 공정", "aliases": ["packaging"], "attached_to": "N0000", "spec": null, "status": "confirmed", "provenance": [], "embedding": null},
+    "N0005": {"id": "N0005", "canonical_name": "전해액주입", "category": "Process", "definition": "전해액을 주입하는 공정", "aliases": ["electrolyte filling"], "attached_to": "N0000", "spec": null, "status": "confirmed", "provenance": [], "embedding": null},
+    "N0006": {"id": "N0006", "canonical_name": "실링", "category": "Process", "definition": "파우치를 밀봉하는 공정", "aliases": ["sealing"], "attached_to": "N0000", "spec": null, "status": "confirmed", "provenance": [], "embedding": null},
+    "N0101": {"id": "N0101", "canonical_name": "노칭프레스", "category": "Unit", "definition": "노칭의 설비", "aliases": ["notching press"], "attached_to": "N0001", "spec": null, "status": "confirmed", "provenance": [], "embedding": null},
+    "N0102": {"id": "N0102", "canonical_name": "비전검사기", "category": "Unit", "definition": "노칭 후 전수 검사 설비", "aliases": ["vision inspector"], "attached_to": "N0001", "spec": null, "status": "proposed", "provenance": [], "embedding": null},
+    "N0201": {"id": "N0201", "canonical_name": "절단정밀도", "category": "Property", "definition": "", "aliases": [], "attached_to": "N0101", "spec": "±0.05mm", "status": "confirmed", "provenance": [], "embedding": null},
+    "N0202": {"id": "N0202", "canonical_name": "버높이", "category": "Property", "definition": "", "aliases": ["burr"], "attached_to": "N0101", "spec": "≤ 12㎎", "status": "proposed", "provenance": [], "embedding": null}
+  },
+  "edges": [
+    {"source": "N0001", "relation": "part_of", "target": "N0000", "evidence": "seed", "status": "confirmed", "provenance": []},
+    {"source": "N0002", "relation": "part_of", "target": "N0000", "evidence": "seed", "status": "confirmed", "provenance": []},
+    {"source": "N0003", "relation": "part_of", "target": "N0000", "evidence": "seed", "status": "confirmed", "provenance": []},
+    {"source": "N0004", "relation": "part_of", "target": "N0000", "evidence": "seed", "status": "confirmed", "provenance": []},
+    {"source": "N0005", "relation": "part_of", "target": "N0000", "evidence": "seed", "status": "confirmed", "provenance": []},
+    {"source": "N0006", "relation": "part_of", "target": "N0000", "evidence": "seed", "status": "confirmed", "provenance": []},
+    {"source": "N0001", "relation": "precedes", "target": "N0002", "evidence": "seed", "status": "confirmed", "provenance": []},
+    {"source": "N0002", "relation": "precedes", "target": "N0003", "evidence": "seed", "status": "confirmed", "provenance": []},
+    {"source": "N0003", "relation": "precedes", "target": "N0004", "evidence": "seed", "status": "confirmed", "provenance": []},
+    {"source": "N0004", "relation": "precedes", "target": "N0005", "evidence": "seed", "status": "confirmed", "provenance": []},
+    {"source": "N0005", "relation": "precedes", "target": "N0006", "evidence": "seed", "status": "confirmed", "provenance": []},
+    {"source": "N0101", "relation": "part_of", "target": "N0001", "evidence": "seed", "status": "confirmed", "provenance": []},
+    {"source": "N0102", "relation": "part_of", "target": "N0001", "evidence": "proposed", "status": "proposed", "provenance": []},
+    {"source": "N0101", "relation": "has_property", "target": "N0201", "evidence": "seed", "status": "confirmed", "provenance": []},
+    {"source": "N0101", "relation": "has_property", "target": "N0202", "evidence": "proposed", "status": "proposed", "provenance": []}
+  ]
+}

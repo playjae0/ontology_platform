@@ -1,0 +1,22 @@
+# frontend
+frontend/node_modules/
+frontend/dist/
+frontend/m1_explore.png
+frontend/m2_datamanage.png
+frontend/m3_workbench.png
+frontend/m3_editor.png
+frontend/m5_relation_editor.png
+
+# runtime SSOT state (seeded from data/mock on startup)
+data/current/
+data/_backup/
+
+# python
+backend/__pycache__/
+**/__pycache__/
+
+# os
+.DS_Store
+frontend/m5_node_picker.png
+frontend/m4_stages.png
+data/stage_config.json

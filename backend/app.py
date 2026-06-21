@@ -1,0 +1,272 @@
+# -*- coding: utf-8 -*-
+"""온톨로지 관리소 — FastAPI 백엔드.
+  M1: 읽기 경로(Explore).  M2: 수동 JSON 주입(검증·채택·롤백·리셋).
+
+불변 원칙(§6):
+  - 읽기 경로는 임베딩을 읽지도 저장하지도 않는다 → reader.JsonReader 만 사용.
+  - sentence-transformers / ontology_agent.skeleton 을 import 하지 않는다.
+  - 모든 쓰기는 JSON 파일에만(§6.3). Neo4j 직접쓰기/merge/move/delete/임베딩저장 없음.
+  - 업로드 ≠ 승인(§6.9): 주입은 SSOT 로딩까지, proposed 는 M3 승인 대상으로 남는다.
+실행:  uvicorn app:app --port 8077 --reload  (platform/backend 에서)
+"""
+from __future__ import annotations
+
+import os
+from pathlib import Path
+from typing import Any
+
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.middleware.cors import CORSMiddleware
+
+from pydantic import BaseModel
+
+import mutations
+import stages
+from reader import JsonReader
+from store import Store, STAGE_SLOTS, STAGE_TO_INGEST
+
+# 데이터 루트(§8): current=SSOT / mock=원본 / _backup=스냅샷
+DATA_ROOT = Path(os.environ.get(
+    "ONTOLOGY_DATA_ROOT", Path(__file__).resolve().parents[1] / "data"))
+
+# WebGL 렌더는 config 로(§3.5) — 프론트가 기동 시 참조
+USE_WEBGL = os.environ.get("USE_WEBGL", "0") == "1"
+
+app = FastAPI(title="온톨로지 관리소 API", version="0.2.0 (M2)")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+store = Store(DATA_ROOT)
+reader = JsonReader(store.current)  # 읽기는 작업 SSOT(current) 직독
+
+
+@app.get("/health")
+def health():
+    return {"ok": True, "data_root": str(DATA_ROOT), "use_webgl": USE_WEBGL}
+
+
+@app.get("/config")
+def config():
+    # 프론트 렌더 설정(§3.5): disableWebGL 은 config 로 노출
+    return {"render": {"disableWebGL": not USE_WEBGL, "renderer": "canvas"}}
+
+
+# ----------------------------------------------------------------- 읽기(R)
+@app.get("/data/status")
+def data_status():
+    return {**reader.status(), **store.slots_status()}
+
+
+@app.get("/graph")
+def graph(scope: str | None = None):
+    return reader.graph(scope)
+
+
+@app.get("/nodes/search")
+def nodes_search(q: str = "", limit: int = 20):
+    """콤보박스 typeahead — name/aliases/id 매치 상위 N개. (라우트 순서: {node_id} 보다 위)"""
+    return reader.search_nodes(q, limit)
+
+
+@app.get("/nodes/{node_id}")
+def get_node(node_id: str):
+    n = reader.node(node_id)
+    if n is None:
+        raise HTTPException(404, f"node '{node_id}' not found")
+    return n
+
+
+@app.get("/nodes/{node_id}/chunks")
+def node_chunks(node_id: str):
+    if reader.node(node_id) is None:
+        raise HTTPException(404, f"node '{node_id}' not found")
+    return reader.chunks_for_node(node_id)
+
+
+# --------------------------------------------------- 수동 주입 / 스테이지(W)
+@app.post("/ingest/upload/{slot}")
+async def ingest_upload(slot: str, request: Request, adopt: bool = False):
+    """slot ∈ {chunks, skeleton, contents}. body=업로드 JSON.
+    adopt=false: 검증만(dry-run, SSOT 불변). adopt=true: 검증+채택(replace).
+    응답: {valid, errors:[{path,msg}], counts?, adopted, ssot_errors?, warning?}
+    """
+    try:
+        data: Any = await request.json()
+    except Exception:
+        raise HTTPException(400, "본문이 유효한 JSON 이 아닙니다.")
+    return store.upload(slot, data, adopt=adopt)
+
+
+@app.post("/ingest/rollback")
+def ingest_rollback():
+    return store.rollback()
+
+
+@app.post("/ingest/reset-mock")
+def ingest_reset_mock():
+    return store.reset_mock()
+
+
+@app.get("/stage/config")
+def stage_config_get():
+    return store.load_stage_config()
+
+
+class StageConfigBody(BaseModel):
+    parser: str | None = None
+    skeleton: str | None = None
+    content: str | None = None
+
+
+@app.put("/stage/config")
+def stage_config_put(body: StageConfigBody):
+    cfg = store.load_stage_config()
+    for slot, spec in body.model_dump().items():
+        if spec is None:
+            continue
+        try:
+            stages.parse_spec(spec)  # 스펙 파싱 가능성 검증
+        except stages.StageError as e:
+            raise HTTPException(400, f"slot '{slot}' 스펙 오류: {e}")
+        cfg[slot] = spec
+    return store.save_stage_config(cfg)
+
+
+@app.post("/stage/run/{slot}")
+async def stage_run(slot: str, request: Request):
+    """슬롯의 설정된 Stage 실행 (§3.2/M4).
+    manual → 400(수동 업로드 전용). external → subprocess 실행 후, 외부 출력은 *미신뢰* 이므로
+    수동 업로드와 동일하게 validate + store.commit(백업·전체 재검증·자동롤백) 으로만 채택.
+    """
+    if slot not in STAGE_SLOTS:
+        raise HTTPException(404, f"알 수 없는 스테이지 슬롯 '{slot}' ({STAGE_SLOTS})")
+    spec = store.load_stage_config()[slot]
+    try:
+        stage = stages.parse_spec(spec)
+    except stages.StageError as e:
+        raise HTTPException(400, str(e))
+
+    ingest_slot = STAGE_TO_INGEST[slot]
+    if stage.kind == "manual":
+        raise HTTPException(
+            400, f"'{slot}' 슬롯은 manual(수동 업로드 전용) — "
+                 f"/ingest/upload/{ingest_slot} 사용. 외부 실행은 config 로 external 설정.")
+
+    try:
+        input_data = await request.json()
+    except Exception:
+        input_data = {}
+
+    try:
+        output = stage.run(input_data)  # subprocess → 출력 JSON 회수
+    except stages.StageError as e:
+        raise HTTPException(422, detail={"ok": False, "stage_error": str(e)})
+
+    # 외부 출력 채택 = 수동 업로드와 동일 게이트(validate + commit + 자동롤백)
+    result = store.upload(ingest_slot, output, adopt=True)
+    return {"slot": slot, "ingest_slot": ingest_slot, "spec": spec, **result}
+
+
+# ------------------------------------------------ 검수·승인·편집 (W, M3)
+@app.get("/review/queue")
+def review_queue():
+    """리뷰 큐 항목 + 근거 청크 원문(resolve) + 구조적 고아 노드(파생)."""
+    queue = store.load_queue()
+    items = []
+    for it in queue.get("items", []):
+        ev = [reader.chunk(cid) for cid in it.get("evidence_cids", [])]
+        items.append({**it, "evidence": [c for c in ev if c]})
+    return {"items": items, "orphans": reader.orphans()}
+
+
+class ApproveBody(BaseModel):
+    rid: str
+    attach_to: str | None = None
+
+
+class BatchBody(BaseModel):
+    rids: list[str]
+
+
+class RidBody(BaseModel):
+    rid: str
+
+
+class AbsorbBody(BaseModel):
+    rid: str
+    target: str
+
+
+class EditBody(BaseModel):
+    canonical_name: str | None = None
+    definition: str | None = None
+    spec: str | None = None
+    status: str | None = None
+
+
+class AliasBody(BaseModel):
+    op: str  # add | remove
+    alias: str
+
+
+def _result(r: dict):
+    # 변이 실패(검증/롤백 등)는 422 로, 그 외 성공.
+    if not r.get("ok", False):
+        raise HTTPException(422, detail=r)
+    return r
+
+
+@app.post("/review/approve")
+def review_approve(body: ApproveBody):
+    return _result(mutations.approve(store, body.rid, body.attach_to))
+
+
+@app.post("/review/approve-batch")
+def review_approve_batch(body: BatchBody):
+    return _result(mutations.approve_batch(store, body.rids))
+
+
+@app.post("/review/reject")
+def review_reject(body: RidBody):
+    return _result(mutations.reject(store, body.rid))
+
+
+@app.post("/review/absorb")
+def review_absorb(body: AbsorbBody):
+    return _result(mutations.absorb(store, body.rid, body.target))
+
+
+@app.post("/nodes/{node_id}/edit")
+def node_edit(node_id: str, body: EditBody):
+    fields = {k: v for k, v in body.model_dump().items() if v is not None}
+    return _result(mutations.edit_node(store, node_id, fields))
+
+
+@app.post("/nodes/{node_id}/alias")
+def node_alias(node_id: str, body: AliasBody):
+    return _result(mutations.alias_op(store, node_id, body.op, body.alias))
+
+
+class EdgeBody(BaseModel):
+    op: str                         # add | delete | update
+    source: str
+    relation: str
+    target: str
+    new_source: str | None = None
+    new_relation: str | None = None
+    new_target: str | None = None
+
+
+@app.post("/edges/edit")
+def edge_edit(body: EdgeBody):
+    """엣지 add/delete/update(재지정·타입변경) — §M5. 전부 store.commit(백업·재검증·롤백).
+    part_of 변이 시 attached_to 동기화. 노드 id 불변, merge/move(노드)/delete(노드) 없음.
+    """
+    return _result(mutations.edit_edge(
+        store, body.op, body.source, body.relation, body.target,
+        new_source=body.new_source, new_relation=body.new_relation,
+        new_target=body.new_target))
