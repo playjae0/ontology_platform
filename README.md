@@ -24,7 +24,8 @@ platform/
 - **M2 — 수동 JSON 주입** ✅ 검증 통과
 - **M3 — 검수/승인/편집 Workbench** ✅ 검증 통과
 - **M5 — 관계(엣지) 편집** ✅ 검증 통과
-- **M4 — 플러그형 스테이지 슬롯(외부 실행 배선)** ✅ 검증 통과 — 첫 슬라이스 완성
+- **M4 — 플러그형 스테이지 슬롯(외부 실행 배선)** ✅ 검증 통과
+- **M6 — 대시보드(읽기 전용 현황)** ✅ 검증 통과 — 첫 슬라이스 완성
 
 ## 데이터 디렉토리 (§8)
 ```
@@ -64,6 +65,7 @@ npm run dev            # http://localhost:5173
 | GET | `/graph?scope={id}` | 그래프 `{nodes, rels}` (NVL 포맷). scope=서브트리 |
 | GET | `/nodes/{id}` | 노드 상세(embedding 미포함) + 인접관계 |
 | GET | `/nodes/{id}/chunks` | describes 청크 원문 |
+| GET | `/dashboard/stats` | 현황 집계 (M6) — 규모·status·공정 커버리지·리뷰큐·alias·건강지표. 읽기 전용·임베딩 미로드 |
 
 ### 수동 주입 (M2)
 | 메서드 | 경로 | 설명 |
@@ -116,5 +118,6 @@ node verify_m3_reconcile.mjs # M3 정합: 별칭 흡수 근거 보존(alias+desc
 node verify_edge_edit.mjs  # M5: 재지정·롤백·삭제→고아·재연결·중복·id불변·merge부재 → m5_relation_editor.png
 node verify_node_picker.mjs # M5: 검색 콤보박스(필터·id직접·없는것거부·부모표시·재지정) → m5_node_picker.png
 node verify_m4.mjs    # M4: echo 외부스테이지 실행→채택 / 깨진출력→거부·불변 / manual→400 → m4_stages.png
+node verify_m6.mjs    # M6: 대시보드 집계 정확·탭 렌더·공정 커버리지 → m6_dashboard.png
 ```
 각 스크립트는 통과 시 exit 0.

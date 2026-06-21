@@ -66,6 +66,22 @@ def graph(scope: str | None = None):
     return reader.graph(scope)
 
 
+@app.get("/dashboard/stats")
+def dashboard_stats():
+    """읽기 전용 현황 집계 (M6) — 현 SSOT(JsonReader, 임베딩 미로드) + 리뷰 큐."""
+    base = reader.dashboard_stats()
+    queue = store.load_queue()
+    by_kind: dict[str, int] = {}
+    for it in queue.get("items", []):
+        by_kind[it["kind"]] = by_kind.get(it["kind"], 0) + 1
+    base["review"] = {
+        "queue_by_kind": by_kind,
+        "queue_total": len(queue.get("items", [])),
+        "orphans": base["health"]["orphan_nodes"],
+    }
+    return base
+
+
 @app.get("/nodes/search")
 def nodes_search(q: str = "", limit: int = 20):
     """콤보박스 typeahead — name/aliases/id 매치 상위 N개. (라우트 순서: {node_id} 보다 위)"""

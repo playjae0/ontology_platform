@@ -96,6 +96,23 @@ async function get<T>(path: string): Promise<T> {
   return res.json() as Promise<T>;
 }
 
+export interface DashboardStats {
+  scale: {
+    nodes: number; edges: number; chunks: number; describes: number;
+    nodes_by_category: Record<string, number>;
+    edges_by_relation: Record<string, number>;
+  };
+  status: Record<string, number>;
+  coverage: { id: string; name: string; nodes: number; chunks: number }[];
+  dictionary: { aliases_total: number };
+  health: {
+    unlinked_chunks: number; total_chunks: number; unlinked_chunk_rate: number;
+    orphan_nodes: number; unit_property_total: number; orphan_node_rate: number;
+  };
+  review: { queue_by_kind: Record<string, number>; queue_total: number; orphans: number };
+}
+export const fetchDashboard = () => get<DashboardStats>("/dashboard/stats");
+
 export const fetchStatus = () => get<DataStatus>("/data/status");
 export const fetchGraph = (scope?: string | null) =>
   get<GraphData>(scope ? `/graph?scope=${encodeURIComponent(scope)}` : "/graph");

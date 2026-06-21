@@ -168,6 +168,83 @@ class JsonReader:
         hits.sort(key=lambda r: (score(r), r["id"]))
         return hits[:limit]
 
+    @staticmethod
+    def _order_by_precedes(ids: list, edges: list) -> list:
+        s = set(ids)
+        nxt = {}
+        for e in edges:
+            if e.get("relation") == "precedes" and e.get("source") in s and e.get("target") in s:
+                nxt[e["source"]] = e["target"]
+        incoming = set(nxt.values())
+        out, seen = [], set()
+        for st in [i for i in ids if i not in incoming]:
+            cur = st
+            while cur in s and cur not in seen:
+                seen.add(cur); out.append(cur); cur = nxt.get(cur)
+        for i in ids:
+            if i not in seen:
+                out.append(i)
+        return out
+
+    def dashboard_stats(self) -> dict:
+        """현 SSOT 집계(읽기 전용·임베딩 미로드). M6 대시보드용."""
+        sk = self._load_skeleton()
+        ct = self._load_contents()
+        nodes, edges = sk["nodes"], sk["edges"]
+        chunks, describes = ct["chunks"], ct["describes"]
+
+        by_cat, by_status = {}, {}
+        aliases_total = 0
+        for n in nodes.values():
+            by_cat[n.get("category", "?")] = by_cat.get(n.get("category", "?"), 0) + 1
+            by_status[n.get("status", "?")] = by_status.get(n.get("status", "?"), 0) + 1
+            aliases_total += len(n.get("aliases", []) or [])
+        by_rel = {}
+        for e in edges:
+            by_rel[e.get("relation", "?")] = by_rel.get(e.get("relation", "?"), 0) + 1
+
+        # describes target → cids
+        tgt_cids: dict[str, set] = {}
+        for d in describes:
+            tgt_cids.setdefault(d.get("target"), set()).add(d.get("source"))
+
+        # 공정별 커버리지 = 대공정(=part_of 부모를 가진 Process), precedes 순
+        has_part_parent = {e["source"] for e in edges if e.get("relation") == "part_of"}
+        procs = [nid for nid, n in nodes.items()
+                 if n.get("category") == "Process" and nid in has_part_parent]
+        procs = self._order_by_precedes(procs, edges)
+        coverage = []
+        for pid in procs:
+            sub = self._descendants(pid, edges)
+            cids = set()
+            for t in sub:
+                cids |= tgt_cids.get(t, set())
+            coverage.append({"id": pid, "name": nodes[pid].get("canonical_name", pid),
+                             "nodes": len(sub), "chunks": len(cids)})
+
+        linked = {d.get("source") for d in describes}
+        all_cids = {c.get("cid") for c in chunks}
+        unlinked = all_cids - linked
+        orphan_n = len(self.orphans())
+        up_total = by_cat.get("Unit", 0) + by_cat.get("Property", 0)
+
+        return {
+            "scale": {
+                "nodes": len(nodes), "edges": len(edges),
+                "chunks": len(chunks), "describes": len(describes),
+                "nodes_by_category": by_cat, "edges_by_relation": by_rel,
+            },
+            "status": by_status,
+            "coverage": coverage,
+            "dictionary": {"aliases_total": aliases_total},
+            "health": {
+                "unlinked_chunks": len(unlinked), "total_chunks": len(chunks),
+                "unlinked_chunk_rate": round(len(unlinked) / len(chunks), 3) if chunks else 0.0,
+                "orphan_nodes": orphan_n, "unit_property_total": up_total,
+                "orphan_node_rate": round(orphan_n / up_total, 3) if up_total else 0.0,
+            },
+        }
+
     def orphans(self) -> list:
         """구조적으로 부모가 사라진 Unit/Property 노드(엣지 삭제 등으로 고아화).
         리뷰 큐에 '재연결 필요'로 표시된다(§M5 게이트3). approve 대상인 후보와 별개.

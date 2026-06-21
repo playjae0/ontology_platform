@@ -5,9 +5,10 @@ import { fetchStatus } from "./api";
 import Explore from "./views/Explore";
 import DataManage from "./views/DataManage";
 import Workbench from "./views/Workbench";
+import Dashboard from "./views/Dashboard";
 import "./App.css";
 
-type View = "explore" | "workbench" | "data";
+type View = "explore" | "workbench" | "data" | "dashboard";
 
 export default function App() {
   const [view, setView] = useState<View>("explore");
@@ -27,6 +28,9 @@ export default function App() {
           <button className={view === "data" ? "active" : ""} onClick={() => setView("data")}>
             데이터 관리
           </button>
+          <button className={view === "dashboard" ? "active" : ""} onClick={() => setView("dashboard")}>
+            대시보드
+          </button>
         </nav>
         {status.data && (
           <span className="topbar-counts">
@@ -39,6 +43,7 @@ export default function App() {
       {view === "explore" && <Explore />}
       {view === "workbench" && <Workbench />}
       {view === "data" && <DataManage />}
+      {view === "dashboard" && <Dashboard />}
     </div>
   );
 }

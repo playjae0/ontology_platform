@@ -1,11 +1,12 @@
 # CLAUDE.md — 온톨로지 관리 플랫폼(관리소) 빌드 스펙 · v3
 
-> **진행 상태**: M1 ✅ · M2 ✅ · M3 ✅ · M5(관계 편집) ✅ · **M4(스테이지 슬롯) ✅** — 첫 슬라이스 완성
+> **진행 상태**: M1 ✅ · M2 ✅ · M3 ✅ · M5(관계 편집) ✅ · M4(스테이지 슬롯) ✅ · **M6(대시보드) ✅** — 첫 슬라이스 완성
 > **이 문서는 빌드 명세다.** §7 밀스톤 순서대로, 각 밀스톤의 **검증 게이트를 통과한 뒤** 다음으로. 한 번에 전부 만들지 말 것.
 > **§6 불변 원칙은 절대 위반 금지.** 충돌 시 멈추고 §6 우선, 그다음 사용자 확인.
 > **사용법**: 이 파일은 레포 루트에 두면 Claude Code가 자동 로드한다. 밀스톤 착수는 짧은 포인터(예: "M3 진행, §7 따라가")로 충분 — 전체 재첨부 불필요.
 
 ### 변경 이력
+- **v3.3**: M6(대시보드) 추가·완료 — 읽기 전용 현황(`GET /dashboard/stats`). §10에서 "대시보드" 제거(Eval·neo4j 등은 유지).
 - **v3.2**: M4(스테이지 슬롯) 완료. **M3 정합**: as-built(별도 `review_queue.json`·후보 materialize·거부=후보 드롭)를 정본으로 §7 M3 재정렬, "SSOT 파생 큐" 폐기. 별칭 흡수에 **근거 보존**(evidence cid → 생존노드 describes) 추가.
 - **v3.1**: M5(관계/엣지 편집) 추가·완료 — §7 M5, §5 `/edges/edit`·`/review/queue` orphans, §6.10에 part_of↔attached_to 동기화, §10에서 edge move/delete 제거(M5로 활성). store.commit 을 전체 검증(스키마+참조무결성)으로 강화.
 - v3: M1·M2를 "DONE+핵심결정"으로 압축(불변 가드레일은 풀 유지). **§7 M3 풀 보강** + 별칭 흡수 = **(A) 풀 재지정**.
@@ -82,6 +83,8 @@ class ExternalScriptStage:        # 나중: 사내 스크립트 subprocess
 
 **화면1 — 데이터 관리+수동 주입 · DONE ✅**: SSOT 상태/slot 테이블, 3 slot 주입 카드(검증→채택은 valid 시만), 직전 롤백·mock 리셋, 스테이지 슬롯 표시. 업로드≠승인 명시.
 
+**화면4 — 대시보드(읽기 전용) · DONE ✅**: 현 SSOT 집계 현황 — 규모(카테고리/관계별), 검수 status 분포, 공정별 커버리지(어느 공정이 비었나), 리뷰 큐 종류별+orphans, 동의어 사전 누적 alias(flywheel), 건강지표(unlinked 청크율·orphan율). 기존 read path 재사용, 쓰기 없음.
+
 **화면3 — 검수/승인/편집 Workbench · M3 ★ (좌우 분할)**:
 - **좌(½)**: NVL 그래프(현 스코프) + **proposed/고아 시각 플래그**(배지/하이라이트). 클릭→우측 로드.
 - **우(½)**: **듀얼 모드 패널**
@@ -94,7 +97,7 @@ class ExternalScriptStage:        # 나중: 사내 스크립트 subprocess
 
 ## 5. API 표면
 
-**읽기(R) · DONE**: `GET /data/status` · `/graph?scope={id}`(NVL 포맷) · `/nodes/{id}`(**embedding 미포함**) · `/nodes/{id}/chunks` · `/review/queue`
+**읽기(R) · DONE**: `GET /data/status` · `/graph?scope={id}`(NVL 포맷) · `/nodes/{id}`(**embedding 미포함**) · `/nodes/{id}/chunks` · `/nodes/search?q=` · `/review/queue` · `/dashboard/stats`(M6 집계, 읽기 전용·임베딩 미로드)
 
 **수동 주입/스테이지(W) · DONE**: `POST /ingest/upload/{slot}?adopt=`(검증↔채택 dry-run, `{valid, errors:[{path,msg}], counts}`) · `/ingest/rollback` · `/ingest/reset-mock` · `/stage/run/{slot}`(501 stub)
 
@@ -165,6 +168,10 @@ class ExternalScriptStage:        # 나중: 사내 스크립트 subprocess
 `stages.py`: `Stage(Protocol)` / `ManualUploadStage`(실행 경로 없음) / `ExternalScriptStage`(**실기능** — `<cmd> <in.json> <out.json>` subprocess, 비정상종료·출력없음·깨진JSON → `StageError`). 슬롯 `parser`/`skeleton`/`content` → config(`data/stage_config.json` + env `STAGE_<SLOT>`, `manual`|`external:<cmd>`). `GET/PUT /stage/config`. `/stage/run/{slot}` 501 해제: manual→400(수동 전용 안내), external→subprocess 실행 후 **외부 출력은 미신뢰 → validate + `store.upload(adopt)` (백업·전체 재검증·자동롤백) 게이트로만 채택**. 화면1 스테이지 슬롯에 config 반영(external 배지 + 실행 버튼).
 검증 `verify_m4.mjs` exit 0: ①echo 스크립트 config→`/stage/run/skeleton`→subprocess→출력 회수 ②검증·채택→SSOT 반영(11→12) ③깨진 출력→422 거부+SSOT 불변 ④manual 슬롯→400 ⑤회귀 M1/M2/M3/M5 exit 0. 파일: `backend/{stages,store,app}.py`, `frontend/.../DataManage.tsx`.
 
+### M6 — 대시보드(읽기 전용 현황) · DONE ✅
+`GET /dashboard/stats`(`reader.dashboard_stats`, 임베딩 미로드·쓰기 없음): 규모(노드·엣지·청크·describes + 카테고리/관계별), status 분포(proposed/confirmed), 공정별 커버리지(대공정 서브트리 노드·청크 수 — 빈 공정 식별), 리뷰 큐 종류별+구조적 orphans, 동의어 사전 누적 alias(flywheel), 건강(unlinked 청크율·orphan 노드율). 프론트 `Dashboard.tsx`(네비 4번째 탭, 카드 + CSS/SVG 막대 — recharts 미사용).
+검증 `verify_m6.mjs` exit 0: ①집계 정확(노드11·카테고리·엣지15·관계·status·큐·alias10·unlinked율0.667) ②탭 렌더+카드6+막대 ③커버리지 backbone 6공정+노드·청크 ④임베딩 미로드 ⑤회귀 7스위트 exit 0. 파일: `backend/{reader,app}.py`, `frontend/.../Dashboard.tsx`.
+
 ---
 
 ## 8. 기술 스택 / 셋업
@@ -183,7 +190,7 @@ class ExternalScriptStage:        # 나중: 사내 스크립트 subprocess
 
 ## 10. 명시적 비범위 (안 함)
 - **노드 merge** — 거버넌스(감사로그·undo)와 함께 다음 단계. (엣지 재지정/타입변경/삭제/추가는 **M5에서 활성화됨**. 노드 재부모는 part_of 엣지 재지정으로 달성. 노드 delete 는 비범위.)
-- 대시보드 · 테스트/Eval(골든셋) · 거버넌스 풀세트(감사로그·버전·롤백·권한).
+- 테스트/Eval(골든셋) · 거버넌스 풀세트(감사로그·버전·롤백·권한). (대시보드는 M6에서 완료.)
 - orphan **자동 해소**(표시만; 수동 재연결은 M5 관계 추가로 가능) · Neo4j 승격 · 멀티유저/인증.
 - 외부 파이프라인 *구현*(파싱/뼈대 코드) — 슬롯 인터페이스만.
 
