@@ -1,11 +1,12 @@
 # CLAUDE.md — 온톨로지 관리 플랫폼(관리소) 빌드 스펙 · v3
 
-> **진행 상태**: M1~M6 ✅ · **M7(Neo4j 승격 + 1000 스케일검증) ✅** — 첫 슬라이스 완성. 남은 비범위: Eval(골든셋)만.
+> **진행 상태**: M1~M7 ✅ · **M8(렌더-at-scale) ✅** — 첫 슬라이스 완성. 남은 비범위: Eval(골든셋)만.
 > **이 문서는 빌드 명세다.** §7 밀스톤 순서대로, 각 밀스톤의 **검증 게이트를 통과한 뒤** 다음으로. 한 번에 전부 만들지 말 것.
 > **§6 불변 원칙은 절대 위반 금지.** 충돌 시 멈추고 §6 우선, 그다음 사용자 확인.
 > **사용법**: 이 파일은 레포 루트에 두면 Claude Code가 자동 로드한다. 밀스톤 착수는 짧은 포인터(예: "M3 진행, §7 따라가")로 충분 — 전체 재첨부 불필요.
 
 ### 변경 이력
+- **v3.5**: M8(렌더-at-scale) 추가·완료 — 확장형 스코핑(ego: 포커스+이웃, ~50 유지, 클릭 확장) + 레이아웃 분기(결정적↔NVL force 워커) + WebGL config 토글. §3.5 반영, M7 M8-신호 해소.
 - **v3.4a**: 백엔드 토글(JSON⇄Neo4j) + 응답시간 표시(진단) — Explore/대시보드 상단. `?backend=` 재사용, 읽기 전용. 미가동 시 토글 비활성+json fallback. `verify_backend_toggle.mjs`.
 - **v3.4**: M7(Neo4j 승격) 추가·완료 — `Neo4jReader`(JsonReader 상속, Cypher 백엔드), `neo4j_sync`(JSON→Neo4j 재생성, label=category), `store.on_change` 훅(SSOT 변경 시 자동 재생성), 읽기 엔드포인트 `?backend=neo4j`. §10에서 "Neo4j 승격" 제거. §9에 1000-노드 스케일 fixture. **§6.3 재확인: Neo4j=읽기 전용 파생 캐시, 직접쓰기 절대 없음.**
 - **v3.3**: M6(대시보드) 추가·완료 — 읽기 전용 현황(`GET /dashboard/stats`). §10에서 "대시보드" 제거(Eval·neo4j 등은 유지).
@@ -73,9 +74,12 @@ class ExternalScriptStage:        # 나중: 사내 스크립트 subprocess
 
 **3.5 프론트(React+Vite+TS, `platform/frontend/`)** — *M1 구현 반영*:
 - `@neo4j-nvl/react`(+interaction-handlers). **`disableTelemetry:true` 필수.**
-- 렌더 `renderer:"canvas"` + `disableWebGL:true`(헤드리스 회피+슬라이스 규모 충분). ⚠️ **config로 유지** — 대규모 시 WebGL 필요.
-- 레이아웃: `layout.ts`에서 **결정적 계층 좌표** 직접 산출(part_of 계층/precedes 순서/has_property 부착)→`positions` 주입. ⚠️ 노드 대폭 증가 시 보강.
 - 캔버스라 **노드 안 HTML 금지** — 상세·편집은 옆 패널.
+- **렌더-at-scale(M8)** — flat 덤프 금지:
+  - **확장형 스코핑(ego)**: 스코프가 임계(60) 초과 시 통째 렌더하지 않고 **포커스+이웃**만(`ego.ts`), 화면에 ~50 이하 유지, 클릭으로 이웃 on-demand 확장. [전체 평면 보기] 토글로 flat 전환 가능.
+  - **레이아웃 분기**: ≤임계=결정적 좌표(`layout.ts` 계층 / ego 방사형); flat·수백 노드=NVL `forceDirected` 워커. (`GraphCanvas` `layoutMode`)
+  - **WebGL config**: `disableWebGL` 토글 — 노드 임계(300) 초과 시 WebGL 권장(수동 토글도). 헤드리스는 Canvas 유지. (`data-renderer`)
+  - 소규모(mock 11)는 현행 결정적 계층 그대로(회귀 없음).
 
 ---
 
@@ -185,11 +189,18 @@ class ExternalScriptStage:        # 나중: 사내 스크립트 subprocess
 검증 `verify_m7_neo4j.mjs` exit 0 (1027-fixture):
 1. JSON→Neo4j 적재(1027) 후 `?backend=neo4j` == `?backend=json` **동일 결과**(graph nodes/rels·status·node 상세·dashboard) ✅
 2. 응답시간 측정·기록: full-graph 읽기 json≈18ms vs neo4j≈70ms — **full-dump 은 JSON 유리**(Neo4j 왕복+재구성). Neo4j 가치는 그래프 순회/동시성. (sync≈230ms)
-3. **렌더-at-scale 관찰**: 공정 스코프(노칭) 171노드 Explore 렌더 — canvas 그려짐(nonblank 12.8%)이나 **밀집**. 대규모(전극/화성) 가면 WebGL+layout+스코핑 필요 → **M8 신호로 기록**. ✅(관찰)
+3. **렌더-at-scale 관찰**: 공정 스코프(노칭) 171노드 — flat 렌더 시 밀집. → **M8에서 해소**(확장형 스코핑). ✅(관찰)
 4. JSON 변이(`/nodes/{id}/edit`)→store.commit→`on_change` 자동 재생성→neo4j 반영 / Neo4j 직접쓰기 엔드포인트 부재(404) ✅
 5. 회귀 8 스위트 exit 0(기본 11노드 mock 유지) ✅
 파일: `backend/{neo4j_sync,reader,store,app}.py`, `data/mock/scale/gen_scale.py`. (Neo4j 5-community on docker, `neo4j` 드라이버.)
 - **진단 — 백엔드 토글**: Explore/대시보드 상단 [JSON⇄Neo4j] 토글 + 응답시간(ms). 프론트 `backend.tsx`(context+토글), 읽기 쿼리에 `?backend=` 전환. 같은 데이터→차이는 속도뿐. `verify_backend_toggle.mjs` exit 0: ①동일 렌더 ②응답시간 표시 갱신 ③Neo4j 미가동(docker stop)→토글 비활성+json 동작(neo4j 503·json 200) ④1027 시간차 가시화(JSON≈30ms vs Neo4j≈550ms) ⑤회귀.
+
+### M8 — 렌더-at-scale (확장형 스코핑 + 레이아웃 + WebGL) · DONE ✅
+동기(측정 기반 §6.8): M7 1027-fixture에서 공정 스코프 171노드 flat 덤프가 밀집 → 스케일에 맞춰 보강.
+- **확장형 스코핑(`ego.ts`, 핵심)**: 스코프>임계(60)면 통째 렌더 금지 — 포커스+이웃만(`egoView`), 화면 ~50 이하, 클릭으로 이웃 확장(`computeEgoLayout` 방사형). [전체 평면 보기] 토글.
+- **레이아웃 분기(`GraphCanvas.layoutMode`)**: ≤임계 결정적(layout.ts/ego 방사형) ↔ flat·수백노드 NVL `forceDirected` 워커. (NVL 워커가 positions 미주입 시 정상 분산 확인.)
+- **WebGL config**: `disableWebGL` 토글(노드>300 권장 + 수동), 헤드리스 Canvas 유지. `data-renderer` 노출.
+검증 `verify_m8.mjs` exit 0 (1027-fixture): ①171 스코프→확장형 35/171(≤50)+검색클릭 확장(35→39) ②전체 평면→`force` 레이아웃 분산 렌더 ③WebGL 토글(canvas→webgl) ④소규모(11 mock) 결정적·scale-bar 없음(회귀) ⑤9 스위트 회귀 exit 0. 파일: `frontend/src/{ego.ts,views/Explore.tsx,components/GraphCanvas.tsx}`.
 
 ---
 

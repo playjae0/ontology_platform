@@ -554,3 +554,20 @@
 }
 .bt-ms[data-backend="neo4j"] { color: #6d28d9; }
 .backend-toggle + .topbar-counts { margin-left: 16px; }
+
+/* ===== 렌더-at-scale 컨트롤 바 (M8) ===== */
+.nvl-host { position: relative; }
+.scale-bar {
+  position: absolute; top: 10px; left: 10px; right: 10px;
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  background: rgba(255,255,255,0.94); border: 1px solid var(--border);
+  border-radius: 8px; padding: 6px 12px; font-size: 12px; z-index: 5;
+}
+.scale-tag { background: #eff6ff; color: #1d4ed8; padding: 2px 8px; border-radius: 999px; font-weight: 600; }
+.scale-tag.flat { background: #fef3c7; color: #b45309; }
+.scale-bar button {
+  border: 1px solid var(--border); background: var(--panel); border-radius: 6px;
+  padding: 3px 10px; cursor: pointer; font-size: 12px;
+}
+.scale-render { margin-left: auto; display: inline-flex; align-items: center; gap: 8px; color: var(--muted); }
+.webgl-toggle { font-size: 11px; }
