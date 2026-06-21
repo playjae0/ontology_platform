@@ -13,6 +13,7 @@ sk.nodes["N0103"] = { id: "N0103", canonical_name: "레이저노칭기", categor
   status: "proposed", provenance: [], embedding: null };
 sk.edges.push({ source: "N0103", relation: "part_of", target: "N0001",
   evidence: "manual", status: "proposed", provenance: [] });
+const baseCount = Object.keys(sk.nodes).length - 1; // mock 노드 수(추가한 N0103 제외)
 const validJson = JSON.stringify(sk, null, 2);
 
 const brokenJson = JSON.stringify({
@@ -51,18 +52,18 @@ await skeletonCard.locator(".result-ok").waitFor({ timeout: 5000 });
 out.adoptEnabledOnValid = !(await adoptBtn.isDisabled());
 await adoptBtn.click();
 await page.waitForFunction(
-  () => document.querySelector(".topbar-counts")?.textContent?.includes("노드 12"),
-  { timeout: 5000 },
+  (n) => document.querySelector(".topbar-counts")?.textContent?.includes(`노드 ${n}`),
+  baseCount + 1, { timeout: 5000 },
 );
 out.countsAfterAdopt = (await page.textContent(".topbar-counts"))?.trim();
 
 await page.screenshot({ path: "m2_datamanage.png" });
 
-// 3) 롤백 → 11
+// 3) 롤백 → baseCount
 await page.getByRole("button", { name: /직전 롤백/ }).click();
 await page.waitForFunction(
-  () => document.querySelector(".topbar-counts")?.textContent?.includes("노드 11"),
-  { timeout: 5000 },
+  (n) => document.querySelector(".topbar-counts")?.textContent?.includes(`노드 ${n}`),
+  baseCount, { timeout: 5000 },
 );
 out.countsAfterRollback = (await page.textContent(".topbar-counts"))?.trim();
 
@@ -72,9 +73,9 @@ console.log(JSON.stringify(out, null, 2));
 
 const ok =
   out.adoptDisabledOnBroken === true &&
-  out.countsAfterBroken?.includes("노드 11") &&
+  out.countsAfterBroken?.includes(`노드 ${baseCount}`) &&
   out.adoptEnabledOnValid === true &&
-  out.countsAfterAdopt?.includes("노드 12") &&
-  out.countsAfterRollback?.includes("노드 11") &&
+  out.countsAfterAdopt?.includes(`노드 ${baseCount + 1}`) &&
+  out.countsAfterRollback?.includes(`노드 ${baseCount}`) &&
   errs.length === 0;
 process.exit(ok ? 0 : 1);

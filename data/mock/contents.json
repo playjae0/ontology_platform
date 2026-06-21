@@ -5,12 +5,45 @@
     {"cid": "C0003", "doc_id": "DOC2", "section": "신규 라인 도입 검토 p.2", "text": "신규 라인에는 레이저노칭기를 도입해 전극을 비접촉 방식으로 절단한다.", "meta": {"page": 2}},
     {"cid": "C0004", "doc_id": "DOC2", "section": "생산성 기준 p.5", "text": "노칭 속도는 50 m/min 이상으로 운전하여 생산성을 확보한다.", "meta": {"page": 5}},
     {"cid": "C0005", "doc_id": "DOC2", "section": "건조 공정 메모", "text": "건조 공정의 건조오븐에서 전극의 잔류 수분을 제거한다.", "meta": {}},
-    {"cid": "C0006", "doc_id": "DOC2", "section": "설비 대장 p.1", "text": "NP-2 설비는 기존 노칭프레스와 동일 사양의 서보 구동 절단기다.", "meta": {"page": 1}}
+    {"cid": "C0006", "doc_id": "DOC2", "section": "설비 대장 p.1", "text": "NP-2 설비는 기존 노칭프레스와 동일 사양의 서보 구동 절단기다.", "meta": {"page": 1}},
+
+    {"cid": "C0010", "doc_id": "MOCK_STK", "section": "스태킹 설비 사양 p.1", "text": "스태커(적층기)는 음극과 양극을 교대로 적층하며, 적층정렬도는 ±0.1mm 이내로 관리한다.", "meta": {"page": 1}},
+    {"cid": "C0011", "doc_id": "MOCK_STK", "section": "스태킹 생산성 p.2", "text": "적층속도는 분당 30매 이상을 목표로 한다.", "meta": {"page": 2}},
+
+    {"cid": "C0012", "doc_id": "MOCK_TAB", "section": "탭용접 사양 p.1", "text": "레이저용접기(탭웰더)로 전극 탭을 접합하며, 용접강도는 50N 이상을 확보한다.", "meta": {"page": 1}},
+    {"cid": "C0013", "doc_id": "MOCK_TAB", "section": "탭용접 품질 p.3", "text": "용접부 저항(용접저항)은 0.5mΩ 이하로 관리한다.", "meta": {"page": 3}},
+
+    {"cid": "C0014", "doc_id": "MOCK_PKG", "section": "패키징 성형 p.2", "text": "파우치성형기는 8±0.2mm 깊이로 성형하며(성형깊이), 성형정렬도는 ±0.15mm를 만족한다.", "meta": {"page": 2}},
+
+    {"cid": "C0015", "doc_id": "MOCK_ELY", "section": "전해액주입 사양 p.4", "text": "주액기(전해액 주액장치)는 셀당 5.0±0.1g을 주입한다(주액량).", "meta": {"page": 4}},
+    {"cid": "C0016", "doc_id": "MOCK_ELY", "section": "주입 환경 p.5", "text": "주입 챔버의 진공도는 10Pa 이하를 유지한다.", "meta": {"page": 5}},
+
+    {"cid": "C0017", "doc_id": "MOCK_SEAL", "section": "실링 사양 p.1", "text": "사이드실러는 180±5℃에서 밀봉하며(실링온도), 실링강도는 8N/15mm 이상을 만족한다.", "meta": {"page": 1}}
   ],
   "describes": [
     {"source": "C0001", "target": "N0101"},
     {"source": "C0001", "target": "N0201"},
     {"source": "C0002", "target": "N0202"},
-    {"source": "C0002", "target": "N0102"}
+    {"source": "C0002", "target": "N0102"},
+
+    {"source": "C0010", "target": "N0110"},
+    {"source": "C0010", "target": "N0210"},
+    {"source": "C0011", "target": "N0211"},
+
+    {"source": "C0012", "target": "N0111"},
+    {"source": "C0012", "target": "N0212"},
+    {"source": "C0013", "target": "N0213"},
+
+    {"source": "C0014", "target": "N0112"},
+    {"source": "C0014", "target": "N0214"},
+    {"source": "C0014", "target": "N0215"},
+
+    {"source": "C0015", "target": "N0113"},
+    {"source": "C0015", "target": "N0216"},
+    {"source": "C0016", "target": "N0217"},
+
+    {"source": "C0017", "target": "N0114"},
+    {"source": "C0017", "target": "N0218"},
+    {"source": "C0017", "target": "N0219"}
   ]
 }

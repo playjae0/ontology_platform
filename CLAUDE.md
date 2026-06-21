@@ -1,11 +1,12 @@
 # CLAUDE.md — 온톨로지 관리 플랫폼(관리소) 빌드 스펙 · v3
 
-> **진행 상태**: M1~M8 ✅ · **M9(인입 워크스페이스) ✅** — 첫 슬라이스 완성. 남은 비범위: Eval(골든셋)만.
+> **진행 상태**: M1~M9 ✅ · **M10(mock 6공정 확장) ✅** — 첫 슬라이스 완성. 다음: Eval(골든셋).
 > **이 문서는 빌드 명세다.** §7 밀스톤 순서대로, 각 밀스톤의 **검증 게이트를 통과한 뒤** 다음으로. 한 번에 전부 만들지 말 것.
 > **§6 불변 원칙은 절대 위반 금지.** 충돌 시 멈추고 §6 우선, 그다음 사용자 확인.
 > **사용법**: 이 파일은 레포 루트에 두면 Claude Code가 자동 로드한다. 밀스톤 착수는 짧은 포인터(예: "M3 진행, §7 따라가")로 충분 — 전체 재첨부 불필요.
 
 ### 변경 이력
+- **v3.7**: M10(mock 6공정 확장) — 11→**26노드**(6공정 각 Unit+Property 2~3, 동의어 영문/축약), 청크 6→14·describes 4→19, 6공정 모두 커버(unlinked 0.667→0.286). 기존 노드 id(N0001/N0101/N0102/N02xx) 보존. 카운트 단언 갱신(m2/m3/m4 카운트-무관, m6 새 baseline).
 - **v3.6**: M9(인입 워크스페이스) 추가·완료 — 배치 단계별 흐름(①업로드~⑤연결), MockStage(데모)·배치 래퍼(`ingest_batch`). **§3.3 정정**(common/ 무의존) + **§6.7 승격**: platform은 `ontology_agent` 코드 의존 0, JSON 계약만 공유.
 - **v3.5**: M8(렌더-at-scale) 추가·완료 — 확장형 스코핑(ego: 포커스+이웃, ~50 유지, 클릭 확장) + 레이아웃 분기(결정적↔NVL force 워커) + WebGL config 토글. §3.5 반영, M7 M8-신호 해소.
 - **v3.4a**: 백엔드 토글(JSON⇄Neo4j) + 응답시간 표시(진단) — Explore/대시보드 상단. `?backend=` 재사용, 읽기 전용. 미가동 시 토글 비활성+json fallback. `verify_backend_toggle.mjs`.
@@ -210,22 +211,30 @@ class ExternalScriptStage:        # 나중: 사내 스크립트 subprocess
 - per-doc(①②⑤) / batch-shared(③④): 전 문서 청크→하나의 스켈레톤·하나의 큐·승인 1회. 게이트: ②없이 ③ 불가, ③(+검수) 없이 ⑤ 불가.
 - `ingest_batch.py`: 배치 상태(`data/current/ingest_batch.json`) + run_parse/skeleton/content. 얇은 래퍼 `/ingest/batch/run/{stage}`, 스테이지는 config 로 external 스왑(기본 `MockStage` 데모, 결정적·§2 준수).
 - 모든 채택 store.commit(백업·재검증·자동롤백). ③은 후보(proposed)까지 — **업로드≠승인(§6.9)**: 노드는 ④승인에서 materialize. ⑤ 미해소는 `orphan_chunk_link`(문서별).
-검증 `verify_m9_ingest.mjs` exit 0: ①다문서 업로드→파싱 행마다 청크수(2,2) ②뼈대→배치 후보 2 하나의 큐(from_batch) ③③승인전 ⑤차단/승인후 ⑤가능 ④연결→per-doc describes 1·orphan 1 ⑤MockStage ①~⑤ 클릭 시연(노드 11→13 ④에서) ⑥회귀 10 스위트 exit 0. 파일: `backend/{stages,ingest_batch,app}.py`, `frontend/.../Ingest.tsx`.
+검증 `verify_m9_ingest.mjs` exit 0: ①다문서 업로드→파싱 행마다 청크수(2,2) ②뼈대→배치 후보 2 하나의 큐(from_batch) ③③승인전 ⑤차단/승인후 ⑤가능 ④연결→per-doc describes 1·orphan 1 ⑤MockStage ①~⑤ 클릭 시연(노드 +2 ④에서) ⑥회귀 exit 0. 파일: `backend/{stages,ingest_batch,app}.py`, `frontend/.../Ingest.tsx`.
+
+### M10 — mock 6공정 확장 (eval·데모용) · DONE ✅
+현 mock(11노드·노칭만 청크)을 **6공정 충실**로 확장 — 골든셋 작성·데모 가능. `data/mock/` 만 갱신(작업 SSOT는 reset-mock 시드), §2 스키마·참조무결성 통과.
+- 6공정 각 Unit 1 + Property 2~3, 공정별 청크가 그 Unit/Property describes(6공정 커버), 동의어(영문/축약). **기존 노드 id 보존**(node_picker/edge_edit 무영향).
+- 결과 baseline: 11→26노드, 청크 6→14, describes 4→19, unlinked 0.667→0.286, alias 23. **6공정 모두 커버(대시보드 빨강 0)**.
+- ★카운트 단언 갱신: m2/m3/m4 **카운트-무관**(baseline 델타), m6 **새 baseline 상수**.
+검증 `verify_m10_mock.mjs` exit 0: ①6공정 모두 Unit·Property·청크(커버리지 빨강 0) ②unlinked 개선·동의어 검색 ③스키마·참조무결성 ④전 화면(Explore·대시보드·인입·검수) 정상 ⑤회귀 11 스위트 exit 0. 파일: `data/mock/{assembly_skeleton,contents}.json`.
 
 ---
 
 ## 8. 기술 스택 / 셋업
-- 백엔드: FastAPI+uvicorn(`pip install --break-system-packages fastapi uvicorn`), 기존 `common/` import.
+- 백엔드: FastAPI+uvicorn(`pip install --break-system-packages fastapi uvicorn neo4j`). **`ontology_agent` 무의존**(§3.3/§6.7).
 - 프론트: React+Vite+TS, TanStack Query, `@neo4j-nvl/{base,react,interaction-handlers}`. 스타일 미니멀.
 - NVL: Canvas, `disableTelemetry:true`, `disableWebGL`은 config. 라이선스는 실배포 전 별도 확인.
 - 데이터: `data/current`(SSOT)·`data/mock`(원본)·`data/_backup`. M1~M3는 게이트웨이/LLM 불필요.
+- **mock baseline(M10)**: **26노드**(Process 7·Unit 7·Property 12), 엣지 30, 청크 14, describes 19, alias 23, 리뷰 큐 4. 6공정 모두 Unit/Property/청크 보유. 카운트 단언은 이 baseline 기준(또는 카운트-무관).
 - 실행: localhost 단일유저·무인증(헤드리스 서버면 포트포워딩).
 
 ---
 
 ## 9. Mock 데이터
-- `data/mock/`(11노드): backbone + Unit/Property + proposed/evidence 청크 + `review_queue.json`. 기본 SSOT·M1~M6 검증용.
-- **스케일 fixture** `data/mock/scale/`(M7): `gen_scale.py` → 1027노드(backbone 6공정 아래 합성 Unit/Property + 청크/describes), §2 스키마 준수, 결정적. M7 스케일 검증 전용(평소 SSOT 아님).
+- `data/mock/`(**26노드, M10**): 6공정 충실 — 각 공정 Unit 1 + Property 2~3, 공정별 문서/청크가 그 Unit/Property 를 describes(6공정 콘텐츠 커버), 매칭·검색용 동의어(영문/축약). 기존 노드 id(N0001/N0101/N0102/N0201/N0202) 보존. + `review_queue.json`(후보 4). 골든셋 작성·데모 가능.
+- **스케일 fixture** `data/mock/scale/`(M7): `gen_scale.py` → 1027노드. M7/M8 스케일 검증 전용(평소 SSOT 아님).
 
 ---
 

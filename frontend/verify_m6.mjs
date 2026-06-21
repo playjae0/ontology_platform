@@ -26,6 +26,7 @@ out.queueByKind = d.review.queue_by_kind;
 out.coverageLen = d.coverage.length;
 out.cov0 = d.coverage[0]; // 노칭: nodes 5, chunks 2
 out.covNames = d.coverage.map((c) => c.name);
+out.coverageAllChunks = d.coverage.every((c) => c.chunks > 0); // 빨강 0 (M10)
 
 // 2) UI: 대시보드 탭 렌더 + 카드/차트
 const browser = await chromium.launch();
@@ -45,15 +46,18 @@ await post("/ingest/reset-mock");
 out.consoleErrors = errs;
 console.log(JSON.stringify(out, null, 2));
 
+// M10 확장 mock 기준 baseline (6공정 충실)
 const ok =
-  out.nodes === 11 &&
-  out.byCat.Process === 7 && out.byCat.Unit === 2 && out.byCat.Property === 2 &&
-  out.edges === 15 && out.byRel.part_of === 8 && out.byRel.precedes === 5 && out.byRel.has_property === 2 &&
-  out.status.confirmed === 9 && out.status.proposed === 2 &&
-  out.aliasesTotal === 10 &&
-  out.unlinkedRate === 0.667 && out.orphanRate === 0.0 &&
+  out.nodes === 26 &&
+  out.byCat.Process === 7 && out.byCat.Unit === 7 && out.byCat.Property === 12 &&
+  out.edges === 30 && out.byRel.part_of === 13 && out.byRel.precedes === 5 && out.byRel.has_property === 12 &&
+  out.status.confirmed === 24 && out.status.proposed === 2 &&
+  out.aliasesTotal === 23 &&
+  out.unlinkedRate === 0.286 && out.orphanRate === 0.0 &&
   out.queueTotal === 4 &&
   out.coverageLen === 6 &&
+  // 6공정 모두 청크 보유(커버리지 빨강 0) — M10 핵심
+  out.coverageAllChunks === true &&
   out.cov0.name === "노칭" && out.cov0.nodes === 5 && out.cov0.chunks === 2 &&
   out.cardCount >= 6 && out.covRows === 6 && out.barCount >= 3 &&
   errs.length === 0;

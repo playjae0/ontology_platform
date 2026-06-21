@@ -61,7 +61,12 @@ out.approveMaterializes = out.nodesAfterApprove === out.nodesBeforeApprove + 2;
 // 새 상태 반영 위해 reload
 await page.reload({ waitUntil: "load" });
 await page.click(".nav button:has-text('인입')");
-await page.waitForSelector(".ingest-steps");
+await page.waitForSelector(".batch-table tbody tr"); // 배치 데이터 로드 완료까지 대기
+// ④ 단계가 검수완료(큐 0)로 반영될 때까지 대기 후 ⑤ 게이트 확인
+await page.waitForFunction(
+  () => !document.querySelector('.ingest-step[data-step="⑤"] button')?.disabled,
+  { timeout: 8000 },
+).catch(() => {});
 
 // 게이트: 승인 후 ⑤ 가능 (gate3b)
 out.contentEnabledAfterApprove = !(await step(page, "⑤").isDisabled());

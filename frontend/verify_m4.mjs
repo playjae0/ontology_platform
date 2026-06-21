@@ -64,11 +64,12 @@ await post("/ingest/reset-mock");
 out.consoleErrors = errs;
 console.log(JSON.stringify(out, null, 2));
 
+// 카운트-무관: echo 채택은 mock+1, 깨진 출력은 불변(=afterEcho)
 const ok =
-  out.startNodes === 11 &&
+  out.startNodes > 0 &&
   out.manual400 === 400 &&
-  out.echoStatus === 200 && out.echoAdopted === true && out.afterEcho === 12 &&
-  out.brokenStatus === 422 && out.afterBroken === 12 &&
+  out.echoStatus === 200 && out.echoAdopted === true && out.afterEcho === out.startNodes + 1 &&
+  out.brokenStatus === 422 && out.afterBroken === out.startNodes + 1 &&
   out.uiExternalBadge === true && out.uiRunButton === true &&
   errs.length === 0;
 process.exit(ok ? 0 : 1);

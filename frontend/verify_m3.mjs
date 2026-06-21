@@ -52,12 +52,14 @@ await browser.close();
 out.consoleErrors = errs;
 console.log(JSON.stringify(out, null, 2));
 
+// 카운트-무관: 초기 노드 수 기준 델타로 단언(mock 확장 대비)
+const init = Number(out.initialNodes);
 const ok =
-  out.initialQueue === 4 && out.initialNodes === "11" &&
+  out.initialQueue === 4 && Number.isFinite(init) &&
   out.editorShows === "레이저노칭기" &&
-  out.afterApproveQueue === 3 && out.afterApproveNodes === "12" &&
-  out.afterAbsorbQueue === 2 && out.afterAbsorbNodes === "12" &&
-  out.afterBatchQueue === 1 && out.afterBatchNodes === "13" &&
+  out.afterApproveQueue === 3 && Number(out.afterApproveNodes) === init + 1 &&
+  out.afterAbsorbQueue === 2 && Number(out.afterAbsorbNodes) === init + 1 &&
+  out.afterBatchQueue === 1 && Number(out.afterBatchNodes) === init + 2 &&
   out.remainingKind === "orphan_unit" &&
   errs.length === 0;
 process.exit(ok ? 0 : 1);
