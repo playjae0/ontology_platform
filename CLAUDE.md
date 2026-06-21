@@ -1,11 +1,12 @@
 # CLAUDE.md — 온톨로지 관리 플랫폼(관리소) 빌드 스펙 · v3
 
-> **진행 상태**: M1~M10 ✅ · **M11(검색 + Eval) ✅** — 첫 슬라이스 + Eval 완성. 비범위 잔여: 거버넌스 풀세트·실 임베딩 보강.
+> **진행 상태**: M1~M11 ✅ · **M12(이벤트 층 스캐폴드: FailureMode/Cause + Mode C + 추적질의) ✅**. 비범위 잔여: 거버넌스 풀세트·실 임베딩 보강·실 taxonomy 정밀화.
 > **이 문서는 빌드 명세다.** §7 밀스톤 순서대로, 각 밀스톤의 **검증 게이트를 통과한 뒤** 다음으로. 한 번에 전부 만들지 말 것.
 > **§6 불변 원칙은 절대 위반 금지.** 충돌 시 멈추고 §6 우선, 그다음 사용자 확인.
 > **사용법**: 이 파일은 레포 루트에 두면 Claude Code가 자동 로드한다. 밀스톤 착수는 짧은 포인터(예: "M3 진행, §7 따라가")로 충분 — 전체 재첨부 불필요.
 
 ### 변경 이력
+- **v3.9**: M12(이벤트 층 스캐폴드) — §2 category += FailureMode/Cause, relation += causes/affects. Mode C(이슈 인입: FailureMode/Cause 후보→승인 materialize+엣지). `/retrieve` causes/affects **양방향** 추적. 층 분리(Mode C는 구조 resolve-only·발생=청크). mock baseline 30노드. **§10 FailureMode/Cause "Phase 2" 해소.** verify_m6 견고화(mock 재계산). 실 meta/taxonomy는 실 샘플 후 정밀화.
 - **v3.8**: M11(검색 + Eval) — `GET /retrieve`(별칭+렉시컬 링킹→part_of/has_property 탐색→describes 수집, **임베딩-free**), `golden_set.json`(21문항·4패턴), `/eval/run`(Recall@k·MRR·패턴분해·alias gap). 화면6 Test/Eval. §6.6 재확인(질문 alias 미누적). 경계: 임베딩-보강 링킹+매칭 eval = 사내 확장.
 - **v3.7**: M10(mock 6공정 확장) — 11→**26노드**(6공정 각 Unit+Property 2~3, 동의어 영문/축약), 청크 6→14·describes 4→19, 6공정 모두 커버(unlinked 0.667→0.286). 기존 노드 id(N0001/N0101/N0102/N02xx) 보존. 카운트 단언 갱신(m2/m3/m4 카운트-무관, m6 새 baseline).
 - **v3.6**: M9(인입 워크스페이스) 추가·완료 — 배치 단계별 흐름(①업로드~⑤연결), MockStage(데모)·배치 래퍼(`ingest_batch`). **§3.3 정정**(common/ 무의존) + **§6.7 승격**: platform은 `ontology_agent` 코드 의존 0, JSON 계약만 공유.
@@ -48,8 +49,9 @@
 
 **`assembly_skeleton.json`** — *M1 실측 확정*:
 - 최상위 `nodes`는 **id-키 딕셔너리**(list 아님): `{"N0001": {…}}`. `JsonReader`는 list/dict 양쪽 수용.
-- 노드: `id`(불변·무의미 N####), `canonical_name`, `category`(Process|Unit|Property), `definition`, `aliases`[], `spec`(Property용, 필드), `status`(proposed|confirmed), `provenance`, 부착 **`attached_to`**.
-- 계층은 `attached_to` 및/또는 `edges`의 `part_of`로 표현. `edges`: `source`, `relation`(part_of|precedes|has_property), `target`, `status`, `provenance`.
+- 노드: `id`(불변·무의미 N####), `canonical_name`, `category`(구조 **Process|Unit|Property** + 이벤트 **FailureMode|Cause**, M12), `definition`, `aliases`[], `spec`(Property용, 필드), `status`(proposed|confirmed), `provenance`, 부착 **`attached_to`**(이벤트 노드는 null — causes/affects 로만 결합).
+- `edges`: `source`, `relation`(구조 **part_of|precedes|has_property** + 이벤트 **causes|affects**, M12), `target`, `status`, `provenance`. 이벤트 의미: `Cause --causes--> FailureMode --affects--> Property|Unit|Process`.
+- **발생/이력은 노드 아님 — 청크**(meta: date/line/lot) → `describes` FailureMode. (발생 노드화 금지)
 
 **`contents.json`**: `{chunks:[…], describes:[{source:"C0007", target:"N0003"}]}`
 
@@ -129,7 +131,7 @@ class ExternalScriptStage:        # 나중: 사내 스크립트 subprocess
 2. **임베딩 비저장.** 읽기 경로는 임베딩을 읽지도 않는다.
 3. **단일 원천 = JSON.** 모든 쓰기 JSON에만(store.commit). **Neo4j = JSON 에서 재생성되는 읽기 전용 파생 캐시 — 직접쓰기 절대 없음(M7 재확인).** 쓰기 = store.commit(JSON) → 그 후 `on_change`→neo4j 재생성. 이중 원천 금지.
 4. **사람 최종 승인 / 뼈대=승인경로만.** 노드·엣지 *생성·확정*은 검수 승인으로만. 스테이지/주입은 제안·로딩까지, 자동 확정 금지.
-5. **콘텐츠(Mode D) resolve-only.** 새 뼈대 노드 생성 금지.
+5. **콘텐츠(Mode D)·이벤트(Mode C) resolve-only / 층 분리(M12).** Mode D 는 새 뼈대 노드 생성 금지. **Mode C 는 Process/Unit/Property 를 *수정 못 함*** — affects/describes 는 구조 노드를 *참조*(resolve-only)만. 새 노드는 FailureMode/Cause 만, 승인 게이트 거쳐. 발생 건은 노드 아님(청크).
 6. **질의/탐색 시 alias 비누적**(용어사전 오염 방지). **검색(M11 `/retrieve`)도 질문 표현을 alias 에 쌓지 않는다 — 읽기 전용.** 단, 검수 시 명시적 alias 추가/별칭 흡수는 *사람의 결정*이라 허용.
 7. **계약 기반 결합 / `ontology_agent` 코드 의존 0.** platform 은 처리소(`ontology_agent`) 코드를 import 하지 않는다 — **JSON 계약(§2)만 공유**. 스테이지 구현 하드코딩 금지(Manual/External/Mock 어댑터, config 선택). 읽기 경로는 임베딩/BGE-M3 부팅 금지.
 8. **안티 오버엔지니어링.** 측정/요구가 정당화하기 전 범위(§10) 선구현 금지.
@@ -229,6 +231,16 @@ class ExternalScriptStage:        # 나중: 사내 스크립트 subprocess
 - `golden_set.json`(data root, SSOT 미복사): 21문항·4패턴(P1 direct/P2 process/P3 backtrace 가중/P4 synonym), gold_chunks=실 mock cid, 비-canonical 표면형(영문·축약·동의어). `POST /eval/run?k=`: Recall@k·MRR·패턴별 분해·gap 목록. 골든셋 고정.
 검증 `verify_m11_eval.mjs` exit 0: ①알려진 질문→gold 노드/청크(별칭+탐색만) ②Recall@5=1.0·MRR≈0.95·4패턴 분해 ③미해소→gap(임베딩 fallback 없음) ④alias 미누적·임베딩 미로드 ⑤회귀 12 스위트 exit 0. 파일: `backend/{reader,app}.py`, `data/golden_set.json`, `frontend/.../Eval.tsx`.
 
+### M12 — 이벤트 층 스캐폴드 (FailureMode/Cause + Mode C + 추적질의) · DONE ✅
+3번째 층(이벤트)을 mock 위 스캐폴드 — PFMEA 역추적("X 불량 원인?")이 돌게. 발생은 청크(노드 아님), 타입만 노드. M3 승인·M9 인입·safe-write·`/retrieve` 재사용.
+- **스키마**(§2): category += FailureMode/Cause, relation += causes/affects. `Cause→causes→FailureMode→affects→구조`. validate 참조무결성 하드, 방향(category)=경고(M5 패턴, 막지 않음).
+- **★층 분리(§6.5)**: Mode C 는 구조(Process/Unit/Property) 미수정 — affects/describes 는 resolve-only 참조. 발생=청크(meta date/line/lot)→describes FailureMode. 새 노드는 FailureMode/Cause 만, 승인 게이트.
+- **Mode C 인입**: `MockStage(event)` + `/ingest/batch/run/event` — 이슈 doc → 후보(`new_failuremode`/`new_cause`) + 발생 청크. 승인(M3 `mutations._apply_one`) → materialize + causes/affects 엣지 + 발생청크 describes. 전부 store.commit.
+- **추적 질의**: `/retrieve` 가 causes/affects 를 **양방향** 탐색(링크=3·구조=2·이벤트=1 가중). "버발생 원인?"→금형마모(Cause)+책임 인자/설비(affects)+이슈청크. 구조 노드→affects⁻¹→관련 FailureMode 역도달.
+- **시각화**: `theme.ts` FailureMode(빨강)/Cause(보라). Explore/대시보드 카테고리 필터·카운트에 이벤트 층.
+검증 `verify_m12_event.mjs` exit 0: ①스키마 수용+방향경고+참조무결성 ②대시보드 이벤트 카운트+Explore 필터 ③Mode C: 후보→승인 materialize+엣지+describes ④추적(버발생→causes+affects+이슈청크, 역도달) ⑤층분리(구조 26→26 불변)+발생=청크 ⑥회귀 13 스위트 exit 0. 파일: `backend/{validate,mutations,stages,ingest_batch,reader,app}.py`, `data/mock/*`, `frontend/src/{theme.ts,views/Explore.tsx,components/LeftPanel.tsx}`.
+> 실 구조 의존부(meta 필드·불량/원인 taxonomy)는 실 샘플 도착 후 정밀화.
+
 ---
 
 ## 8. 기술 스택 / 셋업
@@ -236,13 +248,13 @@ class ExternalScriptStage:        # 나중: 사내 스크립트 subprocess
 - 프론트: React+Vite+TS, TanStack Query, `@neo4j-nvl/{base,react,interaction-handlers}`. 스타일 미니멀.
 - NVL: Canvas, `disableTelemetry:true`, `disableWebGL`은 config. 라이선스는 실배포 전 별도 확인.
 - 데이터: `data/current`(SSOT)·`data/mock`(원본)·`data/_backup`. M1~M3는 게이트웨이/LLM 불필요.
-- **mock baseline(M10)**: **26노드**(Process 7·Unit 7·Property 12), 엣지 30, 청크 14, describes 19, alias 23, 리뷰 큐 4. 6공정 모두 Unit/Property/청크 보유. 카운트 단언은 이 baseline 기준(또는 카운트-무관).
+- **mock baseline(M12)**: **30노드**(Process 7·Unit 7·Property 12·**FailureMode 2·Cause 2**), 엣지 36(+causes 2·affects 4), 청크 17(+이슈 3), describes 24, alias 27. 6공정 커버 + 이벤트 층 2 trace 체인. **verify_m6 는 mock 파일에서 기대값 재계산**(카운트 상수 비의존 — 추가 변경에도 견고).
 - 실행: localhost 단일유저·무인증(헤드리스 서버면 포트포워딩).
 
 ---
 
 ## 9. Mock 데이터
-- `data/mock/`(**26노드, M10**): 6공정 충실 — 각 공정 Unit 1 + Property 2~3, 공정별 문서/청크가 그 Unit/Property 를 describes(6공정 콘텐츠 커버), 매칭·검색용 동의어(영문/축약). 기존 노드 id(N0001/N0101/N0102/N0201/N0202) 보존. + `review_queue.json`(후보 4). 골든셋 작성·데모 가능.
+- `data/mock/`(**30노드, M12**): 6공정 충실(각 Unit 1 + Property 2~3, 청크 describes, 동의어) + **이벤트 층**(FailureMode 버발생·적층정렬불량 / Cause 금형마모·센서드리프트 / causes·affects / 이슈 청크 meta date·line·lot). 기존 노드 id 보존. + `review_queue.json`·`golden_set.json`(data root).
 - **스케일 fixture** `data/mock/scale/`(M7): `gen_scale.py` → 1027노드. M7/M8 스케일 검증 전용(평소 SSOT 아님).
 
 ---
@@ -251,7 +263,8 @@ class ExternalScriptStage:        # 나중: 사내 스크립트 subprocess
 - **노드 merge** — 거버넌스(감사로그·undo)와 함께 다음 단계. (엣지 재지정/타입변경/삭제/추가는 **M5에서 활성화됨**. 노드 재부모는 part_of 엣지 재지정으로 달성. 노드 delete 는 비범위.)
 - 테스트/Eval(골든셋) · 거버넌스 풀세트(감사로그·버전·롤백·권한). (대시보드는 M6에서 완료.)
 - orphan **자동 해소**(표시만; 수동 재연결은 M5 관계 추가로 가능) · 멀티유저/인증. (Neo4j 승격은 M7에서 완료.)
-- 외부 파이프라인 *구현*(파싱/뼈대 코드) — 슬롯 인터페이스만.
+- 외부 파이프라인 *구현*(파싱/뼈대/이벤트 코드) — 슬롯 인터페이스만(Mode C 포함, MockStage 데모).
+- 실 불량/원인 taxonomy·발생 meta 스키마 정밀화 — 실 샘플 도착 후. (이벤트 층 *스캐폴드*는 M12에서 완료.)
 
 > 단, **M2 백업/롤백 1회**·**M3·M5 안전쓰기 재검증**은 거버넌스 풀세트가 아니라 *파괴적/변경 연산의 최소 데이터 위생*이라 포함한다.
 

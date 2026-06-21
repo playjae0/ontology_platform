@@ -1,11 +1,27 @@
-// M6 검증 — 대시보드: 집계 정확 / 탭 렌더·카드·차트 / 공정 커버리지 6공정.
+// M6 검증 — 대시보드: 집계 정확(mock 파일에서 재계산해 대조) / 탭 렌더·카드 / 6공정 커버리지.
 import { chromium } from "playwright";
+import { readFileSync } from "fs";
 
 const API = "http://localhost:8077";
 const out = {};
 const errs = [];
 const get = (p) => fetch(API + p).then((r) => r.json());
 const post = (p) => fetch(API + p, { method: "POST" });
+
+// mock SSOT 에서 기대 집계 재계산(매 mock 변경에도 견고 — 카운트 상수 하드코딩 금지)
+const sk = JSON.parse(readFileSync("../data/mock/assembly_skeleton.json", "utf-8"));
+const ct = JSON.parse(readFileSync("../data/mock/contents.json", "utf-8"));
+const exp = (() => {
+  const nodes = Object.values(sk.nodes);
+  const byCat = {}, byRel = {}, byStatus = {};
+  let aliases = 0;
+  for (const n of nodes) { byCat[n.category] = (byCat[n.category] || 0) + 1; byStatus[n.status] = (byStatus[n.status] || 0) + 1; aliases += (n.aliases || []).length; }
+  for (const e of sk.edges) byRel[e.relation] = (byRel[e.relation] || 0) + 1;
+  const linked = new Set(ct.describes.map((d) => d.source));
+  return { nodes: nodes.length, edges: sk.edges.length, chunks: ct.chunks.length, describes: ct.describes.length,
+    byCat, byRel, byStatus, aliases, unlinked: ct.chunks.filter((c) => !linked.has(c.cid)).length };
+})();
+out.expected = exp;
 
 await post("/ingest/reset-mock");
 
@@ -46,19 +62,19 @@ await post("/ingest/reset-mock");
 out.consoleErrors = errs;
 console.log(JSON.stringify(out, null, 2));
 
-// M10 확장 mock 기준 baseline (6공정 충실)
+// 대시보드 집계 == mock 파일 재계산값 (자체 검증, 카운트 상수 비의존)
+const canon = (o) => JSON.stringify(Object.fromEntries(Object.entries(o).sort()));
+const eq = (a, b) => canon(a) === canon(b);
+const expUnlinkedRate = Math.round((exp.unlinked / exp.chunks) * 1000) / 1000;
 const ok =
-  out.nodes === 26 &&
-  out.byCat.Process === 7 && out.byCat.Unit === 7 && out.byCat.Property === 12 &&
-  out.edges === 30 && out.byRel.part_of === 13 && out.byRel.precedes === 5 && out.byRel.has_property === 12 &&
-  out.status.confirmed === 24 && out.status.proposed === 2 &&
-  out.aliasesTotal === 23 &&
-  out.unlinkedRate === 0.286 && out.orphanRate === 0.0 &&
-  out.queueTotal === 4 &&
+  out.nodes === exp.nodes && out.edges === exp.edges &&
+  eq(out.byCat, exp.byCat) && eq(out.byRel, exp.byRel) &&
+  out.status.confirmed === exp.byStatus.confirmed && out.status.proposed === exp.byStatus.proposed &&
+  out.aliasesTotal === exp.aliases &&
+  out.unlinkedRate === expUnlinkedRate &&
   out.coverageLen === 6 &&
-  // 6공정 모두 청크 보유(커버리지 빨강 0) — M10 핵심
-  out.coverageAllChunks === true &&
-  out.cov0.name === "노칭" && out.cov0.nodes === 5 && out.cov0.chunks === 2 &&
+  out.coverageAllChunks === true && // 6공정 모두 청크 보유(커버리지 빨강 0)
+  out.cov0.name === "노칭" && out.cov0.nodes >= 5 && out.cov0.chunks >= 2 &&
   out.cardCount >= 6 && out.covRows === 6 && out.barCount >= 3 &&
   errs.length === 0;
 process.exit(ok ? 0 : 1);

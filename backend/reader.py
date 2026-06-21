@@ -158,18 +158,34 @@ class JsonReader:
                     linked[nid] = surf
                     break
 
-        # ② 탐색: 링크 노드의 서브트리(설비/인자) 따라 확장
-        visited = set(linked)
+        # ② 탐색: (a) 구조 서브트리(part_of/has_property) (b) 이벤트 causes/affects 양방향(M12)
+        struct = set()
         for nid in list(linked):
-            visited |= self._descendants(nid, edges)
+            struct |= self._descendants(nid, edges)
+        struct -= set(linked)
+        ce_adj: dict[str, set] = {}
+        for e in edges:
+            if e.get("relation") in ("causes", "affects"):
+                ce_adj.setdefault(e.get("source"), set()).add(e.get("target"))
+                ce_adj.setdefault(e.get("target"), set()).add(e.get("source"))
+        event = set()
+        frontier = set(linked) | struct
+        for _ in range(2):  # 2홉: Property→affects⁻¹→FailureMode→causes⁻¹→Cause
+            nxt = set()
+            for n in frontier:
+                for nb in ce_adj.get(n, set()):
+                    if nb not in linked and nb not in struct and nb not in event:
+                        event.add(nb); nxt.add(nb)
+            frontier = nxt
 
-        # ③ 수집: describes 청크. 링크 노드 describe=2, 탐색 노드=1 가중 → 랭킹
+        # ③ 수집: describes 청크. 링크=3 · 구조탐색=2 · 이벤트탐색=1 가중 → 랭킹
         tgt_cids: dict[str, set] = {}
         for d in describes:
             tgt_cids.setdefault(d.get("target"), set()).add(d.get("source"))
+        weight = {**{n: 3 for n in linked}, **{n: 2 for n in struct}, **{n: 1 for n in event}}
+        visited = set(weight)
         score: dict[str, int] = {}
-        for nid in visited:
-            w = 2 if nid in linked else 1
+        for nid, w in weight.items():
             for cid in tgt_cids.get(nid, set()):
                 score[cid] = score.get(cid, 0) + w
         by_cid = {c.get("cid"): c for c in chunks}

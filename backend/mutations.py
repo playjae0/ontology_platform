@@ -65,6 +65,41 @@ def _apply_one(nodes: dict, edges: list, contents: dict,
             describes.append({"source": cid, "target": attach})
         return {"ok": True, "msg": f"청크 {cid} → '{_name(nodes, attach)}' 연결"}
 
+    # ---- 이벤트 층(M12): FailureMode/Cause materialize + causes/affects ----
+    # 층 분리(§6): 구조 노드(Process/Unit/Property)는 수정 안 함 — affects/causes 는 resolve-only 참조.
+    if kind in ("new_failuremode", "new_cause"):
+        nidx = {}
+        for _id, _n in nodes.items():
+            for key in [_n.get("canonical_name"), *(_n.get("aliases") or [])]:
+                if key:
+                    nidx[key] = _id
+        nid = _next_id(nodes)
+        cat = "FailureMode" if kind == "new_failuremode" else "Cause"
+        nodes[nid] = {"id": nid, "canonical_name": surface, "category": cat,
+                      "definition": f"{surface} ({cat})", "aliases": [], "attached_to": None,
+                      "spec": None, "status": "confirmed", "provenance": prov, "embedding": None}
+        made = []
+        if kind == "new_failuremode":
+            for name in item.get("affects_names", []) or []:
+                tgt = nidx.get(name)
+                if tgt:  # 구조 노드를 *참조*만(affects) — 수정 없음
+                    edges.append({"source": nid, "relation": "affects", "target": tgt,
+                                  "evidence": "approved", "status": "confirmed", "provenance": []})
+                    made.append(f"affects {name}")
+        else:  # new_cause → causes FailureMode
+            fm = nidx.get(item.get("causes_name"))
+            if fm:
+                edges.append({"source": nid, "relation": "causes", "target": fm,
+                              "evidence": "approved", "status": "confirmed", "provenance": []})
+                made.append(f"causes {item.get('causes_name')}")
+        # 발생/근거 청크 → 신규 이벤트 노드 describes(resolve-only)
+        describes = contents.setdefault("describes", [])
+        for cid in item.get("evidence_cids", []) or []:
+            if not any(d.get("source") == cid and d.get("target") == nid for d in describes):
+                describes.append({"source": cid, "target": nid})
+        return {"ok": True, "created_id": nid,
+                "msg": f"{cat} '{surface}' ({', '.join(made) or '엣지 미해소'})"}
+
     # 설비/인자 후보 → 신규 노드 + 엣지 생성
     if not attach or attach not in nodes:
         return {"ok": False,
@@ -305,6 +340,10 @@ def _category_warning(nodes: dict, source: str, relation: str, target: str) -> s
         return f"part_of 는 보통 하위→Process 입니다 (현재 {sc}→{tc})"
     if relation == "precedes" and not (sc == "Process" and tc == "Process"):
         return f"precedes 는 보통 Process→Process 입니다 (현재 {sc}→{tc})"
+    if relation == "causes" and not (sc == "Cause" and tc == "FailureMode"):
+        return f"causes 는 보통 Cause→FailureMode 입니다 (현재 {sc}→{tc})"
+    if relation == "affects" and not (sc in ("FailureMode", "Cause") and tc in ("Property", "Unit", "Process")):
+        return f"affects 는 보통 FailureMode/Cause→구조 입니다 (현재 {sc}→{tc})"
     return None
 
 

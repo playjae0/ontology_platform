@@ -11,8 +11,10 @@ from __future__ import annotations
 import re
 from typing import Any
 
-CATEGORIES = {"Process", "Unit", "Property"}
-RELATIONS = {"part_of", "precedes", "has_property"}
+# 구조 층(Process/Unit/Property) + 이벤트 층(FailureMode/Cause, M12)
+CATEGORIES = {"Process", "Unit", "Property", "FailureMode", "Cause"}
+# 구조 관계 + 이벤트 관계(causes/affects, M12)
+RELATIONS = {"part_of", "precedes", "has_property", "causes", "affects"}
 STATUSES = {"proposed", "confirmed"}
 NODE_ID_RE = re.compile(r"^N\d{4,}$")
 CID_RE = re.compile(r"^C\d{4,}$")

@@ -246,9 +246,9 @@ def ingest_batch_upload(body: BatchUpload):
 def ingest_batch_run(stage: str):
     """stage ∈ {parse, skeleton, content}. 게이트 위반 시 400. 채택은 store.commit."""
     fn = {"parse": ingest_batch.run_parse, "skeleton": ingest_batch.run_skeleton,
-          "content": ingest_batch.run_content}.get(stage)
+          "content": ingest_batch.run_content, "event": ingest_batch.run_event}.get(stage)
     if fn is None:
-        raise HTTPException(404, f"알 수 없는 배치 스테이지 '{stage}' (parse|skeleton|content)")
+        raise HTTPException(404, f"알 수 없는 배치 스테이지 '{stage}' (parse|skeleton|content|event)")
     r = fn(store)
     if not r.get("ok"):
         raise HTTPException(400, detail=r)

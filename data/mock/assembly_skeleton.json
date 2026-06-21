@@ -1,69 +1,706 @@
 {
   "nodes": {
-    "N0000": {"id": "N0000", "canonical_name": "조립공정", "category": "Process", "definition": "파우치셀 조립 대공정", "aliases": ["assembly"], "attached_to": null, "spec": null, "status": "confirmed", "provenance": [], "embedding": null},
-    "N0001": {"id": "N0001", "canonical_name": "노칭", "category": "Process", "definition": "전극을 정밀 재단하는 공정", "aliases": ["notching"], "attached_to": "N0000", "spec": null, "status": "confirmed", "provenance": [], "embedding": null},
-    "N0002": {"id": "N0002", "canonical_name": "스태킹", "category": "Process", "definition": "음/양극을 적층하는 공정", "aliases": ["stacking"], "attached_to": "N0000", "spec": null, "status": "confirmed", "provenance": [], "embedding": null},
-    "N0003": {"id": "N0003", "canonical_name": "탭용접", "category": "Process", "definition": "전극 탭을 용접하는 공정", "aliases": ["tab welding"], "attached_to": "N0000", "spec": null, "status": "confirmed", "provenance": [], "embedding": null},
-    "N0004": {"id": "N0004", "canonical_name": "패키징", "category": "Process", "definition": "셀을 파우치에 포장하는 공정", "aliases": ["packaging"], "attached_to": "N0000", "spec": null, "status": "confirmed", "provenance": [], "embedding": null},
-    "N0005": {"id": "N0005", "canonical_name": "전해액주입", "category": "Process", "definition": "전해액을 주입하는 공정", "aliases": ["electrolyte filling"], "attached_to": "N0000", "spec": null, "status": "confirmed", "provenance": [], "embedding": null},
-    "N0006": {"id": "N0006", "canonical_name": "실링", "category": "Process", "definition": "파우치를 밀봉하는 공정", "aliases": ["sealing"], "attached_to": "N0000", "spec": null, "status": "confirmed", "provenance": [], "embedding": null},
-
-    "N0101": {"id": "N0101", "canonical_name": "노칭프레스", "category": "Unit", "definition": "노칭의 설비", "aliases": ["notching press"], "attached_to": "N0001", "spec": null, "status": "confirmed", "provenance": [], "embedding": null},
-    "N0102": {"id": "N0102", "canonical_name": "비전검사기", "category": "Unit", "definition": "노칭 후 전수 검사 설비", "aliases": ["vision inspector"], "attached_to": "N0001", "spec": null, "status": "proposed", "provenance": [], "embedding": null},
-    "N0201": {"id": "N0201", "canonical_name": "절단정밀도", "category": "Property", "definition": "", "aliases": [], "attached_to": "N0101", "spec": "±0.05mm", "status": "confirmed", "provenance": [], "embedding": null},
-    "N0202": {"id": "N0202", "canonical_name": "버높이", "category": "Property", "definition": "", "aliases": ["burr"], "attached_to": "N0101", "spec": "≤ 12㎎", "status": "proposed", "provenance": [], "embedding": null},
-
-    "N0110": {"id": "N0110", "canonical_name": "스태커", "category": "Unit", "definition": "스태킹의 적층 설비", "aliases": ["stacker", "적층기"], "attached_to": "N0002", "spec": null, "status": "confirmed", "provenance": [], "embedding": null},
-    "N0210": {"id": "N0210", "canonical_name": "적층정렬도", "category": "Property", "definition": "", "aliases": ["stack alignment"], "attached_to": "N0110", "spec": "±0.1mm", "status": "confirmed", "provenance": [], "embedding": null},
-    "N0211": {"id": "N0211", "canonical_name": "적층속도", "category": "Property", "definition": "", "aliases": [], "attached_to": "N0110", "spec": "≥ 30 매/min", "status": "confirmed", "provenance": [], "embedding": null},
-
-    "N0111": {"id": "N0111", "canonical_name": "레이저용접기", "category": "Unit", "definition": "탭용접의 용접 설비", "aliases": ["laser welder", "탭웰더"], "attached_to": "N0003", "spec": null, "status": "confirmed", "provenance": [], "embedding": null},
-    "N0212": {"id": "N0212", "canonical_name": "용접강도", "category": "Property", "definition": "", "aliases": ["weld strength"], "attached_to": "N0111", "spec": "≥ 50N", "status": "confirmed", "provenance": [], "embedding": null},
-    "N0213": {"id": "N0213", "canonical_name": "용접저항", "category": "Property", "definition": "", "aliases": [], "attached_to": "N0111", "spec": "≤ 0.5mΩ", "status": "confirmed", "provenance": [], "embedding": null},
-
-    "N0112": {"id": "N0112", "canonical_name": "파우치성형기", "category": "Unit", "definition": "패키징의 성형 설비", "aliases": ["pouch former"], "attached_to": "N0004", "spec": null, "status": "confirmed", "provenance": [], "embedding": null},
-    "N0214": {"id": "N0214", "canonical_name": "성형깊이", "category": "Property", "definition": "", "aliases": ["forming depth"], "attached_to": "N0112", "spec": "8 ± 0.2mm", "status": "confirmed", "provenance": [], "embedding": null},
-    "N0215": {"id": "N0215", "canonical_name": "성형정렬도", "category": "Property", "definition": "", "aliases": [], "attached_to": "N0112", "spec": "±0.15mm", "status": "confirmed", "provenance": [], "embedding": null},
-
-    "N0113": {"id": "N0113", "canonical_name": "주액기", "category": "Unit", "definition": "전해액주입의 주액 설비", "aliases": ["electrolyte filler", "주액장치"], "attached_to": "N0005", "spec": null, "status": "confirmed", "provenance": [], "embedding": null},
-    "N0216": {"id": "N0216", "canonical_name": "주액량", "category": "Property", "definition": "", "aliases": ["fill volume"], "attached_to": "N0113", "spec": "5.0 ± 0.1g", "status": "confirmed", "provenance": [], "embedding": null},
-    "N0217": {"id": "N0217", "canonical_name": "진공도", "category": "Property", "definition": "", "aliases": [], "attached_to": "N0113", "spec": "≤ 10Pa", "status": "confirmed", "provenance": [], "embedding": null},
-
-    "N0114": {"id": "N0114", "canonical_name": "사이드실러", "category": "Unit", "definition": "실링의 밀봉 설비", "aliases": ["side sealer"], "attached_to": "N0006", "spec": null, "status": "confirmed", "provenance": [], "embedding": null},
-    "N0218": {"id": "N0218", "canonical_name": "실링온도", "category": "Property", "definition": "", "aliases": ["seal temp"], "attached_to": "N0114", "spec": "180 ± 5℃", "status": "confirmed", "provenance": [], "embedding": null},
-    "N0219": {"id": "N0219", "canonical_name": "실링강도", "category": "Property", "definition": "", "aliases": [], "attached_to": "N0114", "spec": "≥ 8N/15mm", "status": "confirmed", "provenance": [], "embedding": null}
+    "N0000": {
+      "id": "N0000",
+      "canonical_name": "조립공정",
+      "category": "Process",
+      "definition": "파우치셀 조립 대공정",
+      "aliases": [
+        "assembly"
+      ],
+      "attached_to": null,
+      "spec": null,
+      "status": "confirmed",
+      "provenance": [],
+      "embedding": null
+    },
+    "N0001": {
+      "id": "N0001",
+      "canonical_name": "노칭",
+      "category": "Process",
+      "definition": "전극을 정밀 재단하는 공정",
+      "aliases": [
+        "notching"
+      ],
+      "attached_to": "N0000",
+      "spec": null,
+      "status": "confirmed",
+      "provenance": [],
+      "embedding": null
+    },
+    "N0002": {
+      "id": "N0002",
+      "canonical_name": "스태킹",
+      "category": "Process",
+      "definition": "음/양극을 적층하는 공정",
+      "aliases": [
+        "stacking"
+      ],
+      "attached_to": "N0000",
+      "spec": null,
+      "status": "confirmed",
+      "provenance": [],
+      "embedding": null
+    },
+    "N0003": {
+      "id": "N0003",
+      "canonical_name": "탭용접",
+      "category": "Process",
+      "definition": "전극 탭을 용접하는 공정",
+      "aliases": [
+        "tab welding"
+      ],
+      "attached_to": "N0000",
+      "spec": null,
+      "status": "confirmed",
+      "provenance": [],
+      "embedding": null
+    },
+    "N0004": {
+      "id": "N0004",
+      "canonical_name": "패키징",
+      "category": "Process",
+      "definition": "셀을 파우치에 포장하는 공정",
+      "aliases": [
+        "packaging"
+      ],
+      "attached_to": "N0000",
+      "spec": null,
+      "status": "confirmed",
+      "provenance": [],
+      "embedding": null
+    },
+    "N0005": {
+      "id": "N0005",
+      "canonical_name": "전해액주입",
+      "category": "Process",
+      "definition": "전해액을 주입하는 공정",
+      "aliases": [
+        "electrolyte filling"
+      ],
+      "attached_to": "N0000",
+      "spec": null,
+      "status": "confirmed",
+      "provenance": [],
+      "embedding": null
+    },
+    "N0006": {
+      "id": "N0006",
+      "canonical_name": "실링",
+      "category": "Process",
+      "definition": "파우치를 밀봉하는 공정",
+      "aliases": [
+        "sealing"
+      ],
+      "attached_to": "N0000",
+      "spec": null,
+      "status": "confirmed",
+      "provenance": [],
+      "embedding": null
+    },
+    "N0101": {
+      "id": "N0101",
+      "canonical_name": "노칭프레스",
+      "category": "Unit",
+      "definition": "노칭의 설비",
+      "aliases": [
+        "notching press"
+      ],
+      "attached_to": "N0001",
+      "spec": null,
+      "status": "confirmed",
+      "provenance": [],
+      "embedding": null
+    },
+    "N0102": {
+      "id": "N0102",
+      "canonical_name": "비전검사기",
+      "category": "Unit",
+      "definition": "노칭 후 전수 검사 설비",
+      "aliases": [
+        "vision inspector"
+      ],
+      "attached_to": "N0001",
+      "spec": null,
+      "status": "proposed",
+      "provenance": [],
+      "embedding": null
+    },
+    "N0201": {
+      "id": "N0201",
+      "canonical_name": "절단정밀도",
+      "category": "Property",
+      "definition": "",
+      "aliases": [],
+      "attached_to": "N0101",
+      "spec": "±0.05mm",
+      "status": "confirmed",
+      "provenance": [],
+      "embedding": null
+    },
+    "N0202": {
+      "id": "N0202",
+      "canonical_name": "버높이",
+      "category": "Property",
+      "definition": "",
+      "aliases": [
+        "burr"
+      ],
+      "attached_to": "N0101",
+      "spec": "≤ 12㎎",
+      "status": "proposed",
+      "provenance": [],
+      "embedding": null
+    },
+    "N0110": {
+      "id": "N0110",
+      "canonical_name": "스태커",
+      "category": "Unit",
+      "definition": "스태킹의 적층 설비",
+      "aliases": [
+        "stacker",
+        "적층기"
+      ],
+      "attached_to": "N0002",
+      "spec": null,
+      "status": "confirmed",
+      "provenance": [],
+      "embedding": null
+    },
+    "N0210": {
+      "id": "N0210",
+      "canonical_name": "적층정렬도",
+      "category": "Property",
+      "definition": "",
+      "aliases": [
+        "stack alignment"
+      ],
+      "attached_to": "N0110",
+      "spec": "±0.1mm",
+      "status": "confirmed",
+      "provenance": [],
+      "embedding": null
+    },
+    "N0211": {
+      "id": "N0211",
+      "canonical_name": "적층속도",
+      "category": "Property",
+      "definition": "",
+      "aliases": [],
+      "attached_to": "N0110",
+      "spec": "≥ 30 매/min",
+      "status": "confirmed",
+      "provenance": [],
+      "embedding": null
+    },
+    "N0111": {
+      "id": "N0111",
+      "canonical_name": "레이저용접기",
+      "category": "Unit",
+      "definition": "탭용접의 용접 설비",
+      "aliases": [
+        "laser welder",
+        "탭웰더"
+      ],
+      "attached_to": "N0003",
+      "spec": null,
+      "status": "confirmed",
+      "provenance": [],
+      "embedding": null
+    },
+    "N0212": {
+      "id": "N0212",
+      "canonical_name": "용접강도",
+      "category": "Property",
+      "definition": "",
+      "aliases": [
+        "weld strength"
+      ],
+      "attached_to": "N0111",
+      "spec": "≥ 50N",
+      "status": "confirmed",
+      "provenance": [],
+      "embedding": null
+    },
+    "N0213": {
+      "id": "N0213",
+      "canonical_name": "용접저항",
+      "category": "Property",
+      "definition": "",
+      "aliases": [],
+      "attached_to": "N0111",
+      "spec": "≤ 0.5mΩ",
+      "status": "confirmed",
+      "provenance": [],
+      "embedding": null
+    },
+    "N0112": {
+      "id": "N0112",
+      "canonical_name": "파우치성형기",
+      "category": "Unit",
+      "definition": "패키징의 성형 설비",
+      "aliases": [
+        "pouch former"
+      ],
+      "attached_to": "N0004",
+      "spec": null,
+      "status": "confirmed",
+      "provenance": [],
+      "embedding": null
+    },
+    "N0214": {
+      "id": "N0214",
+      "canonical_name": "성형깊이",
+      "category": "Property",
+      "definition": "",
+      "aliases": [
+        "forming depth"
+      ],
+      "attached_to": "N0112",
+      "spec": "8 ± 0.2mm",
+      "status": "confirmed",
+      "provenance": [],
+      "embedding": null
+    },
+    "N0215": {
+      "id": "N0215",
+      "canonical_name": "성형정렬도",
+      "category": "Property",
+      "definition": "",
+      "aliases": [],
+      "attached_to": "N0112",
+      "spec": "±0.15mm",
+      "status": "confirmed",
+      "provenance": [],
+      "embedding": null
+    },
+    "N0113": {
+      "id": "N0113",
+      "canonical_name": "주액기",
+      "category": "Unit",
+      "definition": "전해액주입의 주액 설비",
+      "aliases": [
+        "electrolyte filler",
+        "주액장치"
+      ],
+      "attached_to": "N0005",
+      "spec": null,
+      "status": "confirmed",
+      "provenance": [],
+      "embedding": null
+    },
+    "N0216": {
+      "id": "N0216",
+      "canonical_name": "주액량",
+      "category": "Property",
+      "definition": "",
+      "aliases": [
+        "fill volume"
+      ],
+      "attached_to": "N0113",
+      "spec": "5.0 ± 0.1g",
+      "status": "confirmed",
+      "provenance": [],
+      "embedding": null
+    },
+    "N0217": {
+      "id": "N0217",
+      "canonical_name": "진공도",
+      "category": "Property",
+      "definition": "",
+      "aliases": [],
+      "attached_to": "N0113",
+      "spec": "≤ 10Pa",
+      "status": "confirmed",
+      "provenance": [],
+      "embedding": null
+    },
+    "N0114": {
+      "id": "N0114",
+      "canonical_name": "사이드실러",
+      "category": "Unit",
+      "definition": "실링의 밀봉 설비",
+      "aliases": [
+        "side sealer"
+      ],
+      "attached_to": "N0006",
+      "spec": null,
+      "status": "confirmed",
+      "provenance": [],
+      "embedding": null
+    },
+    "N0218": {
+      "id": "N0218",
+      "canonical_name": "실링온도",
+      "category": "Property",
+      "definition": "",
+      "aliases": [
+        "seal temp"
+      ],
+      "attached_to": "N0114",
+      "spec": "180 ± 5℃",
+      "status": "confirmed",
+      "provenance": [],
+      "embedding": null
+    },
+    "N0219": {
+      "id": "N0219",
+      "canonical_name": "실링강도",
+      "category": "Property",
+      "definition": "",
+      "aliases": [],
+      "attached_to": "N0114",
+      "spec": "≥ 8N/15mm",
+      "status": "confirmed",
+      "provenance": [],
+      "embedding": null
+    },
+    "N0401": {
+      "id": "N0401",
+      "canonical_name": "버발생",
+      "category": "FailureMode",
+      "definition": "버발생 (FailureMode)",
+      "aliases": [
+        "burr defect"
+      ],
+      "attached_to": null,
+      "spec": null,
+      "status": "confirmed",
+      "provenance": [],
+      "embedding": null
+    },
+    "N0402": {
+      "id": "N0402",
+      "canonical_name": "적층정렬불량",
+      "category": "FailureMode",
+      "definition": "적층정렬불량 (FailureMode)",
+      "aliases": [
+        "stack misalign"
+      ],
+      "attached_to": null,
+      "spec": null,
+      "status": "confirmed",
+      "provenance": [],
+      "embedding": null
+    },
+    "N0501": {
+      "id": "N0501",
+      "canonical_name": "금형마모",
+      "category": "Cause",
+      "definition": "금형마모 (Cause)",
+      "aliases": [
+        "die wear",
+        "mold wear"
+      ],
+      "attached_to": null,
+      "spec": null,
+      "status": "confirmed",
+      "provenance": [],
+      "embedding": null
+    },
+    "N0502": {
+      "id": "N0502",
+      "canonical_name": "센서드리프트",
+      "category": "Cause",
+      "definition": "센서드리프트 (Cause)",
+      "aliases": [
+        "sensor drift"
+      ],
+      "attached_to": null,
+      "spec": null,
+      "status": "confirmed",
+      "provenance": [],
+      "embedding": null
+    }
   },
   "edges": [
-    {"source": "N0001", "relation": "part_of", "target": "N0000", "evidence": "seed", "status": "confirmed", "provenance": []},
-    {"source": "N0002", "relation": "part_of", "target": "N0000", "evidence": "seed", "status": "confirmed", "provenance": []},
-    {"source": "N0003", "relation": "part_of", "target": "N0000", "evidence": "seed", "status": "confirmed", "provenance": []},
-    {"source": "N0004", "relation": "part_of", "target": "N0000", "evidence": "seed", "status": "confirmed", "provenance": []},
-    {"source": "N0005", "relation": "part_of", "target": "N0000", "evidence": "seed", "status": "confirmed", "provenance": []},
-    {"source": "N0006", "relation": "part_of", "target": "N0000", "evidence": "seed", "status": "confirmed", "provenance": []},
-    {"source": "N0001", "relation": "precedes", "target": "N0002", "evidence": "seed", "status": "confirmed", "provenance": []},
-    {"source": "N0002", "relation": "precedes", "target": "N0003", "evidence": "seed", "status": "confirmed", "provenance": []},
-    {"source": "N0003", "relation": "precedes", "target": "N0004", "evidence": "seed", "status": "confirmed", "provenance": []},
-    {"source": "N0004", "relation": "precedes", "target": "N0005", "evidence": "seed", "status": "confirmed", "provenance": []},
-    {"source": "N0005", "relation": "precedes", "target": "N0006", "evidence": "seed", "status": "confirmed", "provenance": []},
-    {"source": "N0101", "relation": "part_of", "target": "N0001", "evidence": "seed", "status": "confirmed", "provenance": []},
-    {"source": "N0102", "relation": "part_of", "target": "N0001", "evidence": "proposed", "status": "proposed", "provenance": []},
-    {"source": "N0101", "relation": "has_property", "target": "N0201", "evidence": "seed", "status": "confirmed", "provenance": []},
-    {"source": "N0101", "relation": "has_property", "target": "N0202", "evidence": "proposed", "status": "proposed", "provenance": []},
-
-    {"source": "N0110", "relation": "part_of", "target": "N0002", "evidence": "seed", "status": "confirmed", "provenance": []},
-    {"source": "N0110", "relation": "has_property", "target": "N0210", "evidence": "seed", "status": "confirmed", "provenance": []},
-    {"source": "N0110", "relation": "has_property", "target": "N0211", "evidence": "seed", "status": "confirmed", "provenance": []},
-    {"source": "N0111", "relation": "part_of", "target": "N0003", "evidence": "seed", "status": "confirmed", "provenance": []},
-    {"source": "N0111", "relation": "has_property", "target": "N0212", "evidence": "seed", "status": "confirmed", "provenance": []},
-    {"source": "N0111", "relation": "has_property", "target": "N0213", "evidence": "seed", "status": "confirmed", "provenance": []},
-    {"source": "N0112", "relation": "part_of", "target": "N0004", "evidence": "seed", "status": "confirmed", "provenance": []},
-    {"source": "N0112", "relation": "has_property", "target": "N0214", "evidence": "seed", "status": "confirmed", "provenance": []},
-    {"source": "N0112", "relation": "has_property", "target": "N0215", "evidence": "seed", "status": "confirmed", "provenance": []},
-    {"source": "N0113", "relation": "part_of", "target": "N0005", "evidence": "seed", "status": "confirmed", "provenance": []},
-    {"source": "N0113", "relation": "has_property", "target": "N0216", "evidence": "seed", "status": "confirmed", "provenance": []},
-    {"source": "N0113", "relation": "has_property", "target": "N0217", "evidence": "seed", "status": "confirmed", "provenance": []},
-    {"source": "N0114", "relation": "part_of", "target": "N0006", "evidence": "seed", "status": "confirmed", "provenance": []},
-    {"source": "N0114", "relation": "has_property", "target": "N0218", "evidence": "seed", "status": "confirmed", "provenance": []},
-    {"source": "N0114", "relation": "has_property", "target": "N0219", "evidence": "seed", "status": "confirmed", "provenance": []}
+    {
+      "source": "N0001",
+      "relation": "part_of",
+      "target": "N0000",
+      "evidence": "seed",
+      "status": "confirmed",
+      "provenance": []
+    },
+    {
+      "source": "N0002",
+      "relation": "part_of",
+      "target": "N0000",
+      "evidence": "seed",
+      "status": "confirmed",
+      "provenance": []
+    },
+    {
+      "source": "N0003",
+      "relation": "part_of",
+      "target": "N0000",
+      "evidence": "seed",
+      "status": "confirmed",
+      "provenance": []
+    },
+    {
+      "source": "N0004",
+      "relation": "part_of",
+      "target": "N0000",
+      "evidence": "seed",
+      "status": "confirmed",
+      "provenance": []
+    },
+    {
+      "source": "N0005",
+      "relation": "part_of",
+      "target": "N0000",
+      "evidence": "seed",
+      "status": "confirmed",
+      "provenance": []
+    },
+    {
+      "source": "N0006",
+      "relation": "part_of",
+      "target": "N0000",
+      "evidence": "seed",
+      "status": "confirmed",
+      "provenance": []
+    },
+    {
+      "source": "N0001",
+      "relation": "precedes",
+      "target": "N0002",
+      "evidence": "seed",
+      "status": "confirmed",
+      "provenance": []
+    },
+    {
+      "source": "N0002",
+      "relation": "precedes",
+      "target": "N0003",
+      "evidence": "seed",
+      "status": "confirmed",
+      "provenance": []
+    },
+    {
+      "source": "N0003",
+      "relation": "precedes",
+      "target": "N0004",
+      "evidence": "seed",
+      "status": "confirmed",
+      "provenance": []
+    },
+    {
+      "source": "N0004",
+      "relation": "precedes",
+      "target": "N0005",
+      "evidence": "seed",
+      "status": "confirmed",
+      "provenance": []
+    },
+    {
+      "source": "N0005",
+      "relation": "precedes",
+      "target": "N0006",
+      "evidence": "seed",
+      "status": "confirmed",
+      "provenance": []
+    },
+    {
+      "source": "N0101",
+      "relation": "part_of",
+      "target": "N0001",
+      "evidence": "seed",
+      "status": "confirmed",
+      "provenance": []
+    },
+    {
+      "source": "N0102",
+      "relation": "part_of",
+      "target": "N0001",
+      "evidence": "proposed",
+      "status": "proposed",
+      "provenance": []
+    },
+    {
+      "source": "N0101",
+      "relation": "has_property",
+      "target": "N0201",
+      "evidence": "seed",
+      "status": "confirmed",
+      "provenance": []
+    },
+    {
+      "source": "N0101",
+      "relation": "has_property",
+      "target": "N0202",
+      "evidence": "proposed",
+      "status": "proposed",
+      "provenance": []
+    },
+    {
+      "source": "N0110",
+      "relation": "part_of",
+      "target": "N0002",
+      "evidence": "seed",
+      "status": "confirmed",
+      "provenance": []
+    },
+    {
+      "source": "N0110",
+      "relation": "has_property",
+      "target": "N0210",
+      "evidence": "seed",
+      "status": "confirmed",
+      "provenance": []
+    },
+    {
+      "source": "N0110",
+      "relation": "has_property",
+      "target": "N0211",
+      "evidence": "seed",
+      "status": "confirmed",
+      "provenance": []
+    },
+    {
+      "source": "N0111",
+      "relation": "part_of",
+      "target": "N0003",
+      "evidence": "seed",
+      "status": "confirmed",
+      "provenance": []
+    },
+    {
+      "source": "N0111",
+      "relation": "has_property",
+      "target": "N0212",
+      "evidence": "seed",
+      "status": "confirmed",
+      "provenance": []
+    },
+    {
+      "source": "N0111",
+      "relation": "has_property",
+      "target": "N0213",
+      "evidence": "seed",
+      "status": "confirmed",
+      "provenance": []
+    },
+    {
+      "source": "N0112",
+      "relation": "part_of",
+      "target": "N0004",
+      "evidence": "seed",
+      "status": "confirmed",
+      "provenance": []
+    },
+    {
+      "source": "N0112",
+      "relation": "has_property",
+      "target": "N0214",
+      "evidence": "seed",
+      "status": "confirmed",
+      "provenance": []
+    },
+    {
+      "source": "N0112",
+      "relation": "has_property",
+      "target": "N0215",
+      "evidence": "seed",
+      "status": "confirmed",
+      "provenance": []
+    },
+    {
+      "source": "N0113",
+      "relation": "part_of",
+      "target": "N0005",
+      "evidence": "seed",
+      "status": "confirmed",
+      "provenance": []
+    },
+    {
+      "source": "N0113",
+      "relation": "has_property",
+      "target": "N0216",
+      "evidence": "seed",
+      "status": "confirmed",
+      "provenance": []
+    },
+    {
+      "source": "N0113",
+      "relation": "has_property",
+      "target": "N0217",
+      "evidence": "seed",
+      "status": "confirmed",
+      "provenance": []
+    },
+    {
+      "source": "N0114",
+      "relation": "part_of",
+      "target": "N0006",
+      "evidence": "seed",
+      "status": "confirmed",
+      "provenance": []
+    },
+    {
+      "source": "N0114",
+      "relation": "has_property",
+      "target": "N0218",
+      "evidence": "seed",
+      "status": "confirmed",
+      "provenance": []
+    },
+    {
+      "source": "N0114",
+      "relation": "has_property",
+      "target": "N0219",
+      "evidence": "seed",
+      "status": "confirmed",
+      "provenance": []
+    },
+    {
+      "source": "N0501",
+      "relation": "causes",
+      "target": "N0401",
+      "evidence": "seed",
+      "status": "confirmed",
+      "provenance": []
+    },
+    {
+      "source": "N0401",
+      "relation": "affects",
+      "target": "N0201",
+      "evidence": "seed",
+      "status": "confirmed",
+      "provenance": []
+    },
+    {
+      "source": "N0401",
+      "relation": "affects",
+      "target": "N0101",
+      "evidence": "seed",
+      "status": "confirmed",
+      "provenance": []
+    },
+    {
+      "source": "N0502",
+      "relation": "causes",
+      "target": "N0402",
+      "evidence": "seed",
+      "status": "confirmed",
+      "provenance": []
+    },
+    {
+      "source": "N0402",
+      "relation": "affects",
+      "target": "N0210",
+      "evidence": "seed",
+      "status": "confirmed",
+      "provenance": []
+    },
+    {
+      "source": "N0402",
+      "relation": "affects",
+      "target": "N0110",
+      "evidence": "seed",
+      "status": "confirmed",
+      "provenance": []
+    }
   ]
 }

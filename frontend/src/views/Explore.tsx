@@ -21,7 +21,7 @@ export default function Explore() {
   const [scope, setScope] = useState<string | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
   const [filters, setFilters] = useState<Filters>({
-    categories: new Set(["Process", "Unit", "Property"]),
+    categories: new Set(["Process", "Unit", "Property", "FailureMode", "Cause"]),
     statuses: new Set(["confirmed", "proposed"]),
   });
   // 확장형 스코핑 상태

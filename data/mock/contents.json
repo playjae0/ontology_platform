@@ -1,49 +1,258 @@
 {
   "chunks": [
-    {"cid": "C0001", "doc_id": "MOCK", "section": "노칭 설비 사양서 p.3", "text": "노칭프레스는 서보 구동 방식으로 전극을 정밀 절단하며, 절단정밀도는 ±0.05mm를 만족해야 한다.", "meta": {"page": 3}},
-    {"cid": "C0002", "doc_id": "MOCK", "section": "품질 기준 p.7", "text": "노칭 후 버높이는 12㎎ 이하로 관리한다. 비전검사기로 전수 검사한다.", "meta": {"page": 7}},
-    {"cid": "C0003", "doc_id": "DOC2", "section": "신규 라인 도입 검토 p.2", "text": "신규 라인에는 레이저노칭기를 도입해 전극을 비접촉 방식으로 절단한다.", "meta": {"page": 2}},
-    {"cid": "C0004", "doc_id": "DOC2", "section": "생산성 기준 p.5", "text": "노칭 속도는 50 m/min 이상으로 운전하여 생산성을 확보한다.", "meta": {"page": 5}},
-    {"cid": "C0005", "doc_id": "DOC2", "section": "건조 공정 메모", "text": "건조 공정의 건조오븐에서 전극의 잔류 수분을 제거한다.", "meta": {}},
-    {"cid": "C0006", "doc_id": "DOC2", "section": "설비 대장 p.1", "text": "NP-2 설비는 기존 노칭프레스와 동일 사양의 서보 구동 절단기다.", "meta": {"page": 1}},
-
-    {"cid": "C0010", "doc_id": "MOCK_STK", "section": "스태킹 설비 사양 p.1", "text": "스태커(적층기)는 음극과 양극을 교대로 적층하며, 적층정렬도는 ±0.1mm 이내로 관리한다.", "meta": {"page": 1}},
-    {"cid": "C0011", "doc_id": "MOCK_STK", "section": "스태킹 생산성 p.2", "text": "적층속도는 분당 30매 이상을 목표로 한다.", "meta": {"page": 2}},
-
-    {"cid": "C0012", "doc_id": "MOCK_TAB", "section": "탭용접 사양 p.1", "text": "레이저용접기(탭웰더)로 전극 탭을 접합하며, 용접강도는 50N 이상을 확보한다.", "meta": {"page": 1}},
-    {"cid": "C0013", "doc_id": "MOCK_TAB", "section": "탭용접 품질 p.3", "text": "용접부 저항(용접저항)은 0.5mΩ 이하로 관리한다.", "meta": {"page": 3}},
-
-    {"cid": "C0014", "doc_id": "MOCK_PKG", "section": "패키징 성형 p.2", "text": "파우치성형기는 8±0.2mm 깊이로 성형하며(성형깊이), 성형정렬도는 ±0.15mm를 만족한다.", "meta": {"page": 2}},
-
-    {"cid": "C0015", "doc_id": "MOCK_ELY", "section": "전해액주입 사양 p.4", "text": "주액기(전해액 주액장치)는 셀당 5.0±0.1g을 주입한다(주액량).", "meta": {"page": 4}},
-    {"cid": "C0016", "doc_id": "MOCK_ELY", "section": "주입 환경 p.5", "text": "주입 챔버의 진공도는 10Pa 이하를 유지한다.", "meta": {"page": 5}},
-
-    {"cid": "C0017", "doc_id": "MOCK_SEAL", "section": "실링 사양 p.1", "text": "사이드실러는 180±5℃에서 밀봉하며(실링온도), 실링강도는 8N/15mm 이상을 만족한다.", "meta": {"page": 1}}
+    {
+      "cid": "C0001",
+      "doc_id": "MOCK",
+      "section": "노칭 설비 사양서 p.3",
+      "text": "노칭프레스는 서보 구동 방식으로 전극을 정밀 절단하며, 절단정밀도는 ±0.05mm를 만족해야 한다.",
+      "meta": {
+        "page": 3
+      }
+    },
+    {
+      "cid": "C0002",
+      "doc_id": "MOCK",
+      "section": "품질 기준 p.7",
+      "text": "노칭 후 버높이는 12㎎ 이하로 관리한다. 비전검사기로 전수 검사한다.",
+      "meta": {
+        "page": 7
+      }
+    },
+    {
+      "cid": "C0003",
+      "doc_id": "DOC2",
+      "section": "신규 라인 도입 검토 p.2",
+      "text": "신규 라인에는 레이저노칭기를 도입해 전극을 비접촉 방식으로 절단한다.",
+      "meta": {
+        "page": 2
+      }
+    },
+    {
+      "cid": "C0004",
+      "doc_id": "DOC2",
+      "section": "생산성 기준 p.5",
+      "text": "노칭 속도는 50 m/min 이상으로 운전하여 생산성을 확보한다.",
+      "meta": {
+        "page": 5
+      }
+    },
+    {
+      "cid": "C0005",
+      "doc_id": "DOC2",
+      "section": "건조 공정 메모",
+      "text": "건조 공정의 건조오븐에서 전극의 잔류 수분을 제거한다.",
+      "meta": {}
+    },
+    {
+      "cid": "C0006",
+      "doc_id": "DOC2",
+      "section": "설비 대장 p.1",
+      "text": "NP-2 설비는 기존 노칭프레스와 동일 사양의 서보 구동 절단기다.",
+      "meta": {
+        "page": 1
+      }
+    },
+    {
+      "cid": "C0010",
+      "doc_id": "MOCK_STK",
+      "section": "스태킹 설비 사양 p.1",
+      "text": "스태커(적층기)는 음극과 양극을 교대로 적층하며, 적층정렬도는 ±0.1mm 이내로 관리한다.",
+      "meta": {
+        "page": 1
+      }
+    },
+    {
+      "cid": "C0011",
+      "doc_id": "MOCK_STK",
+      "section": "스태킹 생산성 p.2",
+      "text": "적층속도는 분당 30매 이상을 목표로 한다.",
+      "meta": {
+        "page": 2
+      }
+    },
+    {
+      "cid": "C0012",
+      "doc_id": "MOCK_TAB",
+      "section": "탭용접 사양 p.1",
+      "text": "레이저용접기(탭웰더)로 전극 탭을 접합하며, 용접강도는 50N 이상을 확보한다.",
+      "meta": {
+        "page": 1
+      }
+    },
+    {
+      "cid": "C0013",
+      "doc_id": "MOCK_TAB",
+      "section": "탭용접 품질 p.3",
+      "text": "용접부 저항(용접저항)은 0.5mΩ 이하로 관리한다.",
+      "meta": {
+        "page": 3
+      }
+    },
+    {
+      "cid": "C0014",
+      "doc_id": "MOCK_PKG",
+      "section": "패키징 성형 p.2",
+      "text": "파우치성형기는 8±0.2mm 깊이로 성형하며(성형깊이), 성형정렬도는 ±0.15mm를 만족한다.",
+      "meta": {
+        "page": 2
+      }
+    },
+    {
+      "cid": "C0015",
+      "doc_id": "MOCK_ELY",
+      "section": "전해액주입 사양 p.4",
+      "text": "주액기(전해액 주액장치)는 셀당 5.0±0.1g을 주입한다(주액량).",
+      "meta": {
+        "page": 4
+      }
+    },
+    {
+      "cid": "C0016",
+      "doc_id": "MOCK_ELY",
+      "section": "주입 환경 p.5",
+      "text": "주입 챔버의 진공도는 10Pa 이하를 유지한다.",
+      "meta": {
+        "page": 5
+      }
+    },
+    {
+      "cid": "C0017",
+      "doc_id": "MOCK_SEAL",
+      "section": "실링 사양 p.1",
+      "text": "사이드실러는 180±5℃에서 밀봉하며(실링온도), 실링강도는 8N/15mm 이상을 만족한다.",
+      "meta": {
+        "page": 1
+      }
+    },
+    {
+      "cid": "C0020",
+      "doc_id": "ISSUE_NOTCH",
+      "section": "불량 이력 2026-03",
+      "text": "2026-03 노칭 라인2에서 버높이 초과 불량(버발생)이 다발했다.",
+      "meta": {
+        "date": "2026-03",
+        "line": "L2",
+        "lot": "LOT-2603"
+      }
+    },
+    {
+      "cid": "C0021",
+      "doc_id": "ISSUE_NOTCH",
+      "section": "원인 분석",
+      "text": "금형 마모로 절단면이 거칠어지며 버발생이 증가한 것으로 분석된다.",
+      "meta": {
+        "date": "2026-03",
+        "line": "L2"
+      }
+    },
+    {
+      "cid": "C0022",
+      "doc_id": "ISSUE_STACK",
+      "section": "불량 이력 2026-04",
+      "text": "2026-04 스태킹 적층정렬불량 증가, 센서드리프트로 정렬 기준이 틀어진 것으로 의심된다.",
+      "meta": {
+        "date": "2026-04",
+        "line": "L1",
+        "lot": "LOT-2604"
+      }
+    }
   ],
   "describes": [
-    {"source": "C0001", "target": "N0101"},
-    {"source": "C0001", "target": "N0201"},
-    {"source": "C0002", "target": "N0202"},
-    {"source": "C0002", "target": "N0102"},
-
-    {"source": "C0010", "target": "N0110"},
-    {"source": "C0010", "target": "N0210"},
-    {"source": "C0011", "target": "N0211"},
-
-    {"source": "C0012", "target": "N0111"},
-    {"source": "C0012", "target": "N0212"},
-    {"source": "C0013", "target": "N0213"},
-
-    {"source": "C0014", "target": "N0112"},
-    {"source": "C0014", "target": "N0214"},
-    {"source": "C0014", "target": "N0215"},
-
-    {"source": "C0015", "target": "N0113"},
-    {"source": "C0015", "target": "N0216"},
-    {"source": "C0016", "target": "N0217"},
-
-    {"source": "C0017", "target": "N0114"},
-    {"source": "C0017", "target": "N0218"},
-    {"source": "C0017", "target": "N0219"}
+    {
+      "source": "C0001",
+      "target": "N0101"
+    },
+    {
+      "source": "C0001",
+      "target": "N0201"
+    },
+    {
+      "source": "C0002",
+      "target": "N0202"
+    },
+    {
+      "source": "C0002",
+      "target": "N0102"
+    },
+    {
+      "source": "C0010",
+      "target": "N0110"
+    },
+    {
+      "source": "C0010",
+      "target": "N0210"
+    },
+    {
+      "source": "C0011",
+      "target": "N0211"
+    },
+    {
+      "source": "C0012",
+      "target": "N0111"
+    },
+    {
+      "source": "C0012",
+      "target": "N0212"
+    },
+    {
+      "source": "C0013",
+      "target": "N0213"
+    },
+    {
+      "source": "C0014",
+      "target": "N0112"
+    },
+    {
+      "source": "C0014",
+      "target": "N0214"
+    },
+    {
+      "source": "C0014",
+      "target": "N0215"
+    },
+    {
+      "source": "C0015",
+      "target": "N0113"
+    },
+    {
+      "source": "C0015",
+      "target": "N0216"
+    },
+    {
+      "source": "C0016",
+      "target": "N0217"
+    },
+    {
+      "source": "C0017",
+      "target": "N0114"
+    },
+    {
+      "source": "C0017",
+      "target": "N0218"
+    },
+    {
+      "source": "C0017",
+      "target": "N0219"
+    },
+    {
+      "source": "C0020",
+      "target": "N0401"
+    },
+    {
+      "source": "C0021",
+      "target": "N0401"
+    },
+    {
+      "source": "C0021",
+      "target": "N0501"
+    },
+    {
+      "source": "C0022",
+      "target": "N0402"
+    },
+    {
+      "source": "C0022",
+      "target": "N0502"
+    }
   ]
 }

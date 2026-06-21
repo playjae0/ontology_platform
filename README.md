@@ -30,7 +30,8 @@ platform/
 - **M8 — 렌더-at-scale(확장형 스코핑 + 레이아웃 분기 + WebGL config)** ✅ 검증 통과
 - **M9 — 인입 워크스페이스(배치 단계별 흐름)** ✅ 검증 통과
 - **M10 — mock 6공정 확장(eval·데모용, 26노드)** ✅ 검증 통과
-- **M11 — 검색(retrieval) + Eval(골든셋 Recall@k·MRR)** ✅ 검증 통과 — 첫 슬라이스 + Eval 완성
+- **M11 — 검색(retrieval) + Eval(골든셋 Recall@k·MRR)** ✅ 검증 통과
+- **M12 — 이벤트 층 스캐폴드(FailureMode/Cause + Mode C + 추적질의)** ✅ 검증 통과 — 3개 층 완성
 
 ## 데이터 디렉토리 (§8)
 ```
@@ -119,7 +120,7 @@ npm run dev            # http://localhost:5173
 | 메서드 | 경로 | 설명 |
 |---|---|---|
 | GET/POST | `/ingest/batch` · `/ingest/batch/upload` · `/ingest/batch/reset` | 배치 상태 / N문서 업로드 / 초기화 |
-| POST | `/ingest/batch/run/{stage}` | `stage∈{parse,skeleton,content}`. 게이트 위반 시 400 |
+| POST | `/ingest/batch/run/{stage}` | `stage∈{parse,skeleton,content,event}`. 게이트 위반 시 400. `event`=Mode C(이벤트 인입, M12) |
 | GET | `/ingest/batch/doc/{doc_id}` | 문서별 청크 + describes 미리보기 |
 
 흐름: ①업로드(N문서)→②파싱(문서별)→③뼈대(배치 공유, 후보→리뷰 큐)→④검수/승인(M3 Workbench 핸드오프)→⑤콘텐츠 연결(문서별, 미해소=orphan). **②없이 ③ 불가, ③(+검수) 없이 ⑤ 불가.** 채택은 store.commit, **업로드≠승인**(③은 후보까지, 노드는 ④에서 materialize). 데모는 [MockStage](backend/stages.py)(결정적 샘플), 사내 코드는 config 로 `external` 스왑.
@@ -145,7 +146,11 @@ node verify_m8.mjs    # M8: 확장형 스코핑(ego)·레이아웃 분기(force)
 node verify_m9_ingest.mjs # M9: 인입 배치 ①~⑤ 흐름·게이트·per-doc describes/orphan → m9_ingest.png
 node verify_m10_mock.mjs  # M10: mock 6공정 확장(커버리지 빨강0·unlinked개선·동의어·전화면) → m10_dashboard.png
 node verify_m11_eval.mjs  # M11: 검색→gold·Recall@k/MRR·패턴분해·alias gap·§6.6/§6.2 → m11_eval.png
+node verify_m12_event.mjs # M12: 이벤트 스키마·Mode C·추적질의(causes/affects 역추적)·층분리 → m12_event.png
 ```
+
+### 이벤트 층 (M12 — PFMEA 역추적)
+3번째 층: `Cause --causes--> FailureMode --affects--> 구조(Property/Unit/Process)`. 발생/이력은 노드가 아니라 청크(meta date/line/lot) → `describes` FailureMode. **층 분리**: Mode C(이슈 인입)는 구조 노드를 *수정 못 하고* resolve-only로 참조만, 새 노드는 FailureMode/Cause만 승인 게이트로. 추적 질의 `/retrieve`가 causes/affects를 양방향 탐색 — "버발생 원인?"→금형마모(Cause)+책임 인자/설비(affects)+이슈청크. Explore/대시보드에 FailureMode(빨강)/Cause(보라) 층 가시화.
 
 ### 검색 + Eval (M11)
 검색 = 질문 → 별칭+렉시컬 링킹 → part_of/has_property 탐색 → describes 청크 수집. **임베딩 불필요** — mock 에서도 Recall 의미있음(부수효과: "온톨로지에 질문하기"). 미해소는 `alias gap`으로 표시(임베딩-보강은 사내 실 임베딩 확장 경계). 골든셋 `data/golden_set.json`(21문항·4패턴, gold=실 mock cid). Test/Eval 탭에서 [평가 실행]→Recall@k·MRR·패턴별 집계·gap 목록.

@@ -137,6 +137,42 @@ def run_skeleton(store) -> dict:
     return {"ok": True, "candidates": added, "batch": b}
 
 
+# ----------------------------------------------------- 이벤트 인입 (Mode C, M12)
+def run_event(store) -> dict:
+    """이슈 doc → FailureMode/Cause 후보(리뷰 큐) + 발생/근거 청크(contents). 파싱 후 실행."""
+    b = load_batch(store)
+    if not b["docs"] or any(d["parse"] != "done" for d in b["docs"]):
+        return {"ok": False, "error": "②파싱 미완료 — 이벤트 인입 불가"}
+    contents = store.load_contents()
+    chunks = contents.setdefault("chunks", [])
+    have = {c.get("cid") for c in chunks}
+    queue = store.load_queue()
+    have_surf = {it.get("surface") for it in queue["items"]}
+    st = _stage(store, "event")
+    added = 0
+    for d in b["docs"]:
+        out = st.run({"doc_id": d["doc_id"], "index": d["index"]})
+        for c in out.get("chunks", []):  # 발생/근거 청크(노드 아님)
+            if c.get("cid") not in have:
+                chunks.append(c)
+                have.add(c.get("cid"))
+        for cand in out.get("candidates", []):  # FailureMode/Cause 후보만
+            if cand.get("surface") in have_surf:
+                continue
+            cand["from_batch"] = True
+            cand["rid"] = f"BE{len(queue['items']) + 1:03d}"
+            queue["items"].append(cand)
+            have_surf.add(cand["surface"])
+            added += 1
+    commit = store.commit(contents=contents, queue=queue)
+    if not commit["ok"]:
+        return {"ok": False, **commit}
+    b["stage_event"] = "ran"
+    b["event_candidates"] = added
+    save_batch(store, b)
+    return {"ok": True, "candidates": added, "batch": b}
+
+
 # ----------------------------------------------------- ⑤ 콘텐츠 연결 (per-doc)
 def run_content(store) -> dict:
     b = load_batch(store)

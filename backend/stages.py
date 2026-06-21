@@ -121,6 +121,34 @@ def _mock_content(inp: dict) -> dict:
     return {"describes": describes, "orphans": orphans}
 
 
+def _mock_event(inp: dict) -> dict:
+    """Mode C(M12) — 이슈 doc → ①FailureMode/Cause 후보 ②발생/근거 청크.
+    발생은 노드 아님(청크). FailureMode/Cause 만 후보(승인 시 materialize).
+    """
+    idx = int(inp.get("index", 0))
+    doc = inp.get("doc_id", f"DOC{idx + 1:02d}")
+    base = 9500 + idx * 10
+    fm = f"용접결함{idx + 1}"
+    cause = f"출력불안정{idx + 1}"
+    co, cc = f"C{base:04d}", f"C{base + 1:04d}"
+    return {
+        "doc_id": doc,
+        "chunks": [
+            {"cid": co, "doc_id": doc, "section": "불량 이력", "text": f"{doc} 라인에서 {fm} 불량이 발생했다.",
+             "meta": {"date": "2026-05", "line": f"L{idx + 1}", "role": "occurrence"}},
+            {"cid": cc, "doc_id": doc, "section": "원인 분석", "text": f"{cause}으로 {fm}이 증가한 것으로 분석된다.",
+             "meta": {"date": "2026-05", "role": "cause_evidence"}},
+        ],
+        "candidates": [
+            {"kind": "new_failuremode", "surface": fm, "category": "FailureMode",
+             "affects_names": ["용접강도", "레이저용접기"], "reason": "이슈 인입 후보(Mode C)",
+             "doc_id": doc, "evidence_cids": [co]},
+            {"kind": "new_cause", "surface": cause, "category": "Cause",
+             "causes_name": fm, "reason": "원인 후보(Mode C)", "doc_id": doc, "evidence_cids": [cc]},
+        ],
+    }
+
+
 class MockStage:
     """결정적 mock 스테이지(데모). slot 별로 _mock_* 디스패치."""
     kind = "mock"
@@ -129,7 +157,8 @@ class MockStage:
         self.slot = slot
 
     def run(self, input_data: dict) -> dict:
-        fn = {"parser": _mock_parse, "skeleton": _mock_skeleton, "content": _mock_content}.get(self.slot)
+        fn = {"parser": _mock_parse, "skeleton": _mock_skeleton,
+              "content": _mock_content, "event": _mock_event}.get(self.slot)
         if fn is None:
             raise StageError(f"MockStage: 알 수 없는 slot '{self.slot}'")
         return fn(input_data)

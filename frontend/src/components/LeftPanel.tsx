@@ -17,7 +17,7 @@ interface Props {
   onSelect: (id: string) => void;
 }
 
-const ALL_CATS = ["Process", "Unit", "Property"];
+const ALL_CATS = ["Process", "Unit", "Property", "FailureMode", "Cause"];
 const ALL_STATUS = ["confirmed", "proposed"];
 
 export default function LeftPanel({
