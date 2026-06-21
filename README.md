@@ -25,7 +25,8 @@ platform/
 - **M3 — 검수/승인/편집 Workbench** ✅ 검증 통과
 - **M5 — 관계(엣지) 편집** ✅ 검증 통과
 - **M4 — 플러그형 스테이지 슬롯(외부 실행 배선)** ✅ 검증 통과
-- **M6 — 대시보드(읽기 전용 현황)** ✅ 검증 통과 — 첫 슬라이스 완성
+- **M6 — 대시보드(읽기 전용 현황)** ✅ 검증 통과
+- **M7 — Neo4j 승격 + 1000-노드 스케일 검증** ✅ 검증 통과 — 첫 슬라이스 완성
 
 ## 데이터 디렉토리 (§8)
 ```
@@ -66,6 +67,8 @@ npm run dev            # http://localhost:5173
 | GET | `/nodes/{id}` | 노드 상세(embedding 미포함) + 인접관계 |
 | GET | `/nodes/{id}/chunks` | describes 청크 원문 |
 | GET | `/dashboard/stats` | 현황 집계 (M6) — 규모·status·공정 커버리지·리뷰큐·alias·건강지표. 읽기 전용·임베딩 미로드 |
+| GET | 위 읽기 엔드포인트 `?backend=json\|neo4j` | M7 — 백엔드 선택(기본 json). neo4j 비활성 시 503 |
+| POST | `/neo4j/sync` · `/neo4j/deactivate` / GET `/neo4j/status` | M7 — JSON→Neo4j 재생성·활성화. **직접쓰기 엔드포인트 없음(§6.3)** |
 
 ### 수동 주입 (M2)
 | 메서드 | 경로 | 설명 |
@@ -119,5 +122,21 @@ node verify_edge_edit.mjs  # M5: 재지정·롤백·삭제→고아·재연결·
 node verify_node_picker.mjs # M5: 검색 콤보박스(필터·id직접·없는것거부·부모표시·재지정) → m5_node_picker.png
 node verify_m4.mjs    # M4: echo 외부스테이지 실행→채택 / 깨진출력→거부·불변 / manual→400 → m4_stages.png
 node verify_m6.mjs    # M6: 대시보드 집계 정확·탭 렌더·공정 커버리지 → m6_dashboard.png
+node verify_m7_neo4j.mjs # M7: 1000-fixture json==neo4j 동일·응답시간·렌더관찰·변이반영 → m7_scale_render.png
+```
+
+### Neo4j (M7) 셋업
+JSON = SSOT, Neo4j = JSON에서 재생성되는 **읽기 전용 파생 캐시**(§6.3, 직접쓰기 없음).
+```bash
+# docker (colima 등)에서 Neo4j 5-community
+docker run -d --name onto-neo4j -p 7474:7474 -p 7687:7687 \
+  -e NEO4J_AUTH=neo4j/ontology123 neo4j:5-community
+pip install --break-system-packages neo4j      # 파이썬 드라이버
+# 연결정보 override: NEO4J_URI(bolt://localhost:7687)·NEO4J_USER·NEO4J_PASSWORD
+curl -X POST localhost:8077/neo4j/sync          # 현 SSOT 적재·활성화
+# 이후 읽기: /graph?backend=neo4j 등. SSOT 변경 시 자동 재생성.
+
+# 1000-노드 스케일 fixture 생성
+python3 data/mock/scale/gen_scale.py            # → data/mock/scale/*.json
 ```
 각 스크립트는 통과 시 exit 0.

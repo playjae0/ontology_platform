@@ -1,11 +1,12 @@
 # CLAUDE.md — 온톨로지 관리 플랫폼(관리소) 빌드 스펙 · v3
 
-> **진행 상태**: M1 ✅ · M2 ✅ · M3 ✅ · M5(관계 편집) ✅ · M4(스테이지 슬롯) ✅ · **M6(대시보드) ✅** — 첫 슬라이스 완성
+> **진행 상태**: M1~M6 ✅ · **M7(Neo4j 승격 + 1000 스케일검증) ✅** — 첫 슬라이스 완성. 남은 비범위: Eval(골든셋)만.
 > **이 문서는 빌드 명세다.** §7 밀스톤 순서대로, 각 밀스톤의 **검증 게이트를 통과한 뒤** 다음으로. 한 번에 전부 만들지 말 것.
 > **§6 불변 원칙은 절대 위반 금지.** 충돌 시 멈추고 §6 우선, 그다음 사용자 확인.
 > **사용법**: 이 파일은 레포 루트에 두면 Claude Code가 자동 로드한다. 밀스톤 착수는 짧은 포인터(예: "M3 진행, §7 따라가")로 충분 — 전체 재첨부 불필요.
 
 ### 변경 이력
+- **v3.4**: M7(Neo4j 승격) 추가·완료 — `Neo4jReader`(JsonReader 상속, Cypher 백엔드), `neo4j_sync`(JSON→Neo4j 재생성, label=category), `store.on_change` 훅(SSOT 변경 시 자동 재생성), 읽기 엔드포인트 `?backend=neo4j`. §10에서 "Neo4j 승격" 제거. §9에 1000-노드 스케일 fixture. **§6.3 재확인: Neo4j=읽기 전용 파생 캐시, 직접쓰기 절대 없음.**
 - **v3.3**: M6(대시보드) 추가·완료 — 읽기 전용 현황(`GET /dashboard/stats`). §10에서 "대시보드" 제거(Eval·neo4j 등은 유지).
 - **v3.2**: M4(스테이지 슬롯) 완료. **M3 정합**: as-built(별도 `review_queue.json`·후보 materialize·거부=후보 드롭)를 정본으로 §7 M3 재정렬, "SSOT 파생 큐" 폐기. 별칭 흡수에 **근거 보존**(evidence cid → 생존노드 describes) 추가.
 - **v3.1**: M5(관계/엣지 편집) 추가·완료 — §7 M5, §5 `/edges/edit`·`/review/queue` orphans, §6.10에 part_of↔attached_to 동기화, §10에서 edge move/delete 제거(M5로 활성). store.commit 을 전체 검증(스키마+참조무결성)으로 강화.
@@ -18,7 +19,7 @@
 - **만들 것**: 2차전지 제조 온톨로지의 **도메인 전문가용 관리 콘솔**(그래프 시각화 + 노드 상세/근거 청크 + 검수·승인·편집).
 - **결정적 제약**: 파이프라인 *구현 코드*(파싱·온톨로지 생성)는 외부 사내망 → 못 가져옴. 플랫폼은 **JSON 계약 기반**, 각 스테이지는 **플러그형 슬롯**(지금=수동 주입 / 나중=외부 스크립트 stub).
 - **지금은 mock JSON + 수동 주입으로 전 기능 구축·검증.** 외부 코드·실데이터 의존 0.
-- **단일 원천(SSOT) = JSON 파일.** Neo4j 승격 범위 밖. 시각화 = **NVL**, `disableTelemetry:true` 필수.
+- **단일 원천(SSOT) = JSON 파일.** Neo4j = JSON 에서 재생성되는 읽기 전용 파생 캐시(M7, 직접쓰기 없음). 시각화 = **NVL**, `disableTelemetry:true` 필수.
 
 ---
 
@@ -67,7 +68,7 @@ class ExternalScriptStage:        # 나중: 사내 스크립트 subprocess
 
 **3.3 백엔드(FastAPI, `platform/backend/`)**: 기존 `common/` import 재사용. **읽기 경로는 JSON 직접 파싱 경량 read-model** — `Skeleton.load()` 류 금지(임베딩 재계산해 BGE-M3 부팅). `sentence-transformers` 없이 기동(M1 준수).
 
-**3.4 읽기 어댑터**: `GraphReader` → `JsonReader`(구현됨) / `Neo4jReader`(나중). 프론트는 `GraphReader`만 본다.
+**3.4 읽기 어댑터**: `GraphReader` → `JsonReader`(기본) / `Neo4jReader`(M7, 구현됨). **Neo4jReader = JsonReader 의 데이터 소스만 Cypher 로 교체**(`_load_skeleton`/`_load_contents` override) → 집계/조회 로직 전부 상속 ⇒ JsonReader 와 동일 결과 보장. 프론트는 `GraphReader`만 본다(시그니처 불변); 읽기 엔드포인트 `?backend=json|neo4j`. **Neo4j 는 JSON 에서 재생성되는 읽기 전용 파생 캐시(§6.3)** — SSOT 변경 시 `store.on_change` 훅이 `neo4j_sync` 자동 재생성.
 
 **3.5 프론트(React+Vite+TS, `platform/frontend/`)** — *M1 구현 반영*:
 - `@neo4j-nvl/react`(+interaction-handlers). **`disableTelemetry:true` 필수.**
@@ -97,7 +98,9 @@ class ExternalScriptStage:        # 나중: 사내 스크립트 subprocess
 
 ## 5. API 표면
 
-**읽기(R) · DONE**: `GET /data/status` · `/graph?scope={id}`(NVL 포맷) · `/nodes/{id}`(**embedding 미포함**) · `/nodes/{id}/chunks` · `/nodes/search?q=` · `/review/queue` · `/dashboard/stats`(M6 집계, 읽기 전용·임베딩 미로드)
+**읽기(R) · DONE**: `GET /data/status` · `/graph?scope={id}`(NVL 포맷) · `/nodes/{id}`(**embedding 미포함**) · `/nodes/{id}/chunks` · `/nodes/search?q=` · `/review/queue` · `/dashboard/stats`(M6 집계). 읽기 엔드포인트는 `?backend=json|neo4j`(M7, 기본 json) 지원.
+
+**Neo4j 승격(M7)**: `POST /neo4j/sync`(JSON→Neo4j 재생성·활성화) · `GET /neo4j/status` · `POST /neo4j/deactivate`. **Neo4j 직접쓰기 엔드포인트 없음(§6.3).**
 
 **수동 주입/스테이지(W) · DONE**: `POST /ingest/upload/{slot}?adopt=`(검증↔채택 dry-run, `{valid, errors:[{path,msg}], counts}`) · `/ingest/rollback` · `/ingest/reset-mock` · `/stage/run/{slot}`(501 stub)
 
@@ -112,7 +115,7 @@ class ExternalScriptStage:        # 나중: 사내 스크립트 subprocess
 ## 6. 불변 원칙 — 가드레일 (MUST NOT VIOLATE)
 1. **id 불변·무의미**(N####). 재발급·의미부여 금지.
 2. **임베딩 비저장.** 읽기 경로는 임베딩을 읽지도 않는다.
-3. **단일 원천 = JSON.** 모든 쓰기 JSON에만. Neo4j 파생·직접쓰기 없음.
+3. **단일 원천 = JSON.** 모든 쓰기 JSON에만(store.commit). **Neo4j = JSON 에서 재생성되는 읽기 전용 파생 캐시 — 직접쓰기 절대 없음(M7 재확인).** 쓰기 = store.commit(JSON) → 그 후 `on_change`→neo4j 재생성. 이중 원천 금지.
 4. **사람 최종 승인 / 뼈대=승인경로만.** 노드·엣지 *생성·확정*은 검수 승인으로만. 스테이지/주입은 제안·로딩까지, 자동 확정 금지.
 5. **콘텐츠(Mode D) resolve-only.** 새 뼈대 노드 생성 금지.
 6. **질의/탐색 시 alias 비누적**(용어사전 오염 방지). 단, 검수 시 명시적 alias 추가/별칭 흡수는 *사람의 결정*이라 허용.
@@ -172,6 +175,20 @@ class ExternalScriptStage:        # 나중: 사내 스크립트 subprocess
 `GET /dashboard/stats`(`reader.dashboard_stats`, 임베딩 미로드·쓰기 없음): 규모(노드·엣지·청크·describes + 카테고리/관계별), status 분포(proposed/confirmed), 공정별 커버리지(대공정 서브트리 노드·청크 수 — 빈 공정 식별), 리뷰 큐 종류별+구조적 orphans, 동의어 사전 누적 alias(flywheel), 건강(unlinked 청크율·orphan 노드율). 프론트 `Dashboard.tsx`(네비 4번째 탭, 카드 + CSS/SVG 막대 — recharts 미사용).
 검증 `verify_m6.mjs` exit 0: ①집계 정확(노드11·카테고리·엣지15·관계·status·큐·alias10·unlinked율0.667) ②탭 렌더+카드6+막대 ③커버리지 backbone 6공정+노드·청크 ④임베딩 미로드 ⑤회귀 7스위트 exit 0. 파일: `backend/{reader,app}.py`, `frontend/.../Dashboard.tsx`.
 
+### M7 — Neo4j 승격 + 1000-노드 스케일 검증 · DONE ✅
+**★가드레일 §6.3**: JSON=SSOT, Neo4j=재생성되는 읽기 전용 파생 캐시(직접쓰기 절대 없음). 모든 쓰기 store.commit(JSON)→`on_change`→neo4j 재생성.
+- `neo4j_sync.sync_to_neo4j`(driver-based, 전량 재생성, 라벨=category·관계=PART_OF/…, Chunk+DESCRIBES) + `Neo4jReader`(JsonReader 상속, `_load_*`만 Cypher → 동일 결과 보장).
+- config: 읽기 엔드포인트 `?backend=json|neo4j`(기본 json). 연결 `NEO4J_URI/USER/PASSWORD`. `POST /neo4j/sync`(적재·활성화), `/neo4j/status`, `/neo4j/deactivate`. 미가동/실패 → 503 명확 에러(앱 기본 json 이라 fallback 자명).
+- **스케일 fixture**(§9): `data/mock/scale/gen_scale.py` → 1027노드(backbone 6공정 아래 합성 Unit/Property + 청크/describes), 스키마 준수. M7 검증은 11노드가 아닌 이 1000-fixture 로 수행.
+
+검증 `verify_m7_neo4j.mjs` exit 0 (1027-fixture):
+1. JSON→Neo4j 적재(1027) 후 `?backend=neo4j` == `?backend=json` **동일 결과**(graph nodes/rels·status·node 상세·dashboard) ✅
+2. 응답시간 측정·기록: full-graph 읽기 json≈18ms vs neo4j≈70ms — **full-dump 은 JSON 유리**(Neo4j 왕복+재구성). Neo4j 가치는 그래프 순회/동시성. (sync≈230ms)
+3. **렌더-at-scale 관찰**: 공정 스코프(노칭) 171노드 Explore 렌더 — canvas 그려짐(nonblank 12.8%)이나 **밀집**. 대규모(전극/화성) 가면 WebGL+layout+스코핑 필요 → **M8 신호로 기록**. ✅(관찰)
+4. JSON 변이(`/nodes/{id}/edit`)→store.commit→`on_change` 자동 재생성→neo4j 반영 / Neo4j 직접쓰기 엔드포인트 부재(404) ✅
+5. 회귀 8 스위트 exit 0(기본 11노드 mock 유지) ✅
+파일: `backend/{neo4j_sync,reader,store,app}.py`, `data/mock/scale/gen_scale.py`. (Neo4j 5-community on docker, `neo4j` 드라이버.)
+
 ---
 
 ## 8. 기술 스택 / 셋업
@@ -184,14 +201,15 @@ class ExternalScriptStage:        # 나중: 사내 스크립트 subprocess
 ---
 
 ## 9. Mock 데이터
-`data/mock/`에 배치 완료. **M3 테스트용으로 `status:proposed` 노드 몇 개 + 고아(부착 없는 노드, describes 없는 청크) 몇 개를 포함하도록 보강**할 것.
+- `data/mock/`(11노드): backbone + Unit/Property + proposed/evidence 청크 + `review_queue.json`. 기본 SSOT·M1~M6 검증용.
+- **스케일 fixture** `data/mock/scale/`(M7): `gen_scale.py` → 1027노드(backbone 6공정 아래 합성 Unit/Property + 청크/describes), §2 스키마 준수, 결정적. M7 스케일 검증 전용(평소 SSOT 아님).
 
 ---
 
 ## 10. 명시적 비범위 (안 함)
 - **노드 merge** — 거버넌스(감사로그·undo)와 함께 다음 단계. (엣지 재지정/타입변경/삭제/추가는 **M5에서 활성화됨**. 노드 재부모는 part_of 엣지 재지정으로 달성. 노드 delete 는 비범위.)
 - 테스트/Eval(골든셋) · 거버넌스 풀세트(감사로그·버전·롤백·권한). (대시보드는 M6에서 완료.)
-- orphan **자동 해소**(표시만; 수동 재연결은 M5 관계 추가로 가능) · Neo4j 승격 · 멀티유저/인증.
+- orphan **자동 해소**(표시만; 수동 재연결은 M5 관계 추가로 가능) · 멀티유저/인증. (Neo4j 승격은 M7에서 완료.)
 - 외부 파이프라인 *구현*(파싱/뼈대 코드) — 슬롯 인터페이스만.
 
 > 단, **M2 백업/롤백 1회**·**M3·M5 안전쓰기 재검증**은 거버넌스 풀세트가 아니라 *파괴적/변경 연산의 최소 데이터 위생*이라 포함한다.

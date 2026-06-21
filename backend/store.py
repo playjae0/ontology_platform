@@ -42,7 +42,16 @@ class Store:
         self.backup = self.root / "_backup"
         self.current.mkdir(parents=True, exist_ok=True)
         self.backup.mkdir(parents=True, exist_ok=True)
+        # SSOT(JSON) 변경 후 호출되는 훅 — Neo4j 파생 캐시 재생성 등(§6.3)
+        self.on_change = None
         self._ensure_seeded()
+
+    def _notify(self) -> None:
+        if self.on_change:
+            try:
+                self.on_change()
+            except Exception:
+                pass  # 파생 캐시 재생성 실패가 SSOT 쓰기를 막지 않는다
 
     # ---- 경로/로딩 ----
     def _path(self, slot: str) -> Path:
@@ -102,6 +111,7 @@ class Store:
             self.rollback()
             return {"ok": False, "errors": errors,
                     "warning": "변이 후 검증 실패 → 자동 롤백됨"}
+        self._notify()
         return {"ok": True}
 
     # ---- 백업/롤백 ----
@@ -131,6 +141,7 @@ class Store:
         latest = stack[-1]
         self._restore(latest)
         shutil.rmtree(latest)  # 1단계 소비
+        self._notify()
         return {"ok": True, "restored_from": latest.name}
 
     def reset_mock(self) -> dict:
@@ -141,6 +152,7 @@ class Store:
         for f in self.mock.glob("*.json"):
             shutil.copy2(f, self.current / f.name)
         self._ensure_seeded()
+        self._notify()
         return {"ok": True}
 
     # ---- 채택 ----
@@ -173,6 +185,7 @@ class Store:
             return {"valid": True, "adopted": False, "errors": [],
                     "ssot_errors": ssot_errors,
                     "warning": "채택 후 SSOT 교차검증 실패 → 자동 롤백됨"}
+        self._notify()
         return {"valid": True, "adopted": True, "errors": [], "counts": counts}
 
     # ---- 상태 ----

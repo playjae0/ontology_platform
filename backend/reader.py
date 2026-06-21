@@ -65,8 +65,9 @@ class JsonReader:
             by_cat[n.get("category", "?")] = by_cat.get(n.get("category", "?"), 0) + 1
             by_status[n.get("status", "?")] = by_status.get(n.get("status", "?"), 0) + 1
         return {
-            "skeleton_loaded": self.skeleton_path.exists(),
-            "contents_loaded": self.contents_path.exists(),
+            # 데이터 존재 기준(파일경로 비의존) → Neo4jReader 등 비-파일 백엔드도 동일 동작
+            "skeleton_loaded": len(sk["nodes"]) > 0,
+            "contents_loaded": len(ct["chunks"]) > 0 or len(ct["describes"]) > 0,
             "counts": {
                 "nodes": len(sk["nodes"]),
                 "edges": len(sk["edges"]),

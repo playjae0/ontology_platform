@@ -43,10 +43,49 @@ app.add_middleware(
 store = Store(DATA_ROOT)
 reader = JsonReader(store.current)  # 읽기는 작업 SSOT(current) 직독
 
+# ---- Neo4j 파생 캐시 (M7) — JSON=SSOT, Neo4j=재생성되는 읽기 전용 캐시(§6.3) ----
+NEO4J_URI = os.environ.get("NEO4J_URI", "bolt://localhost:7687")
+NEO4J_USER = os.environ.get("NEO4J_USER", "neo4j")
+NEO4J_PASSWORD = os.environ.get("NEO4J_PASSWORD", "ontology123")
+_neo4j: dict = {"driver": None, "reader": None, "active": False}
+
+
+def _ensure_neo4j_driver():
+    """드라이버 연결(실패 시 명확한 예외). 성공 시 캐시."""
+    if _neo4j["driver"] is not None:
+        return _neo4j["driver"]
+    from neo4j import GraphDatabase  # 미설치/미가동이면 여기서 에러
+    drv = GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD))
+    drv.verify_connectivity()
+    _neo4j["driver"] = drv
+    return drv
+
+
+def _resync_neo4j():
+    """SSOT 변경 후 Neo4j 재생성(active 일 때만). store.on_change 훅."""
+    if not _neo4j["active"]:
+        return
+    import neo4j_sync
+    drv = _ensure_neo4j_driver()
+    neo4j_sync.sync_to_neo4j(drv, store.load_skeleton(), store.load_contents())
+
+
+store.on_change = _resync_neo4j
+
+
+def pick_reader(backend: str):
+    """backend='neo4j' 면 Neo4jReader(미가동/실패 시 503). 그 외 JsonReader."""
+    if backend == "neo4j":
+        if not _neo4j["active"] or _neo4j["reader"] is None:
+            raise HTTPException(503, "Neo4j 비활성 — POST /neo4j/sync 로 적재·활성화 필요.")
+        return _neo4j["reader"]
+    return reader
+
 
 @app.get("/health")
 def health():
-    return {"ok": True, "data_root": str(DATA_ROOT), "use_webgl": USE_WEBGL}
+    return {"ok": True, "data_root": str(DATA_ROOT), "use_webgl": USE_WEBGL,
+            "neo4j_active": _neo4j["active"]}
 
 
 @app.get("/config")
@@ -57,19 +96,19 @@ def config():
 
 # ----------------------------------------------------------------- 읽기(R)
 @app.get("/data/status")
-def data_status():
-    return {**reader.status(), **store.slots_status()}
+def data_status(backend: str = "json"):
+    return {**pick_reader(backend).status(), **store.slots_status()}
 
 
 @app.get("/graph")
-def graph(scope: str | None = None):
-    return reader.graph(scope)
+def graph(scope: str | None = None, backend: str = "json"):
+    return pick_reader(backend).graph(scope)
 
 
 @app.get("/dashboard/stats")
-def dashboard_stats():
+def dashboard_stats(backend: str = "json"):
     """읽기 전용 현황 집계 (M6) — 현 SSOT(JsonReader, 임베딩 미로드) + 리뷰 큐."""
-    base = reader.dashboard_stats()
+    base = pick_reader(backend).dashboard_stats()
     queue = store.load_queue()
     by_kind: dict[str, int] = {}
     for it in queue.get("items", []):
@@ -89,18 +128,19 @@ def nodes_search(q: str = "", limit: int = 20):
 
 
 @app.get("/nodes/{node_id}")
-def get_node(node_id: str):
-    n = reader.node(node_id)
+def get_node(node_id: str, backend: str = "json"):
+    n = pick_reader(backend).node(node_id)
     if n is None:
         raise HTTPException(404, f"node '{node_id}' not found")
     return n
 
 
 @app.get("/nodes/{node_id}/chunks")
-def node_chunks(node_id: str):
-    if reader.node(node_id) is None:
+def node_chunks(node_id: str, backend: str = "json"):
+    rd = pick_reader(backend)
+    if rd.node(node_id) is None:
         raise HTTPException(404, f"node '{node_id}' not found")
-    return reader.chunks_for_node(node_id)
+    return rd.chunks_for_node(node_id)
 
 
 # --------------------------------------------------- 수동 주입 / 스테이지(W)
@@ -125,6 +165,36 @@ def ingest_rollback():
 @app.post("/ingest/reset-mock")
 def ingest_reset_mock():
     return store.reset_mock()
+
+
+# ----------------------------------------------------- Neo4j 승격 (M7)
+@app.get("/neo4j/status")
+def neo4j_status():
+    return {"active": _neo4j["active"], "uri": NEO4J_URI}
+
+
+@app.post("/neo4j/sync")
+def neo4j_sync_endpoint():
+    """현 SSOT(JSON) → Neo4j 재생성·활성화. 연결 실패 시 503(명확한 에러)."""
+    import time
+    import neo4j_sync
+    try:
+        drv = _ensure_neo4j_driver()
+    except Exception as e:
+        _neo4j["active"] = False
+        raise HTTPException(503, f"Neo4j 연결 실패: {e} (uri={NEO4J_URI}). JSON 백엔드로 계속 가능.")
+    t0 = time.perf_counter()
+    counts = neo4j_sync.sync_to_neo4j(drv, store.load_skeleton(), store.load_contents())
+    ms = round((time.perf_counter() - t0) * 1000, 1)
+    _neo4j["reader"] = neo4j_sync.Neo4jReader(drv)
+    _neo4j["active"] = True
+    return {"ok": True, "synced": counts, "sync_ms": ms}
+
+
+@app.post("/neo4j/deactivate")
+def neo4j_deactivate():
+    _neo4j["active"] = False
+    return {"ok": True, "active": False}
 
 
 @app.get("/stage/config")

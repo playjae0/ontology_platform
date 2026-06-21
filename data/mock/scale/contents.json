@@ -1,0 +1,1722 @@
+{
+ "chunks": [
+  {
+   "cid": "C0001",
+   "doc_id": "SCALE",
+   "section": "합성 §C0001",
+   "text": "노칭 공정의 1번 설비는 합성 사양으로 동작한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0002",
+   "doc_id": "SCALE",
+   "section": "합성 §C0002",
+   "text": "노칭 인자 1-1는 ±5% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0003",
+   "doc_id": "SCALE",
+   "section": "합성 §C0003",
+   "text": "노칭 공정의 4번 설비는 합성 사양으로 동작한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0004",
+   "doc_id": "SCALE",
+   "section": "합성 §C0004",
+   "text": "노칭 공정의 7번 설비는 합성 사양으로 동작한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0005",
+   "doc_id": "SCALE",
+   "section": "합성 §C0005",
+   "text": "노칭 인자 7-4는 ±20% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0006",
+   "doc_id": "SCALE",
+   "section": "합성 §C0006",
+   "text": "노칭 인자 8-3는 ±15% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0007",
+   "doc_id": "SCALE",
+   "section": "합성 §C0007",
+   "text": "노칭 인자 9-2는 ±10% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0008",
+   "doc_id": "SCALE",
+   "section": "합성 §C0008",
+   "text": "노칭 공정의 10번 설비는 합성 사양으로 동작한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0009",
+   "doc_id": "SCALE",
+   "section": "합성 §C0009",
+   "text": "노칭 인자 10-1는 ±5% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0010",
+   "doc_id": "SCALE",
+   "section": "합성 §C0010",
+   "text": "노칭 공정의 13번 설비는 합성 사양으로 동작한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0011",
+   "doc_id": "SCALE",
+   "section": "합성 §C0011",
+   "text": "노칭 공정의 16번 설비는 합성 사양으로 동작한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0012",
+   "doc_id": "SCALE",
+   "section": "합성 §C0012",
+   "text": "노칭 인자 16-4는 ±20% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0013",
+   "doc_id": "SCALE",
+   "section": "합성 §C0013",
+   "text": "노칭 인자 17-3는 ±15% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0014",
+   "doc_id": "SCALE",
+   "section": "합성 §C0014",
+   "text": "노칭 인자 18-2는 ±10% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0015",
+   "doc_id": "SCALE",
+   "section": "합성 §C0015",
+   "text": "노칭 공정의 19번 설비는 합성 사양으로 동작한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0016",
+   "doc_id": "SCALE",
+   "section": "합성 §C0016",
+   "text": "노칭 인자 19-1는 ±5% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0017",
+   "doc_id": "SCALE",
+   "section": "합성 §C0017",
+   "text": "노칭 공정의 22번 설비는 합성 사양으로 동작한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0018",
+   "doc_id": "SCALE",
+   "section": "합성 §C0018",
+   "text": "노칭 공정의 25번 설비는 합성 사양으로 동작한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0019",
+   "doc_id": "SCALE",
+   "section": "합성 §C0019",
+   "text": "노칭 인자 25-4는 ±20% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0020",
+   "doc_id": "SCALE",
+   "section": "합성 §C0020",
+   "text": "노칭 인자 26-3는 ±15% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0021",
+   "doc_id": "SCALE",
+   "section": "합성 §C0021",
+   "text": "노칭 인자 27-2는 ±10% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0022",
+   "doc_id": "SCALE",
+   "section": "합성 §C0022",
+   "text": "노칭 공정의 28번 설비는 합성 사양으로 동작한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0023",
+   "doc_id": "SCALE",
+   "section": "합성 §C0023",
+   "text": "노칭 인자 28-1는 ±5% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0024",
+   "doc_id": "SCALE",
+   "section": "합성 §C0024",
+   "text": "노칭 공정의 31번 설비는 합성 사양으로 동작한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0025",
+   "doc_id": "SCALE",
+   "section": "합성 §C0025",
+   "text": "노칭 공정의 34번 설비는 합성 사양으로 동작한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0026",
+   "doc_id": "SCALE",
+   "section": "합성 §C0026",
+   "text": "노칭 인자 34-4는 ±20% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0027",
+   "doc_id": "SCALE",
+   "section": "합성 §C0027",
+   "text": "스태킹 공정의 1번 설비는 합성 사양으로 동작한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0028",
+   "doc_id": "SCALE",
+   "section": "합성 §C0028",
+   "text": "스태킹 인자 1-1는 ±5% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0029",
+   "doc_id": "SCALE",
+   "section": "합성 §C0029",
+   "text": "스태킹 공정의 4번 설비는 합성 사양으로 동작한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0030",
+   "doc_id": "SCALE",
+   "section": "합성 §C0030",
+   "text": "스태킹 공정의 7번 설비는 합성 사양으로 동작한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0031",
+   "doc_id": "SCALE",
+   "section": "합성 §C0031",
+   "text": "스태킹 인자 7-4는 ±20% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0032",
+   "doc_id": "SCALE",
+   "section": "합성 §C0032",
+   "text": "스태킹 인자 8-3는 ±15% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0033",
+   "doc_id": "SCALE",
+   "section": "합성 §C0033",
+   "text": "스태킹 인자 9-2는 ±10% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0034",
+   "doc_id": "SCALE",
+   "section": "합성 §C0034",
+   "text": "스태킹 공정의 10번 설비는 합성 사양으로 동작한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0035",
+   "doc_id": "SCALE",
+   "section": "합성 §C0035",
+   "text": "스태킹 인자 10-1는 ±5% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0036",
+   "doc_id": "SCALE",
+   "section": "합성 §C0036",
+   "text": "스태킹 공정의 13번 설비는 합성 사양으로 동작한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0037",
+   "doc_id": "SCALE",
+   "section": "합성 §C0037",
+   "text": "스태킹 공정의 16번 설비는 합성 사양으로 동작한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0038",
+   "doc_id": "SCALE",
+   "section": "합성 §C0038",
+   "text": "스태킹 인자 16-4는 ±20% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0039",
+   "doc_id": "SCALE",
+   "section": "합성 §C0039",
+   "text": "스태킹 인자 17-3는 ±15% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0040",
+   "doc_id": "SCALE",
+   "section": "합성 §C0040",
+   "text": "스태킹 인자 18-2는 ±10% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0041",
+   "doc_id": "SCALE",
+   "section": "합성 §C0041",
+   "text": "스태킹 공정의 19번 설비는 합성 사양으로 동작한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0042",
+   "doc_id": "SCALE",
+   "section": "합성 §C0042",
+   "text": "스태킹 인자 19-1는 ±5% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0043",
+   "doc_id": "SCALE",
+   "section": "합성 §C0043",
+   "text": "스태킹 공정의 22번 설비는 합성 사양으로 동작한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0044",
+   "doc_id": "SCALE",
+   "section": "합성 §C0044",
+   "text": "스태킹 공정의 25번 설비는 합성 사양으로 동작한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0045",
+   "doc_id": "SCALE",
+   "section": "합성 §C0045",
+   "text": "스태킹 인자 25-4는 ±20% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0046",
+   "doc_id": "SCALE",
+   "section": "합성 §C0046",
+   "text": "스태킹 인자 26-3는 ±15% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0047",
+   "doc_id": "SCALE",
+   "section": "합성 §C0047",
+   "text": "스태킹 인자 27-2는 ±10% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0048",
+   "doc_id": "SCALE",
+   "section": "합성 §C0048",
+   "text": "스태킹 공정의 28번 설비는 합성 사양으로 동작한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0049",
+   "doc_id": "SCALE",
+   "section": "합성 §C0049",
+   "text": "스태킹 인자 28-1는 ±5% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0050",
+   "doc_id": "SCALE",
+   "section": "합성 §C0050",
+   "text": "스태킹 공정의 31번 설비는 합성 사양으로 동작한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0051",
+   "doc_id": "SCALE",
+   "section": "합성 §C0051",
+   "text": "스태킹 공정의 34번 설비는 합성 사양으로 동작한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0052",
+   "doc_id": "SCALE",
+   "section": "합성 §C0052",
+   "text": "스태킹 인자 34-4는 ±20% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0053",
+   "doc_id": "SCALE",
+   "section": "합성 §C0053",
+   "text": "탭용접 공정의 1번 설비는 합성 사양으로 동작한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0054",
+   "doc_id": "SCALE",
+   "section": "합성 §C0054",
+   "text": "탭용접 인자 1-1는 ±5% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0055",
+   "doc_id": "SCALE",
+   "section": "합성 §C0055",
+   "text": "탭용접 공정의 4번 설비는 합성 사양으로 동작한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0056",
+   "doc_id": "SCALE",
+   "section": "합성 §C0056",
+   "text": "탭용접 공정의 7번 설비는 합성 사양으로 동작한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0057",
+   "doc_id": "SCALE",
+   "section": "합성 §C0057",
+   "text": "탭용접 인자 7-4는 ±20% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0058",
+   "doc_id": "SCALE",
+   "section": "합성 §C0058",
+   "text": "탭용접 인자 8-3는 ±15% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0059",
+   "doc_id": "SCALE",
+   "section": "합성 §C0059",
+   "text": "탭용접 인자 9-2는 ±10% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0060",
+   "doc_id": "SCALE",
+   "section": "합성 §C0060",
+   "text": "탭용접 공정의 10번 설비는 합성 사양으로 동작한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0061",
+   "doc_id": "SCALE",
+   "section": "합성 §C0061",
+   "text": "탭용접 인자 10-1는 ±5% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0062",
+   "doc_id": "SCALE",
+   "section": "합성 §C0062",
+   "text": "탭용접 공정의 13번 설비는 합성 사양으로 동작한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0063",
+   "doc_id": "SCALE",
+   "section": "합성 §C0063",
+   "text": "탭용접 공정의 16번 설비는 합성 사양으로 동작한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0064",
+   "doc_id": "SCALE",
+   "section": "합성 §C0064",
+   "text": "탭용접 인자 16-4는 ±20% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0065",
+   "doc_id": "SCALE",
+   "section": "합성 §C0065",
+   "text": "탭용접 인자 17-3는 ±15% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0066",
+   "doc_id": "SCALE",
+   "section": "합성 §C0066",
+   "text": "탭용접 인자 18-2는 ±10% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0067",
+   "doc_id": "SCALE",
+   "section": "합성 §C0067",
+   "text": "탭용접 공정의 19번 설비는 합성 사양으로 동작한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0068",
+   "doc_id": "SCALE",
+   "section": "합성 §C0068",
+   "text": "탭용접 인자 19-1는 ±5% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0069",
+   "doc_id": "SCALE",
+   "section": "합성 §C0069",
+   "text": "탭용접 공정의 22번 설비는 합성 사양으로 동작한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0070",
+   "doc_id": "SCALE",
+   "section": "합성 §C0070",
+   "text": "탭용접 공정의 25번 설비는 합성 사양으로 동작한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0071",
+   "doc_id": "SCALE",
+   "section": "합성 §C0071",
+   "text": "탭용접 인자 25-4는 ±20% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0072",
+   "doc_id": "SCALE",
+   "section": "합성 §C0072",
+   "text": "탭용접 인자 26-3는 ±15% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0073",
+   "doc_id": "SCALE",
+   "section": "합성 §C0073",
+   "text": "탭용접 인자 27-2는 ±10% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0074",
+   "doc_id": "SCALE",
+   "section": "합성 §C0074",
+   "text": "탭용접 공정의 28번 설비는 합성 사양으로 동작한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0075",
+   "doc_id": "SCALE",
+   "section": "합성 §C0075",
+   "text": "탭용접 인자 28-1는 ±5% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0076",
+   "doc_id": "SCALE",
+   "section": "합성 §C0076",
+   "text": "탭용접 공정의 31번 설비는 합성 사양으로 동작한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0077",
+   "doc_id": "SCALE",
+   "section": "합성 §C0077",
+   "text": "탭용접 공정의 34번 설비는 합성 사양으로 동작한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0078",
+   "doc_id": "SCALE",
+   "section": "합성 §C0078",
+   "text": "탭용접 인자 34-4는 ±20% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0079",
+   "doc_id": "SCALE",
+   "section": "합성 §C0079",
+   "text": "패키징 공정의 1번 설비는 합성 사양으로 동작한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0080",
+   "doc_id": "SCALE",
+   "section": "합성 §C0080",
+   "text": "패키징 인자 1-1는 ±5% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0081",
+   "doc_id": "SCALE",
+   "section": "합성 §C0081",
+   "text": "패키징 공정의 4번 설비는 합성 사양으로 동작한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0082",
+   "doc_id": "SCALE",
+   "section": "합성 §C0082",
+   "text": "패키징 공정의 7번 설비는 합성 사양으로 동작한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0083",
+   "doc_id": "SCALE",
+   "section": "합성 §C0083",
+   "text": "패키징 인자 7-4는 ±20% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0084",
+   "doc_id": "SCALE",
+   "section": "합성 §C0084",
+   "text": "패키징 인자 8-3는 ±15% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0085",
+   "doc_id": "SCALE",
+   "section": "합성 §C0085",
+   "text": "패키징 인자 9-2는 ±10% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0086",
+   "doc_id": "SCALE",
+   "section": "합성 §C0086",
+   "text": "패키징 공정의 10번 설비는 합성 사양으로 동작한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0087",
+   "doc_id": "SCALE",
+   "section": "합성 §C0087",
+   "text": "패키징 인자 10-1는 ±5% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0088",
+   "doc_id": "SCALE",
+   "section": "합성 §C0088",
+   "text": "패키징 공정의 13번 설비는 합성 사양으로 동작한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0089",
+   "doc_id": "SCALE",
+   "section": "합성 §C0089",
+   "text": "패키징 공정의 16번 설비는 합성 사양으로 동작한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0090",
+   "doc_id": "SCALE",
+   "section": "합성 §C0090",
+   "text": "패키징 인자 16-4는 ±20% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0091",
+   "doc_id": "SCALE",
+   "section": "합성 §C0091",
+   "text": "패키징 인자 17-3는 ±15% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0092",
+   "doc_id": "SCALE",
+   "section": "합성 §C0092",
+   "text": "패키징 인자 18-2는 ±10% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0093",
+   "doc_id": "SCALE",
+   "section": "합성 §C0093",
+   "text": "패키징 공정의 19번 설비는 합성 사양으로 동작한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0094",
+   "doc_id": "SCALE",
+   "section": "합성 §C0094",
+   "text": "패키징 인자 19-1는 ±5% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0095",
+   "doc_id": "SCALE",
+   "section": "합성 §C0095",
+   "text": "패키징 공정의 22번 설비는 합성 사양으로 동작한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0096",
+   "doc_id": "SCALE",
+   "section": "합성 §C0096",
+   "text": "패키징 공정의 25번 설비는 합성 사양으로 동작한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0097",
+   "doc_id": "SCALE",
+   "section": "합성 §C0097",
+   "text": "패키징 인자 25-4는 ±20% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0098",
+   "doc_id": "SCALE",
+   "section": "합성 §C0098",
+   "text": "패키징 인자 26-3는 ±15% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0099",
+   "doc_id": "SCALE",
+   "section": "합성 §C0099",
+   "text": "패키징 인자 27-2는 ±10% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0100",
+   "doc_id": "SCALE",
+   "section": "합성 §C0100",
+   "text": "패키징 공정의 28번 설비는 합성 사양으로 동작한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0101",
+   "doc_id": "SCALE",
+   "section": "합성 §C0101",
+   "text": "패키징 인자 28-1는 ±5% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0102",
+   "doc_id": "SCALE",
+   "section": "합성 §C0102",
+   "text": "패키징 공정의 31번 설비는 합성 사양으로 동작한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0103",
+   "doc_id": "SCALE",
+   "section": "합성 §C0103",
+   "text": "패키징 공정의 34번 설비는 합성 사양으로 동작한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0104",
+   "doc_id": "SCALE",
+   "section": "합성 §C0104",
+   "text": "패키징 인자 34-4는 ±20% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0105",
+   "doc_id": "SCALE",
+   "section": "합성 §C0105",
+   "text": "전해액주입 공정의 1번 설비는 합성 사양으로 동작한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0106",
+   "doc_id": "SCALE",
+   "section": "합성 §C0106",
+   "text": "전해액주입 인자 1-1는 ±5% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0107",
+   "doc_id": "SCALE",
+   "section": "합성 §C0107",
+   "text": "전해액주입 공정의 4번 설비는 합성 사양으로 동작한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0108",
+   "doc_id": "SCALE",
+   "section": "합성 §C0108",
+   "text": "전해액주입 공정의 7번 설비는 합성 사양으로 동작한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0109",
+   "doc_id": "SCALE",
+   "section": "합성 §C0109",
+   "text": "전해액주입 인자 7-4는 ±20% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0110",
+   "doc_id": "SCALE",
+   "section": "합성 §C0110",
+   "text": "전해액주입 인자 8-3는 ±15% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0111",
+   "doc_id": "SCALE",
+   "section": "합성 §C0111",
+   "text": "전해액주입 인자 9-2는 ±10% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0112",
+   "doc_id": "SCALE",
+   "section": "합성 §C0112",
+   "text": "전해액주입 공정의 10번 설비는 합성 사양으로 동작한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0113",
+   "doc_id": "SCALE",
+   "section": "합성 §C0113",
+   "text": "전해액주입 인자 10-1는 ±5% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0114",
+   "doc_id": "SCALE",
+   "section": "합성 §C0114",
+   "text": "전해액주입 공정의 13번 설비는 합성 사양으로 동작한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0115",
+   "doc_id": "SCALE",
+   "section": "합성 §C0115",
+   "text": "전해액주입 공정의 16번 설비는 합성 사양으로 동작한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0116",
+   "doc_id": "SCALE",
+   "section": "합성 §C0116",
+   "text": "전해액주입 인자 16-4는 ±20% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0117",
+   "doc_id": "SCALE",
+   "section": "합성 §C0117",
+   "text": "전해액주입 인자 17-3는 ±15% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0118",
+   "doc_id": "SCALE",
+   "section": "합성 §C0118",
+   "text": "전해액주입 인자 18-2는 ±10% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0119",
+   "doc_id": "SCALE",
+   "section": "합성 §C0119",
+   "text": "전해액주입 공정의 19번 설비는 합성 사양으로 동작한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0120",
+   "doc_id": "SCALE",
+   "section": "합성 §C0120",
+   "text": "전해액주입 인자 19-1는 ±5% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0121",
+   "doc_id": "SCALE",
+   "section": "합성 §C0121",
+   "text": "전해액주입 공정의 22번 설비는 합성 사양으로 동작한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0122",
+   "doc_id": "SCALE",
+   "section": "합성 §C0122",
+   "text": "전해액주입 공정의 25번 설비는 합성 사양으로 동작한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0123",
+   "doc_id": "SCALE",
+   "section": "합성 §C0123",
+   "text": "전해액주입 인자 25-4는 ±20% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0124",
+   "doc_id": "SCALE",
+   "section": "합성 §C0124",
+   "text": "전해액주입 인자 26-3는 ±15% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0125",
+   "doc_id": "SCALE",
+   "section": "합성 §C0125",
+   "text": "전해액주입 인자 27-2는 ±10% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0126",
+   "doc_id": "SCALE",
+   "section": "합성 §C0126",
+   "text": "전해액주입 공정의 28번 설비는 합성 사양으로 동작한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0127",
+   "doc_id": "SCALE",
+   "section": "합성 §C0127",
+   "text": "전해액주입 인자 28-1는 ±5% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0128",
+   "doc_id": "SCALE",
+   "section": "합성 §C0128",
+   "text": "전해액주입 공정의 31번 설비는 합성 사양으로 동작한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0129",
+   "doc_id": "SCALE",
+   "section": "합성 §C0129",
+   "text": "전해액주입 공정의 34번 설비는 합성 사양으로 동작한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0130",
+   "doc_id": "SCALE",
+   "section": "합성 §C0130",
+   "text": "전해액주입 인자 34-4는 ±20% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0131",
+   "doc_id": "SCALE",
+   "section": "합성 §C0131",
+   "text": "실링 공정의 1번 설비는 합성 사양으로 동작한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0132",
+   "doc_id": "SCALE",
+   "section": "합성 §C0132",
+   "text": "실링 인자 1-1는 ±5% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0133",
+   "doc_id": "SCALE",
+   "section": "합성 §C0133",
+   "text": "실링 공정의 4번 설비는 합성 사양으로 동작한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0134",
+   "doc_id": "SCALE",
+   "section": "합성 §C0134",
+   "text": "실링 공정의 7번 설비는 합성 사양으로 동작한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0135",
+   "doc_id": "SCALE",
+   "section": "합성 §C0135",
+   "text": "실링 인자 7-4는 ±20% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0136",
+   "doc_id": "SCALE",
+   "section": "합성 §C0136",
+   "text": "실링 인자 8-3는 ±15% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0137",
+   "doc_id": "SCALE",
+   "section": "합성 §C0137",
+   "text": "실링 인자 9-2는 ±10% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0138",
+   "doc_id": "SCALE",
+   "section": "합성 §C0138",
+   "text": "실링 공정의 10번 설비는 합성 사양으로 동작한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0139",
+   "doc_id": "SCALE",
+   "section": "합성 §C0139",
+   "text": "실링 인자 10-1는 ±5% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0140",
+   "doc_id": "SCALE",
+   "section": "합성 §C0140",
+   "text": "실링 공정의 13번 설비는 합성 사양으로 동작한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0141",
+   "doc_id": "SCALE",
+   "section": "합성 §C0141",
+   "text": "실링 공정의 16번 설비는 합성 사양으로 동작한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0142",
+   "doc_id": "SCALE",
+   "section": "합성 §C0142",
+   "text": "실링 인자 16-4는 ±20% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0143",
+   "doc_id": "SCALE",
+   "section": "합성 §C0143",
+   "text": "실링 인자 17-3는 ±15% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0144",
+   "doc_id": "SCALE",
+   "section": "합성 §C0144",
+   "text": "실링 인자 18-2는 ±10% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0145",
+   "doc_id": "SCALE",
+   "section": "합성 §C0145",
+   "text": "실링 공정의 19번 설비는 합성 사양으로 동작한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0146",
+   "doc_id": "SCALE",
+   "section": "합성 §C0146",
+   "text": "실링 인자 19-1는 ±5% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0147",
+   "doc_id": "SCALE",
+   "section": "합성 §C0147",
+   "text": "실링 공정의 22번 설비는 합성 사양으로 동작한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0148",
+   "doc_id": "SCALE",
+   "section": "합성 §C0148",
+   "text": "실링 공정의 25번 설비는 합성 사양으로 동작한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0149",
+   "doc_id": "SCALE",
+   "section": "합성 §C0149",
+   "text": "실링 인자 25-4는 ±20% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0150",
+   "doc_id": "SCALE",
+   "section": "합성 §C0150",
+   "text": "실링 인자 26-3는 ±15% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0151",
+   "doc_id": "SCALE",
+   "section": "합성 §C0151",
+   "text": "실링 인자 27-2는 ±10% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0152",
+   "doc_id": "SCALE",
+   "section": "합성 §C0152",
+   "text": "실링 공정의 28번 설비는 합성 사양으로 동작한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0153",
+   "doc_id": "SCALE",
+   "section": "합성 §C0153",
+   "text": "실링 인자 28-1는 ±5% 관리한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0154",
+   "doc_id": "SCALE",
+   "section": "합성 §C0154",
+   "text": "실링 공정의 31번 설비는 합성 사양으로 동작한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0155",
+   "doc_id": "SCALE",
+   "section": "합성 §C0155",
+   "text": "실링 공정의 34번 설비는 합성 사양으로 동작한다.",
+   "meta": {}
+  },
+  {
+   "cid": "C0156",
+   "doc_id": "SCALE",
+   "section": "합성 §C0156",
+   "text": "실링 인자 34-4는 ±20% 관리한다.",
+   "meta": {}
+  }
+ ],
+ "describes": [
+  {
+   "source": "C0001",
+   "target": "N0007"
+  },
+  {
+   "source": "C0002",
+   "target": "N0008"
+  },
+  {
+   "source": "C0003",
+   "target": "N0022"
+  },
+  {
+   "source": "C0004",
+   "target": "N0037"
+  },
+  {
+   "source": "C0005",
+   "target": "N0041"
+  },
+  {
+   "source": "C0006",
+   "target": "N0045"
+  },
+  {
+   "source": "C0007",
+   "target": "N0049"
+  },
+  {
+   "source": "C0008",
+   "target": "N0052"
+  },
+  {
+   "source": "C0009",
+   "target": "N0053"
+  },
+  {
+   "source": "C0010",
+   "target": "N0067"
+  },
+  {
+   "source": "C0011",
+   "target": "N0082"
+  },
+  {
+   "source": "C0012",
+   "target": "N0086"
+  },
+  {
+   "source": "C0013",
+   "target": "N0090"
+  },
+  {
+   "source": "C0014",
+   "target": "N0094"
+  },
+  {
+   "source": "C0015",
+   "target": "N0097"
+  },
+  {
+   "source": "C0016",
+   "target": "N0098"
+  },
+  {
+   "source": "C0017",
+   "target": "N0112"
+  },
+  {
+   "source": "C0018",
+   "target": "N0127"
+  },
+  {
+   "source": "C0019",
+   "target": "N0131"
+  },
+  {
+   "source": "C0020",
+   "target": "N0135"
+  },
+  {
+   "source": "C0021",
+   "target": "N0139"
+  },
+  {
+   "source": "C0022",
+   "target": "N0142"
+  },
+  {
+   "source": "C0023",
+   "target": "N0143"
+  },
+  {
+   "source": "C0024",
+   "target": "N0157"
+  },
+  {
+   "source": "C0025",
+   "target": "N0172"
+  },
+  {
+   "source": "C0026",
+   "target": "N0176"
+  },
+  {
+   "source": "C0027",
+   "target": "N0177"
+  },
+  {
+   "source": "C0028",
+   "target": "N0178"
+  },
+  {
+   "source": "C0029",
+   "target": "N0192"
+  },
+  {
+   "source": "C0030",
+   "target": "N0207"
+  },
+  {
+   "source": "C0031",
+   "target": "N0211"
+  },
+  {
+   "source": "C0032",
+   "target": "N0215"
+  },
+  {
+   "source": "C0033",
+   "target": "N0219"
+  },
+  {
+   "source": "C0034",
+   "target": "N0222"
+  },
+  {
+   "source": "C0035",
+   "target": "N0223"
+  },
+  {
+   "source": "C0036",
+   "target": "N0237"
+  },
+  {
+   "source": "C0037",
+   "target": "N0252"
+  },
+  {
+   "source": "C0038",
+   "target": "N0256"
+  },
+  {
+   "source": "C0039",
+   "target": "N0260"
+  },
+  {
+   "source": "C0040",
+   "target": "N0264"
+  },
+  {
+   "source": "C0041",
+   "target": "N0267"
+  },
+  {
+   "source": "C0042",
+   "target": "N0268"
+  },
+  {
+   "source": "C0043",
+   "target": "N0282"
+  },
+  {
+   "source": "C0044",
+   "target": "N0297"
+  },
+  {
+   "source": "C0045",
+   "target": "N0301"
+  },
+  {
+   "source": "C0046",
+   "target": "N0305"
+  },
+  {
+   "source": "C0047",
+   "target": "N0309"
+  },
+  {
+   "source": "C0048",
+   "target": "N0312"
+  },
+  {
+   "source": "C0049",
+   "target": "N0313"
+  },
+  {
+   "source": "C0050",
+   "target": "N0327"
+  },
+  {
+   "source": "C0051",
+   "target": "N0342"
+  },
+  {
+   "source": "C0052",
+   "target": "N0346"
+  },
+  {
+   "source": "C0053",
+   "target": "N0347"
+  },
+  {
+   "source": "C0054",
+   "target": "N0348"
+  },
+  {
+   "source": "C0055",
+   "target": "N0362"
+  },
+  {
+   "source": "C0056",
+   "target": "N0377"
+  },
+  {
+   "source": "C0057",
+   "target": "N0381"
+  },
+  {
+   "source": "C0058",
+   "target": "N0385"
+  },
+  {
+   "source": "C0059",
+   "target": "N0389"
+  },
+  {
+   "source": "C0060",
+   "target": "N0392"
+  },
+  {
+   "source": "C0061",
+   "target": "N0393"
+  },
+  {
+   "source": "C0062",
+   "target": "N0407"
+  },
+  {
+   "source": "C0063",
+   "target": "N0422"
+  },
+  {
+   "source": "C0064",
+   "target": "N0426"
+  },
+  {
+   "source": "C0065",
+   "target": "N0430"
+  },
+  {
+   "source": "C0066",
+   "target": "N0434"
+  },
+  {
+   "source": "C0067",
+   "target": "N0437"
+  },
+  {
+   "source": "C0068",
+   "target": "N0438"
+  },
+  {
+   "source": "C0069",
+   "target": "N0452"
+  },
+  {
+   "source": "C0070",
+   "target": "N0467"
+  },
+  {
+   "source": "C0071",
+   "target": "N0471"
+  },
+  {
+   "source": "C0072",
+   "target": "N0475"
+  },
+  {
+   "source": "C0073",
+   "target": "N0479"
+  },
+  {
+   "source": "C0074",
+   "target": "N0482"
+  },
+  {
+   "source": "C0075",
+   "target": "N0483"
+  },
+  {
+   "source": "C0076",
+   "target": "N0497"
+  },
+  {
+   "source": "C0077",
+   "target": "N0512"
+  },
+  {
+   "source": "C0078",
+   "target": "N0516"
+  },
+  {
+   "source": "C0079",
+   "target": "N0517"
+  },
+  {
+   "source": "C0080",
+   "target": "N0518"
+  },
+  {
+   "source": "C0081",
+   "target": "N0532"
+  },
+  {
+   "source": "C0082",
+   "target": "N0547"
+  },
+  {
+   "source": "C0083",
+   "target": "N0551"
+  },
+  {
+   "source": "C0084",
+   "target": "N0555"
+  },
+  {
+   "source": "C0085",
+   "target": "N0559"
+  },
+  {
+   "source": "C0086",
+   "target": "N0562"
+  },
+  {
+   "source": "C0087",
+   "target": "N0563"
+  },
+  {
+   "source": "C0088",
+   "target": "N0577"
+  },
+  {
+   "source": "C0089",
+   "target": "N0592"
+  },
+  {
+   "source": "C0090",
+   "target": "N0596"
+  },
+  {
+   "source": "C0091",
+   "target": "N0600"
+  },
+  {
+   "source": "C0092",
+   "target": "N0604"
+  },
+  {
+   "source": "C0093",
+   "target": "N0607"
+  },
+  {
+   "source": "C0094",
+   "target": "N0608"
+  },
+  {
+   "source": "C0095",
+   "target": "N0622"
+  },
+  {
+   "source": "C0096",
+   "target": "N0637"
+  },
+  {
+   "source": "C0097",
+   "target": "N0641"
+  },
+  {
+   "source": "C0098",
+   "target": "N0645"
+  },
+  {
+   "source": "C0099",
+   "target": "N0649"
+  },
+  {
+   "source": "C0100",
+   "target": "N0652"
+  },
+  {
+   "source": "C0101",
+   "target": "N0653"
+  },
+  {
+   "source": "C0102",
+   "target": "N0667"
+  },
+  {
+   "source": "C0103",
+   "target": "N0682"
+  },
+  {
+   "source": "C0104",
+   "target": "N0686"
+  },
+  {
+   "source": "C0105",
+   "target": "N0687"
+  },
+  {
+   "source": "C0106",
+   "target": "N0688"
+  },
+  {
+   "source": "C0107",
+   "target": "N0702"
+  },
+  {
+   "source": "C0108",
+   "target": "N0717"
+  },
+  {
+   "source": "C0109",
+   "target": "N0721"
+  },
+  {
+   "source": "C0110",
+   "target": "N0725"
+  },
+  {
+   "source": "C0111",
+   "target": "N0729"
+  },
+  {
+   "source": "C0112",
+   "target": "N0732"
+  },
+  {
+   "source": "C0113",
+   "target": "N0733"
+  },
+  {
+   "source": "C0114",
+   "target": "N0747"
+  },
+  {
+   "source": "C0115",
+   "target": "N0762"
+  },
+  {
+   "source": "C0116",
+   "target": "N0766"
+  },
+  {
+   "source": "C0117",
+   "target": "N0770"
+  },
+  {
+   "source": "C0118",
+   "target": "N0774"
+  },
+  {
+   "source": "C0119",
+   "target": "N0777"
+  },
+  {
+   "source": "C0120",
+   "target": "N0778"
+  },
+  {
+   "source": "C0121",
+   "target": "N0792"
+  },
+  {
+   "source": "C0122",
+   "target": "N0807"
+  },
+  {
+   "source": "C0123",
+   "target": "N0811"
+  },
+  {
+   "source": "C0124",
+   "target": "N0815"
+  },
+  {
+   "source": "C0125",
+   "target": "N0819"
+  },
+  {
+   "source": "C0126",
+   "target": "N0822"
+  },
+  {
+   "source": "C0127",
+   "target": "N0823"
+  },
+  {
+   "source": "C0128",
+   "target": "N0837"
+  },
+  {
+   "source": "C0129",
+   "target": "N0852"
+  },
+  {
+   "source": "C0130",
+   "target": "N0856"
+  },
+  {
+   "source": "C0131",
+   "target": "N0857"
+  },
+  {
+   "source": "C0132",
+   "target": "N0858"
+  },
+  {
+   "source": "C0133",
+   "target": "N0872"
+  },
+  {
+   "source": "C0134",
+   "target": "N0887"
+  },
+  {
+   "source": "C0135",
+   "target": "N0891"
+  },
+  {
+   "source": "C0136",
+   "target": "N0895"
+  },
+  {
+   "source": "C0137",
+   "target": "N0899"
+  },
+  {
+   "source": "C0138",
+   "target": "N0902"
+  },
+  {
+   "source": "C0139",
+   "target": "N0903"
+  },
+  {
+   "source": "C0140",
+   "target": "N0917"
+  },
+  {
+   "source": "C0141",
+   "target": "N0932"
+  },
+  {
+   "source": "C0142",
+   "target": "N0936"
+  },
+  {
+   "source": "C0143",
+   "target": "N0940"
+  },
+  {
+   "source": "C0144",
+   "target": "N0944"
+  },
+  {
+   "source": "C0145",
+   "target": "N0947"
+  },
+  {
+   "source": "C0146",
+   "target": "N0948"
+  },
+  {
+   "source": "C0147",
+   "target": "N0962"
+  },
+  {
+   "source": "C0148",
+   "target": "N0977"
+  },
+  {
+   "source": "C0149",
+   "target": "N0981"
+  },
+  {
+   "source": "C0150",
+   "target": "N0985"
+  },
+  {
+   "source": "C0151",
+   "target": "N0989"
+  },
+  {
+   "source": "C0152",
+   "target": "N0992"
+  },
+  {
+   "source": "C0153",
+   "target": "N0993"
+  },
+  {
+   "source": "C0154",
+   "target": "N1007"
+  },
+  {
+   "source": "C0155",
+   "target": "N1022"
+  },
+  {
+   "source": "C0156",
+   "target": "N1026"
+  }
+ ]
+}
