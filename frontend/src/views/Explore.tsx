@@ -16,7 +16,7 @@ const MAX_VISIBLE = 50;     // 화면에 한 번에 유지할 상한
 const FORCE_THRESHOLD = 60; // flat 보기에서 초과 시 NVL force 워커
 const WEBGL_THRESHOLD = 300; // 초과 시 WebGL 권장(config)
 
-export default function Explore() {
+export default function Explore({ focusNode }: { focusNode?: string | null }) {
   const { backend, recordMs } = useBackend();
   const [scope, setScope] = useState<string | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
@@ -43,6 +43,11 @@ export default function Explore() {
       return d;
     },
   });
+
+  // 문서관리 등에서 노드 점프 시 우측 상세에 표시
+  useEffect(() => {
+    if (focusNode) setSelected(focusNode);
+  }, [focusNode]);
 
   // 스코프 바뀌면 확장 상태 초기화 (포커스 = 스코프 노드 또는 첫 노드)
   useEffect(() => {

@@ -208,6 +208,28 @@ export interface EdgeEdit {
 export const editEdge = (body: EdgeEdit) =>
   post<{ ok: boolean; warning?: string | null }>("/edges/edit", body);
 
+// ---- M13 문서관리 / 출처 ----
+export interface DocSummary {
+  doc_id: string; chunk_count: number; node_count: number;
+  processes: string[]; layer: string; sections: string[];
+}
+export const fetchDocuments = () => get<DocSummary[]>("/documents");
+
+export interface DocDetail {
+  doc_id: string;
+  chunks: { cid: string; section: string; text: string; meta: Record<string, unknown>;
+    describes: { id: string; name: string; category: string }[] }[];
+  footprint: { id: string; name: string; category: string }[];
+}
+export const fetchDocument = (docId: string) => get<DocDetail>(`/documents/${docId}`);
+
+export interface NodeProvenance {
+  id: string; name: string; category: string;
+  describes_chunks: { cid: string; doc_id: string; section: string; text: string; meta: Record<string, unknown> }[];
+  provenance: { doc_id?: string; surface?: string }[];
+}
+export const fetchNodeProvenance = (id: string) => get<NodeProvenance>(`/nodes/${id}/provenance`);
+
 // ---- M11 검색 + Eval ----
 export interface RetrieveResult {
   query: string;

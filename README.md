@@ -31,7 +31,8 @@ platform/
 - **M9 — 인입 워크스페이스(배치 단계별 흐름)** ✅ 검증 통과
 - **M10 — mock 6공정 확장(eval·데모용, 26노드)** ✅ 검증 통과
 - **M11 — 검색(retrieval) + Eval(골든셋 Recall@k·MRR)** ✅ 검증 통과
-- **M12 — 이벤트 층 스캐폴드(FailureMode/Cause + Mode C + 추적질의)** ✅ 검증 통과 — 3개 층 완성
+- **M12 — 이벤트 층 스캐폴드(FailureMode/Cause + Mode C + 추적질의)** ✅ 검증 통과
+- **M13 — 문서관리/정보 저장소(출처·provenance 브라우징)** ✅ 검증 통과 — 7-워크스페이스 완성
 
 ## 데이터 디렉토리 (§8)
 ```
@@ -74,6 +75,7 @@ npm run dev            # http://localhost:5173
 | GET | `/dashboard/stats` | 현황 집계 (M6) — 규모·status·공정 커버리지·리뷰큐·alias·건강지표. 읽기 전용·임베딩 미로드 |
 | GET | `/retrieve?q=&k=` | 검색 (M11) — 별칭+렉시컬 링킹→part_of/has_property 탐색→describes 청크. **임베딩-free**, 미해소=alias gap |
 | GET/POST | `/eval/golden` · `/eval/run?k=` | 골든셋 / 평가 실행 (M11) — Recall@k·MRR·패턴분해·gap. 골든셋 고정 |
+| GET | `/documents` · `/documents/{doc_id}` · `/nodes/{id}/provenance` | 문서관리/출처 (M13) — per-doc 집계 / 청크·describes·meta / 노드 역방향. 읽기 전용·additive |
 | GET | 위 읽기 엔드포인트 `?backend=json\|neo4j` | M7 — 백엔드 선택(기본 json). neo4j 비활성 시 503 |
 | POST | `/neo4j/sync` · `/neo4j/deactivate` / GET `/neo4j/status` | M7 — JSON→Neo4j 재생성·활성화. **직접쓰기 엔드포인트 없음(§6.3)** |
 
@@ -147,7 +149,11 @@ node verify_m9_ingest.mjs # M9: 인입 배치 ①~⑤ 흐름·게이트·per-doc
 node verify_m10_mock.mjs  # M10: mock 6공정 확장(커버리지 빨강0·unlinked개선·동의어·전화면) → m10_dashboard.png
 node verify_m11_eval.mjs  # M11: 검색→gold·Recall@k/MRR·패턴분해·alias gap·§6.6/§6.2 → m11_eval.png
 node verify_m12_event.mjs # M12: 이벤트 스키마·Mode C·추적질의(causes/affects 역추적)·층분리 → m12_event.png
+node verify_m13_docs.mjs  # M13: 문서관리 집계·문서상세(meta)·노드 역방향 출처·이벤트문서 → m13_docs.png
 ```
+
+### 문서관리 (M13 — 출처 브라우징)
+"이 지식이 어느 자료에서 왔나" — 기존 `문서→청크→describes→노드`·`node.provenance` 사슬에 **읽기 전용 뷰만** 얹음(스키마/쓰기 0). 공정별 문서 카탈로그(층 배지: 구조/이벤트) · 문서 상세(청크 원문·섹션·meta + describes 노드 + 그래프 발자국) · 노드 역방향 출처(어느 문서·청크에서 왔나, 전 층) + Explore 점프.
 
 ### 이벤트 층 (M12 — PFMEA 역추적)
 3번째 층: `Cause --causes--> FailureMode --affects--> 구조(Property/Unit/Process)`. 발생/이력은 노드가 아니라 청크(meta date/line/lot) → `describes` FailureMode. **층 분리**: Mode C(이슈 인입)는 구조 노드를 *수정 못 하고* resolve-only로 참조만, 새 노드는 FailureMode/Cause만 승인 게이트로. 추적 질의 `/retrieve`가 causes/affects를 양방향 탐색 — "버발생 원인?"→금형마모(Cause)+책임 인자/설비(affects)+이슈청크. Explore/대시보드에 FailureMode(빨강)/Cause(보라) 층 가시화.

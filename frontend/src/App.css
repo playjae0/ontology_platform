@@ -623,3 +623,30 @@
 .eval-head { display: flex; align-items: center; justify-content: space-between; }
 .eval-metrics { display: flex; gap: 12px; margin: 12px 0; }
 .ask-result { margin-top: 10px; }
+
+/* ===== 화면7 — 문서관리 (M13) ===== */
+.documents { display: grid; grid-template-columns: 320px 1fr; flex: 1; min-height: 0; }
+.doc-catalog { overflow-y: auto; border-right: 1px solid var(--border); background: var(--panel); padding: 12px; }
+.doc-catalog h3 { font-size: 13px; margin: 0 0 10px; }
+.doc-group { margin-bottom: 14px; }
+.doc-group-h { font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); margin: 0 0 6px; }
+.doc-card { display: block; width: 100%; text-align: left; border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; margin-bottom: 6px; background: var(--panel); cursor: pointer; }
+.doc-card.active { background: #eff6ff; border-color: #2563eb; }
+.doc-card-h { display: flex; align-items: center; justify-content: space-between; }
+.doc-card-h strong { font-size: 13px; }
+.layer-badge { font-size: 10px; padding: 2px 7px; border-radius: 999px; }
+.layer-badge.structure { background: #dbeafe; color: #1d4ed8; }
+.layer-badge.event { background: #fee2e2; color: #b91c1c; }
+.layer-badge.both { background: #ede9fe; color: #6d28d9; }
+
+.doc-detail { overflow-y: auto; padding: 18px 22px; }
+.doc-view h2 { font-size: 18px; margin: 0 0 10px; }
+.doc-view h4 { font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); border-top: 1px solid var(--border); padding-top: 12px; margin: 16px 0 8px; }
+.footprint { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 14px; }
+.fp-node, .describe-tag button { display: inline-flex; align-items: center; gap: 4px; border: 1px solid var(--border); background: var(--panel); border-radius: 999px; padding: 2px 10px; cursor: pointer; font-size: 12px; }
+.fp-node:hover { background: #f1f5f9; }
+.chunk-describes { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 8px; }
+.describe-tag { display: inline-flex; align-items: center; }
+.describe-tag .jump { border: none; background: none; cursor: pointer; color: #2563eb; padding: 0 4px; font-size: 13px; }
+.meta-pill { font-family: ui-monospace, Menlo, monospace; font-size: 11px; color: #7c3aed; margin-left: 6px; }
+.doc-view .jump { border: 1px solid var(--border); background: var(--panel); border-radius: 6px; padding: 2px 8px; cursor: pointer; font-size: 12px; margin-left: auto; }

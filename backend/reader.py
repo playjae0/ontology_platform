@@ -139,6 +139,110 @@ class JsonReader:
         ct = self._load_contents()
         return next((c for c in ct["chunks"] if c.get("cid") == cid), None)
 
+    # ---- 문서관리(M13) — 읽기 전용·additive: 기존 chunks/describes/provenance 집계만 ----
+    @staticmethod
+    def _node_processes(nid: str, nodes: dict, edges: list, _seen=None) -> set:
+        """노드 → 닿는 공정(Process) id 집합. 구조: attached_to 상향. 이벤트: affects/causes 따라."""
+        _seen = _seen or set()
+        if nid in _seen or nid not in nodes:
+            return set()
+        _seen.add(nid)
+        n = nodes[nid]
+        cat = n.get("category")
+        if cat == "Process":
+            return {nid}
+        if cat in ("Unit", "Property"):
+            at = n.get("attached_to")
+            return JsonReader._node_processes(at, nodes, edges, _seen) if at else set()
+        # 이벤트 층: FailureMode→affects 구조, Cause→causes FailureMode
+        out = set()
+        for e in edges:
+            if e.get("source") != nid:
+                continue
+            if e.get("relation") in ("affects", "causes"):
+                out |= JsonReader._node_processes(e.get("target"), nodes, edges, _seen)
+        return out
+
+    def _doc_index(self):
+        sk = self._load_skeleton()
+        ct = self._load_contents()
+        nodes, edges = sk["nodes"], sk["edges"]
+        chunks, describes = ct["chunks"], ct["describes"]
+        chunk_targets: dict[str, list] = {}
+        for d in describes:
+            chunk_targets.setdefault(d.get("source"), []).append(d.get("target"))
+        return nodes, edges, chunks, describes, chunk_targets
+
+    def documents(self) -> list:
+        nodes, edges, chunks, _describes, chunk_targets = self._doc_index()
+        docs: dict[str, dict] = {}
+        for c in chunks:
+            doc = c.get("doc_id", "?")
+            d = docs.setdefault(doc, {"doc_id": doc, "chunks": [], "sections": set(),
+                                      "described": set()})
+            d["chunks"].append(c.get("cid"))
+            if c.get("section"):
+                d["sections"].add(c.get("section"))
+            for nid in chunk_targets.get(c.get("cid"), []):
+                d["described"].add(nid)
+        out = []
+        for doc, d in docs.items():
+            cats = {nodes[n].get("category") for n in d["described"] if n in nodes}
+            procs = set()
+            for n in d["described"]:
+                procs |= self._node_processes(n, nodes, edges)
+            struct = bool(cats & {"Process", "Unit", "Property"})
+            event = bool(cats & {"FailureMode", "Cause"})
+            out.append({
+                "doc_id": doc,
+                "chunk_count": len(d["chunks"]),
+                "node_count": len(d["described"]),
+                "processes": sorted(nodes[p].get("canonical_name", p) for p in procs if p in nodes),
+                "layer": "both" if (struct and event) else "event" if event else "structure",
+                "sections": sorted(d["sections"]),
+            })
+        return sorted(out, key=lambda x: x["doc_id"])
+
+    def document(self, doc_id: str) -> dict:
+        nodes, _edges, chunks, _describes, chunk_targets = self._doc_index()
+        rows = []
+        described = set()
+        for c in chunks:
+            if c.get("doc_id") != doc_id:
+                continue
+            tgts = []
+            for nid in chunk_targets.get(c.get("cid"), []):
+                described.add(nid)
+                n = nodes.get(nid)
+                tgts.append({"id": nid, "name": n.get("canonical_name") if n else nid,
+                             "category": n.get("category") if n else "?"})
+            rows.append({"cid": c.get("cid"), "section": c.get("section"),
+                         "text": c.get("text"), "meta": c.get("meta", {}), "describes": tgts})
+        footprint = [{"id": nid, "name": nodes[nid].get("canonical_name"),
+                      "category": nodes[nid].get("category")} for nid in sorted(described) if nid in nodes]
+        return {"doc_id": doc_id, "chunks": rows, "footprint": footprint}
+
+    def node_provenance(self, node_id: str) -> dict | None:
+        sk = self._load_skeleton()
+        ct = self._load_contents()
+        nodes = sk["nodes"]
+        if node_id not in nodes:
+            return None
+        n = nodes[node_id]
+        by_cid = {c.get("cid"): c for c in ct["chunks"]}
+        cids = [d.get("source") for d in ct["describes"] if d.get("target") == node_id]
+        from_chunks = []
+        for cid in cids:
+            c = by_cid.get(cid)
+            if c:
+                from_chunks.append({"cid": cid, "doc_id": c.get("doc_id"), "section": c.get("section"),
+                                    "text": c.get("text"), "meta": c.get("meta", {})})
+        return {
+            "id": node_id, "name": n.get("canonical_name"), "category": n.get("category"),
+            "describes_chunks": from_chunks,
+            "provenance": n.get("provenance", []),  # node.provenance(doc_id, surface)
+        }
+
     def retrieve(self, q: str, k: int = 5) -> dict:
         """검색(retrieval) — ①링킹(별칭 exact + 렉시컬 substring) ②탐색(part_of/has_property)
         ③수집(describes 청크). 임베딩 미사용·미로드(§6.2). 질문 표현을 alias 에 누적하지 않음(§6.6).

@@ -1,11 +1,12 @@
 # CLAUDE.md — 온톨로지 관리 플랫폼(관리소) 빌드 스펙 · v3
 
-> **진행 상태**: M1~M11 ✅ · **M12(이벤트 층 스캐폴드: FailureMode/Cause + Mode C + 추적질의) ✅**. 비범위 잔여: 거버넌스 풀세트·실 임베딩 보강·실 taxonomy 정밀화.
+> **진행 상태**: M1~M12 ✅ · **M13(문서관리/출처 브라우징) ✅** — 7-워크스페이스 IA 완성. 비범위 잔여: 거버넌스 풀세트·실 임베딩 보강·실 taxonomy 정밀화.
 > **이 문서는 빌드 명세다.** §7 밀스톤 순서대로, 각 밀스톤의 **검증 게이트를 통과한 뒤** 다음으로. 한 번에 전부 만들지 말 것.
 > **§6 불변 원칙은 절대 위반 금지.** 충돌 시 멈추고 §6 우선, 그다음 사용자 확인.
 > **사용법**: 이 파일은 레포 루트에 두면 Claude Code가 자동 로드한다. 밀스톤 착수는 짧은 포인터(예: "M3 진행, §7 따라가")로 충분 — 전체 재첨부 불필요.
 
 ### 변경 이력
+- **v3.10**: M13(문서관리/출처 브라우징) — 읽기 전용·additive(스키마/쓰기 0). `GET /documents`(per-doc 집계: 청크·노드·닿는 공정·층) · `/documents/{doc_id}`(청크+describes+meta+발자국) · `/nodes/{id}/provenance`(역방향: describes⁻¹+node.provenance). 화면7 문서관리(공정별 카탈로그·문서상세·노드 역방향·Explore 점프). §10 "문서관리" 해소.
 - **v3.9**: M12(이벤트 층 스캐폴드) — §2 category += FailureMode/Cause, relation += causes/affects. Mode C(이슈 인입: FailureMode/Cause 후보→승인 materialize+엣지). `/retrieve` causes/affects **양방향** 추적. 층 분리(Mode C는 구조 resolve-only·발생=청크). mock baseline 30노드. **§10 FailureMode/Cause "Phase 2" 해소.** verify_m6 견고화(mock 재계산). 실 meta/taxonomy는 실 샘플 후 정밀화.
 - **v3.8**: M11(검색 + Eval) — `GET /retrieve`(별칭+렉시컬 링킹→part_of/has_property 탐색→describes 수집, **임베딩-free**), `golden_set.json`(21문항·4패턴), `/eval/run`(Recall@k·MRR·패턴분해·alias gap). 화면6 Test/Eval. §6.6 재확인(질문 alias 미누적). 경계: 임베딩-보강 링킹+매칭 eval = 사내 확장.
 - **v3.7**: M10(mock 6공정 확장) — 11→**26노드**(6공정 각 Unit+Property 2~3, 동의어 영문/축약), 청크 6→14·describes 4→19, 6공정 모두 커버(unlinked 0.667→0.286). 기존 노드 id(N0001/N0101/N0102/N02xx) 보존. 카운트 단언 갱신(m2/m3/m4 카운트-무관, m6 새 baseline).
@@ -94,6 +95,8 @@ class ExternalScriptStage:        # 나중: 사내 스크립트 subprocess
 
 **화면1 — 데이터 관리+수동 주입 · DONE ✅**: SSOT 상태/slot 테이블, 3 slot 주입 카드(검증→채택은 valid 시만), 직전 롤백·mock 리셋, 스테이지 슬롯 표시. 업로드≠승인 명시.
 
+**화면7 — 문서관리/정보 저장소 · DONE ✅ (M13)**: "이 지식이 어느 자료에서 왔나" 브라우징. **읽기 전용·additive**(기존 chunks·describes·node.provenance 집계만, 스키마/쓰기 0). 좌 공정별 카탈로그(문서 카드+층 배지, 이벤트 문서 포함) / 우 문서 상세(청크 원문·섹션·meta + 각 청크 describes 노드 + 그래프 발자국) · 노드 역방향 출처(어느 문서·청크, 전 층) + Explore 점프.
+
 **화면6 — Test/Eval · DONE ✅ (M11)**: 검색(retrieval) + 골든셋 평가. 골든셋 표 + [평가 실행]→문항별 Recall@k/rank + 패턴별 집계 + 미해소(alias gap) 목록 + "온톨로지에 질문하기"(검색 박스). 읽기 전용·임베딩 미사용.
 
 **화면5 — 인입 워크스페이스 · DONE ✅ (M9)**: 문서→json 통합 인입. 상단 단계 진행바(①업로드~⑤연결), 배치 테이블(행=문서, 칩=파싱/연결 + 청크·describes·orphan 수), 행 클릭→문서 청크/describes 미리보기. ③뼈대·④검수=배치 공유 밴드, ④는 검수 Workbench 핸드오프.
@@ -112,7 +115,7 @@ class ExternalScriptStage:        # 나중: 사내 스크립트 subprocess
 
 ## 5. API 표면
 
-**읽기(R) · DONE**: `GET /data/status` · `/graph?scope={id}`(NVL 포맷) · `/nodes/{id}`(**embedding 미포함**) · `/nodes/{id}/chunks` · `/nodes/search?q=` · `/review/queue` · `/dashboard/stats`(M6) · **`/retrieve?q=`(M11 검색, 임베딩-free)** · **`/eval/golden`·`POST /eval/run?k=`(M11 평가)**. 읽기 엔드포인트는 `?backend=json|neo4j`(M7, 기본 json) 지원.
+**읽기(R) · DONE**: `GET /data/status` · `/graph?scope={id}`(NVL 포맷) · `/nodes/{id}`(**embedding 미포함**) · `/nodes/{id}/chunks` · `/nodes/search?q=` · `/review/queue` · `/dashboard/stats`(M6) · **`/retrieve?q=`(M11)** · **`/eval/golden`·`POST /eval/run?k=`(M11)** · **`/documents`·`/documents/{doc_id}`·`/nodes/{id}/provenance`(M13 문서관리/출처)**. 읽기 엔드포인트는 `?backend=json|neo4j`(M7, 기본 json) 지원.
 
 **Neo4j 승격(M7)**: `POST /neo4j/sync`(JSON→Neo4j 재생성·활성화) · `GET /neo4j/status` · `POST /neo4j/deactivate`. **Neo4j 직접쓰기 엔드포인트 없음(§6.3).**
 
@@ -241,6 +244,12 @@ class ExternalScriptStage:        # 나중: 사내 스크립트 subprocess
 검증 `verify_m12_event.mjs` exit 0: ①스키마 수용+방향경고+참조무결성 ②대시보드 이벤트 카운트+Explore 필터 ③Mode C: 후보→승인 materialize+엣지+describes ④추적(버발생→causes+affects+이슈청크, 역도달) ⑤층분리(구조 26→26 불변)+발생=청크 ⑥회귀 13 스위트 exit 0. 파일: `backend/{validate,mutations,stages,ingest_batch,reader,app}.py`, `data/mock/*`, `frontend/src/{theme.ts,views/Explore.tsx,components/LeftPanel.tsx}`.
 > 실 구조 의존부(meta 필드·불량/원인 taxonomy)는 실 샘플 도착 후 정밀화.
 
+### M13 — 문서관리 / 정보 저장소 (출처·provenance 브라우징) · DONE ✅
+문서 중심 뷰 — "이 지식이 어느 자료에서 왔나". 7-워크스페이스 IA 의 마지막. **읽기 전용·additive**: 기존 데이터(chunks·describes·node.provenance)만 집계, **스키마/쓰기 변경 0**. reader 재사용·임베딩 미로드(§6.2).
+- `reader.documents()`: doc_id 그룹 + per-doc 집계(청크수·describes 노드수·닿는 공정(attached_to 상향 / 이벤트는 affects·causes 따라)·층(structure/event/both)·sections). `document(doc_id)`: 청크 원문+meta + 각 청크 describes 노드 + 그래프 발자국. `node_provenance(id)`: 역방향(describes⁻¹ 청크 + node.provenance).
+- 프론트 `Documents.tsx`: 공정별 카탈로그(문서 카드·층 배지) / 문서 상세(청크·meta·describes 노드) / 노드 역방향 출처 + **Explore 점프**(`focusNode`).
+검증 `verify_m13_docs.mjs` exit 0: ①/documents 집계(청크·노드·공정·층) 정확 ②문서 상세 청크+describes+meta ③노드 역방향(전 층: 이벤트 ISSUE_NOTCH·구조 MOCK) ④이벤트 문서 FailureMode describe+발생 meta ⑤읽기전용(POST /documents→405)·노드 30 불변·임베딩 미로드 ⑥회귀 14 스위트 exit 0. 파일: `backend/{reader,app}.py`, `frontend/.../Documents.tsx`.
+
 ---
 
 ## 8. 기술 스택 / 셋업
@@ -261,7 +270,7 @@ class ExternalScriptStage:        # 나중: 사내 스크립트 subprocess
 
 ## 10. 명시적 비범위 (안 함)
 - **노드 merge** — 거버넌스(감사로그·undo)와 함께 다음 단계. (엣지 재지정/타입변경/삭제/추가는 **M5에서 활성화됨**. 노드 재부모는 part_of 엣지 재지정으로 달성. 노드 delete 는 비범위.)
-- 테스트/Eval(골든셋) · 거버넌스 풀세트(감사로그·버전·롤백·권한). (대시보드는 M6에서 완료.)
+- 거버넌스 풀세트(감사로그·버전·롤백·권한). (대시보드 M6 · Eval M11 · 문서관리 M13 에서 완료.)
 - orphan **자동 해소**(표시만; 수동 재연결은 M5 관계 추가로 가능) · 멀티유저/인증. (Neo4j 승격은 M7에서 완료.)
 - 외부 파이프라인 *구현*(파싱/뼈대/이벤트 코드) — 슬롯 인터페이스만(Mode C 포함, MockStage 데모).
 - 실 불량/원인 taxonomy·발생 meta 스키마 정밀화 — 실 샘플 도착 후. (이벤트 층 *스캐폴드*는 M12에서 완료.)

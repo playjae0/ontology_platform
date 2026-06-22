@@ -203,6 +203,25 @@ def node_chunks(node_id: str, backend: str = "json"):
     return rd.chunks_for_node(node_id)
 
 
+# ----------------------------------------------- 문서관리 / 출처 (M13, 읽기 전용)
+@app.get("/documents")
+def documents(backend: str = "json"):
+    return pick_reader(backend).documents()
+
+
+@app.get("/documents/{doc_id}")
+def document(doc_id: str, backend: str = "json"):
+    return pick_reader(backend).document(doc_id)
+
+
+@app.get("/nodes/{node_id}/provenance")
+def node_provenance(node_id: str, backend: str = "json"):
+    p = pick_reader(backend).node_provenance(node_id)
+    if p is None:
+        raise HTTPException(404, f"node '{node_id}' not found")
+    return p
+
+
 # --------------------------------------------------- 수동 주입 / 스테이지(W)
 @app.post("/ingest/upload/{slot}")
 async def ingest_upload(slot: str, request: Request, adopt: bool = False):

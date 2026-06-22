@@ -8,10 +8,11 @@ import Workbench from "./views/Workbench";
 import Dashboard from "./views/Dashboard";
 import Ingest from "./views/Ingest";
 import Eval from "./views/Eval";
+import Documents from "./views/Documents";
 import { BackendProvider, BackendToggle } from "./backend";
 import "./App.css";
 
-type View = "explore" | "workbench" | "data" | "dashboard" | "ingest" | "eval";
+type View = "explore" | "workbench" | "data" | "dashboard" | "ingest" | "eval" | "docs";
 
 export default function App() {
   return (
@@ -23,8 +24,10 @@ export default function App() {
 
 function AppShell() {
   const [view, setView] = useState<View>("explore");
+  const [jumpNode, setJumpNode] = useState<string | null>(null);
   const status = useQuery({ queryKey: ["status"], queryFn: fetchStatus });
   const showToggle = view === "explore" || view === "dashboard";
+  const jumpToExplore = (id: string) => { setJumpNode(id); setView("explore"); };
 
   return (
     <div className="app">
@@ -46,6 +49,9 @@ function AppShell() {
           <button className={view === "dashboard" ? "active" : ""} onClick={() => setView("dashboard")}>
             대시보드
           </button>
+          <button className={view === "docs" ? "active" : ""} onClick={() => setView("docs")}>
+            문서관리
+          </button>
           <button className={view === "eval" ? "active" : ""} onClick={() => setView("eval")}>
             Test/Eval
           </button>
@@ -59,12 +65,13 @@ function AppShell() {
         )}
       </header>
 
-      {view === "explore" && <Explore />}
+      {view === "explore" && <Explore focusNode={jumpNode} />}
       {view === "workbench" && <Workbench />}
       {view === "data" && <DataManage />}
       {view === "dashboard" && <Dashboard />}
       {view === "ingest" && <Ingest onGotoWorkbench={() => setView("workbench")} />}
       {view === "eval" && <Eval />}
+      {view === "docs" && <Documents onJump={jumpToExplore} />}
     </div>
   );
 }
