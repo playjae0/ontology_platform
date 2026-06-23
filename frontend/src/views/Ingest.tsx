@@ -4,7 +4,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   fetchBatch, batchUpload, batchRun, batchReset, fetchBatchDoc, fetchReviewQueue,
 } from "../api";
-import type { BatchDoc } from "../api";
 
 const STEPS = ["① 업로드", "② 파싱", "③ 뼈대", "④ 검수·승인", "⑤ 콘텐츠 연결"];
 

@@ -45,23 +45,39 @@ data/
 `ONTOLOGY_DATA_ROOT` 로 루트 override 가능.
 
 ## 실행
-### 백엔드 (포트 8077)
-```bash
-pip install --break-system-packages fastapi uvicorn
-cd platform/backend
-uvicorn app:app --port 8077 --reload
-# 데이터 디렉토리 override: ONTOLOGY_DATA_DIR=/path uvicorn app:app ...
-```
-읽기 경로는 sentence-transformers/임베딩을 로드하지 않는다(§6.2). `ontology_agent.skeleton.Skeleton.load()`
-는 노드마다 BGE-M3 임베딩을 재계산하므로 읽기에 절대 사용하지 않는다.
 
-### 프론트엔드 (포트 5173)
+### ⭐ 가장 쉬운 방법 — 원클릭 (포트 충돌 안전)
+```bash
+pip install --break-system-packages fastapi uvicorn   # 1회 (Neo4j 쓰면 neo4j 도)
+python run.py        # 끝. 출력되는 http://localhost:<포트> 를 브라우저로 열면 됨
+```
+- `run.py` 가 **빈 포트를 자동 탐색**(기본 8077, 차 있으면 8078·8079…). `--port N` 으로 시작 포트 지정 가능.
+- `frontend/dist`(빌드된 프론트)가 있으면 **백엔드 한 프로세스가 화면까지 단일 포트로 서빙** → **Node·인터넷 불필요, Python 만** 있으면 됨. (배포 zip 에 dist 포함)
+- API 주소는 **상대경로**라 포트가 무엇이든 같은 출처로 동작 — 사내 어떤 포트 환경에서도 OK.
+- 종료는 `Ctrl-C`.
+
+> 요구사항: **Python 3.10+** (타입 힌트). Neo4j(M7)는 선택 — 미설치여도 기본 JSON 백엔드로 전부 동작.
+
+### 개발 모드 (프론트 수정 시, Node 필요)
+```bash
+python run.py --dev      # 백엔드 + Vite dev 동시 기동(포트 자동), 프론트 핫리로드
+# 또는 수동:
+pip install --break-system-packages fastapi uvicorn
+cd backend && uvicorn app:app --port 8077          # 백엔드
+cd frontend && npm install && npm run dev          # 프론트(5173, 차면 자동 증가)
+# 프론트 빌드(배포용 dist 생성): cd frontend && npm run build
+```
+읽기 경로는 sentence-transformers/임베딩을 로드하지 않는다(§6.2). 데이터 루트 override: `ONTOLOGY_DATA_ROOT=/path`.
+
+<details><summary>구버전 수동 실행(참고)</summary>
+
 ```bash
 cd platform/frontend
 npm install
 npm run dev            # http://localhost:5173
 # 백엔드 주소 override: VITE_API_BASE=http://host:port npm run dev
 ```
+</details>
 
 ## API
 ### 읽기 (M1)

@@ -1,8 +1,11 @@
 // API 레이어 — 백엔드 읽기 엔드포인트 (§5 R)
 // 백엔드는 GraphReader 만 노출하므로 JSON↔Neo4j 전환 시 프론트는 불변.
 
+// API 주소: VITE_API_BASE > (프로덕션 빌드면 상대경로 "" — SPA를 백엔드가 같은 포트로 서빙) >
+// dev 기본 http://localhost:8077. 프로덕션 상대경로 = 백엔드 포트가 무엇이든 같은 출처라 포트 무관.
 export const API_BASE =
-  import.meta.env.VITE_API_BASE ?? "http://localhost:8077";
+  import.meta.env.VITE_API_BASE ??
+  (import.meta.env.PROD ? "" : "http://localhost:8077");
 
 export type Category = "Process" | "Unit" | "Property";
 export type Status = "proposed" | "confirmed";
@@ -179,7 +182,9 @@ export const fetchReviewQueue = () =>
   get<{ items: ReviewItem[]; orphans: OrphanNode[] }>("/review/queue");
 export const approveReview = (rid: string, attach_to?: string | null) =>
   post("/review/approve", { rid, attach_to: attach_to ?? null });
-export const approveBatch = (rids: string[]) => post("/review/approve-batch", { rids });
+export const approveBatch = (rids: string[]) =>
+  post<{ approved: string[]; skipped: { rid: string; reason: string }[] }>(
+    "/review/approve-batch", { rids });
 export const rejectReview = (rid: string) => post("/review/reject", { rid });
 export const absorbReview = (rid: string, target: string) =>
   post("/review/absorb", { rid, target });

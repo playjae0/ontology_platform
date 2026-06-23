@@ -88,7 +88,7 @@ await postRaw("/nodes/N0002/edit", JSON.stringify({ canonical_name: "스태킹-M
 const nn = await get("/nodes/N0002?backend=neo4j");
 out.mutationReflected = nn.canonical_name === "스태킹-MUT";
 const w = await postRaw("/neo4j/write", JSON.stringify({}));
-out.noDirectWrite = w.status === 404;
+out.noDirectWrite = [404, 405].includes(w.status); // 부재(SPA 정적서빙 시 405)
 
 // 정리: mock 으로 복원(+neo4j 재동기)
 await postRaw("/ingest/reset-mock");

@@ -36,7 +36,8 @@ USE_WEBGL = os.environ.get("USE_WEBGL", "0") == "1"
 app = FastAPI(title="온톨로지 관리소 API", version="0.2.0 (M2)")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    # localhost/127.0.0.1 의 *모든 포트* 허용 — dev 프론트 포트가 바뀌어도(충돌 자동회피) 안전.
+    allow_origin_regex=r"https?://(localhost|127\.0\.0\.1)(:\d+)?",
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -479,3 +480,11 @@ def edge_edit(body: EdgeBody):
         store, body.op, body.source, body.relation, body.target,
         new_source=body.new_source, new_relation=body.new_relation,
         new_target=body.new_target))
+
+
+# ---- 프로덕션 단일포트: 빌드된 프론트(frontend/dist)가 있으면 SPA 서빙 ----
+# (이 mount 는 반드시 *모든 API 라우트 뒤*에 등록 — API 경로가 먼저 매칭되고 나머지는 SPA)
+_DIST = Path(__file__).resolve().parents[1] / "frontend" / "dist"
+if _DIST.exists():
+    from fastapi.staticfiles import StaticFiles
+    app.mount("/", StaticFiles(directory=str(_DIST), html=True), name="spa")

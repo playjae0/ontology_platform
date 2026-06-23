@@ -83,7 +83,7 @@ const ok =
   out.nonexistentStatus === 422 &&
   out.ssotUnchanged === "N0001" &&
   out.dupStatus === 422 &&
-  out.mergeStatus === 404 &&
+  [404, 405].includes(out.mergeStatus) && // 부재(SPA 정적서빙 시 405, 아니면 404)
   out.orphanShown === true &&
   out.reattached === true &&
   out.orphanGoneAfterReadd === true &&
