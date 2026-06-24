@@ -1,5 +1,5 @@
 // 화면2 — Explore (읽기 전용) · 3-pane. 렌더-at-scale(M8): 확장형 스코핑 + 레이아웃 분기 + WebGL config.
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchGraph } from "../api";
 import type { GraphData } from "../api";
@@ -48,6 +48,29 @@ export default function Explore({ focusNode }: { focusNode?: string | null }) {
   useEffect(() => {
     if (focusNode) setSelected(focusNode);
   }, [focusNode]);
+
+  // open vocabulary: 데이터에 처음 등장하는 category/status 를 필터에 자동 포함
+  // (사내 라벨 Defect·임의 status 가 기본으로 보이게). 한 번 본 값만 추가 →
+  // 사용자가 나중에 체크 해제한 것을 재추가하지 않음.
+  const seenRef = useRef({ cats: new Set<string>(), sts: new Set<string>() });
+  useEffect(() => {
+    const g = fullGraph.data;
+    if (!g) return;
+    setFilters((f) => {
+      const categories = new Set(f.categories);
+      const statuses = new Set(f.statuses);
+      let changed = false;
+      for (const n of g.nodes) {
+        if (!seenRef.current.cats.has(n.category)) {
+          seenRef.current.cats.add(n.category); categories.add(n.category); changed = true;
+        }
+        if (!seenRef.current.sts.has(n.status)) {
+          seenRef.current.sts.add(n.status); statuses.add(n.status); changed = true;
+        }
+      }
+      return changed ? { categories, statuses } : f;
+    });
+  }, [fullGraph.data]);
 
   // 스코프 바뀌면 확장 상태 초기화 (포커스 = 스코프 노드 또는 첫 노드)
   useEffect(() => {

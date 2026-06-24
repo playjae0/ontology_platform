@@ -361,8 +361,9 @@ def edit_edge(store, op: str, source: str, relation: str, target: str,
     warning: str | None = None
 
     if op == "add":
-        if relation not in RELATIONS:
-            return {"ok": False, "error": f"relation 허용값 아님: {relation!r}"}
+        # open vocabulary: 관계명은 자유(비어있지 않은 문자열) — 사내 스키마가 정함.
+        if not isinstance(relation, str) or not relation:
+            return {"ok": False, "error": f"relation 은 비어있지 않은 문자열이어야 함: {relation!r}"}
         if _dup_exists(edges, source, relation, target):
             return {"ok": False, "error": "중복 엣지(동일 source-relation-target)"}
         edges.append({"source": source, "relation": relation, "target": target,

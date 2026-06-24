@@ -17,7 +17,8 @@ interface Props {
   onSelect: (id: string) => void;
 }
 
-const ALL_CATS = ["Process", "Unit", "Property", "FailureMode", "Cause"];
+// 알려진 라벨은 고정 순서로 앞에, 데이터에 있는 그 외 라벨(예: Defect, 사내 라벨)은 뒤에 붙임.
+const KNOWN_CATS = ["Process", "Unit", "Property", "FailureMode", "Cause", "Defect"];
 const ALL_STATUS = ["confirmed", "proposed"];
 
 export default function LeftPanel({
@@ -34,6 +35,14 @@ export default function LeftPanel({
     () => (full?.nodes ?? []).filter((n) => n.category === "Process"),
     [full],
   );
+
+  // 데이터에 실제로 등장하는 카테고리 = 알려진 라벨(고정 순서) + 그 외(발견 순). open vocabulary.
+  const cats = useMemo(() => {
+    const present = new Set((full?.nodes ?? []).map((n) => n.category));
+    const known = KNOWN_CATS.filter((c) => present.has(c));
+    const extra = [...present].filter((c) => !KNOWN_CATS.includes(c)).sort();
+    return [...known, ...extra];
+  }, [full]);
 
   // 동의어/이름 검색: caption(=canonical_name) 매칭. alias 는 노드 상세에 있으나
   // 그래프 노드 캡션 기준 간이 검색(§6.6: 검색이 alias를 누적하지 않음 — 읽기만).
@@ -74,7 +83,7 @@ export default function LeftPanel({
 
       <section>
         <h3>카테고리</h3>
-        {ALL_CATS.map((c) => (
+        {cats.map((c) => (
           <label key={c} className="filter-row">
             <input
               type="checkbox"

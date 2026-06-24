@@ -159,7 +159,7 @@ class JsonReader:
         for e in edges:
             if e.get("source") != nid:
                 continue
-            if e.get("relation") in ("affects", "causes"):
+            if (e.get("relation") or "").lower() in ("affects", "causes"):
                 out |= JsonReader._node_processes(e.get("target"), nodes, edges, _seen)
         return out
 
@@ -269,7 +269,7 @@ class JsonReader:
         struct -= set(linked)
         ce_adj: dict[str, set] = {}
         for e in edges:
-            if e.get("relation") in ("causes", "affects"):
+            if (e.get("relation") or "").lower() in ("causes", "affects"):
                 ce_adj.setdefault(e.get("source"), set()).add(e.get("target"))
                 ce_adj.setdefault(e.get("target"), set()).add(e.get("source"))
         event = set()
@@ -343,7 +343,7 @@ class JsonReader:
         s = set(ids)
         nxt = {}
         for e in edges:
-            if e.get("relation") == "precedes" and e.get("source") in s and e.get("target") in s:
+            if (e.get("relation") or "").lower() == "precedes" and e.get("source") in s and e.get("target") in s:
                 nxt[e["source"]] = e["target"]
         incoming = set(nxt.values())
         out, seen = [], set()
@@ -379,7 +379,7 @@ class JsonReader:
             tgt_cids.setdefault(d.get("target"), set()).add(d.get("source"))
 
         # 공정별 커버리지 = 대공정(=part_of 부모를 가진 Process), precedes 순
-        has_part_parent = {e["source"] for e in edges if e.get("relation") == "part_of"}
+        has_part_parent = {e["source"] for e in edges if (e.get("relation") or "").lower() == "part_of"}
         procs = [nid for nid, n in nodes.items()
                  if n.get("category") == "Process" and nid in has_part_parent]
         procs = self._order_by_precedes(procs, edges)
@@ -423,9 +423,10 @@ class JsonReader:
         nodes, edges = sk["nodes"], sk["edges"]
         has_parent = set()
         for e in edges:
-            if e.get("relation") == "part_of":
+            rel = (e.get("relation") or "").lower()
+            if rel == "part_of":
                 has_parent.add(e.get("source"))
-            elif e.get("relation") == "has_property":
+            elif rel == "has_property":
                 has_parent.add(e.get("target"))
         out = []
         for nid, n in nodes.items():
@@ -459,10 +460,11 @@ class JsonReader:
         """scope_id 아래로 part_of/has_property 후손을 모은다 (자신 포함)."""
         children: dict[str, list[str]] = {}
         for e in edges:
-            if e["relation"] in ("part_of", "has_property"):
+            rel = (e.get("relation") or "").lower()  # 대소문자 무관(PART_OF/part_of 동일)
+            if rel in ("part_of", "has_property"):
                 # part_of: child -part_of-> parent  (자식이 source)
                 # has_property: unit -has_property-> property (속성이 target)
-                if e["relation"] == "part_of":
+                if rel == "part_of":
                     children.setdefault(e["target"], []).append(e["source"])
                 else:
                     children.setdefault(e["source"], []).append(e["target"])

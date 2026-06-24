@@ -11,10 +11,15 @@ from __future__ import annotations
 import re
 from typing import Any
 
-# 구조 층(Process/Unit/Property) + 이벤트 층(FailureMode/Cause, M12)
-CATEGORIES = {"Process", "Unit", "Property", "FailureMode", "Cause"}
-# 구조 관계 + 이벤트 관계(causes/affects, M12)
-RELATIONS = {"part_of", "precedes", "has_property", "causes", "affects"}
+# 알려진 어휘(known vocabulary) — UI 색/스타일·의미 기반 부가기능의 힌트일 뿐,
+# 하드 허용목록(allowlist)이 아니다. 온톨로지 스키마는 사내 구현(Cypher 등)이
+# 정하므로 플랫폼은 어떤 라벨/관계가 와도 수용한다(open vocabulary). 검증은
+# "모양(shape) + 참조 무결성"만 강제하고, category/relation 값 자체는 제약하지 않는다.
+KNOWN_CATEGORIES = {"Process", "Unit", "Property", "FailureMode", "Cause", "Defect"}
+KNOWN_RELATIONS = {"part_of", "precedes", "has_property", "causes", "affects", "mirrors"}
+# 하위호환 별칭(다른 모듈이 import 하던 이름)
+CATEGORIES = KNOWN_CATEGORIES
+RELATIONS = KNOWN_RELATIONS
 STATUSES = {"proposed", "confirmed"}
 NODE_ID_RE = re.compile(r"^N\d{4,}$")
 CID_RE = re.compile(r"^C\d{4,}$")
@@ -68,8 +73,9 @@ def _validate_skeleton(data: Any, errs: list[Error]) -> set[str]:
             if not _is_str(n.get("canonical_name")) or not n.get("canonical_name"):
                 _err(errs, f"{ref}.canonical_name", "비어있지 않은 문자열 필요")
             cat = n.get("category")
-            if cat not in CATEGORIES:
-                _err(errs, f"{ref}.category", f"허용값 아님({sorted(CATEGORIES)}): {cat!r}")
+            # open vocabulary: 라벨 값은 자유 — 비어있지 않은 문자열이기만 하면 됨.
+            if not _is_str(cat) or not cat:
+                _err(errs, f"{ref}.category", f"비어있지 않은 문자열 필요(라벨 자유): {cat!r}")
             st = n.get("status")
             if st is not None and st not in STATUSES:
                 _err(errs, f"{ref}.status", f"허용값 아님({sorted(STATUSES)}): {st!r}")
@@ -94,8 +100,9 @@ def _validate_skeleton(data: Any, errs: list[Error]) -> set[str]:
                 if not _is_str(e.get(f)):
                     _err(errs, f"{p}.{f}", "문자열 필요")
             rel = e.get("relation")
-            if rel not in RELATIONS:
-                _err(errs, f"{p}.relation", f"허용값 아님({sorted(RELATIONS)}): {rel!r}")
+            # open vocabulary: 관계명도 자유 — 비어있지 않은 문자열이기만 하면 됨.
+            if not _is_str(rel) or not rel:
+                _err(errs, f"{p}.relation", f"비어있지 않은 문자열 필요(관계명 자유): {rel!r}")
             st = e.get("status")
             if st is not None and st not in STATUSES:
                 _err(errs, f"{p}.status", f"허용값 아님({sorted(STATUSES)}): {st!r}")
