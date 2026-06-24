@@ -33,6 +33,24 @@ SLOT_FILE = {
 }
 QUEUE_FILE = "review_queue.json"  # 리뷰 큐(파이프라인 산출물; M3 승인 대상)
 
+# 엣지 배열을 담는 키의 흔한 동의어(사내/Neo4j 내보내기 호환). canonical = "edges".
+_EDGE_KEY_ALIASES = ("relationships", "relations", "links", "rels")
+
+
+def normalize_skeleton(data: Any) -> Any:
+    """업로드된 skeleton 의 키를 canonical 로 정규화(additive·관용).
+
+    - 엣지 배열이 'edges' 가 아니라 relationships/relations/links/rels 로 와도 수용.
+      ('edges' 가 이미 있으면 건드리지 않는다.)
+    온톨로지 스키마는 사내가 정하므로 봉투 키만 맞춰주고 값/어휘는 그대로 보존.
+    """
+    if not isinstance(data, dict) or "edges" in data:
+        return data
+    for alt in _EDGE_KEY_ALIASES:
+        if isinstance(data.get(alt), list):
+            return {**data, "edges": data[alt]}
+    return data
+
 
 class Store:
     def __init__(self, data_root: Path):
@@ -165,6 +183,9 @@ class Store:
             return {"valid": False,
                     "errors": [{"path": "slot", "msg": f"알 수 없는 slot '{slot}'"}],
                     "adopted": False}
+
+        if slot == "skeleton":
+            data = normalize_skeleton(data)  # edges 키 동의어 수용(additive)
 
         errors = validate.validate_slot(slot, data)
         if errors:
