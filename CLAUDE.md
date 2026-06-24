@@ -6,6 +6,7 @@
 > **사용법**: 이 파일은 레포 루트에 두면 Claude Code가 자동 로드한다. 밀스톤 착수는 짧은 포인터(예: "M3 진행, §7 따라가")로 충분 — 전체 재첨부 불필요.
 
 ### 변경 이력
+- **v3.11**: 사내 핸드오프 — **open vocabulary 정본화**. 사내 ontology JSON(`category=Defect`·`relation=MIRRORS`·대문자 `PART_OF`)이 검증에서 거부되던 문제. 검증을 **"모양+참조무결성"만**으로 완화(category/relation enum 거부 제거), reader 의미탐색 **대소문자 무관**, 프론트 색=모르는 라벨 해시 배정·필터 동적 수집, store 가 엣지 키 동의어(relationships/relations/links/rels) 정규화. **§6.11 신설(불변): 어휘는 데이터가 정함 — enum 하드코딩으로 되돌리지 말 것.** §2 갱신, §10 에 잔여 강제(status·엣지필드명·id형식) 점진 개방 계획(+id는 mint 로직 동반). 프론트 의존성 Vite 5 호환 다운핀(사내 설치 충돌 해소). 운영함정: `run.py`는 uvicorn `--reload` 없음 → **코드 받으면 백엔드 재시작 필수**(README 명시).
 - **v3.10**: M13(문서관리/출처 브라우징) — 읽기 전용·additive(스키마/쓰기 0). `GET /documents`(per-doc 집계: 청크·노드·닿는 공정·층) · `/documents/{doc_id}`(청크+describes+meta+발자국) · `/nodes/{id}/provenance`(역방향: describes⁻¹+node.provenance). 화면7 문서관리(공정별 카탈로그·문서상세·노드 역방향·Explore 점프). §10 "문서관리" 해소.
 - **v3.9**: M12(이벤트 층 스캐폴드) — §2 category += FailureMode/Cause, relation += causes/affects. Mode C(이슈 인입: FailureMode/Cause 후보→승인 materialize+엣지). `/retrieve` causes/affects **양방향** 추적. 층 분리(Mode C는 구조 resolve-only·발생=청크). mock baseline 30노드. **§10 FailureMode/Cause "Phase 2" 해소.** verify_m6 견고화(mock 재계산). 실 meta/taxonomy는 실 샘플 후 정밀화.
 - **v3.8**: M11(검색 + Eval) — `GET /retrieve`(별칭+렉시컬 링킹→part_of/has_property 탐색→describes 수집, **임베딩-free**), `golden_set.json`(21문항·4패턴), `/eval/run`(Recall@k·MRR·패턴분해·alias gap). 화면6 Test/Eval. §6.6 재확인(질문 alias 미누적). 경계: 임베딩-보강 링킹+매칭 eval = 사내 확장.
@@ -48,10 +49,11 @@
 
 **`chunks.json`**: `{doc_id, source, chunks:[{cid:"C0001", text, section, meta}]}`
 
-**`assembly_skeleton.json`** — *M1 실측 확정*:
-- 최상위 `nodes`는 **id-키 딕셔너리**(list 아님): `{"N0001": {…}}`. `JsonReader`는 list/dict 양쪽 수용.
-- 노드: `id`(불변·무의미 N####), `canonical_name`, `category`(구조 **Process|Unit|Property** + 이벤트 **FailureMode|Cause**, M12), `definition`, `aliases`[], `spec`(Property용, 필드), `status`(proposed|confirmed), `provenance`, 부착 **`attached_to`**(이벤트 노드는 null — causes/affects 로만 결합).
-- `edges`: `source`, `relation`(구조 **part_of|precedes|has_property** + 이벤트 **causes|affects**, M12), `target`, `status`, `provenance`. 이벤트 의미: `Cause --causes--> FailureMode --affects--> Property|Unit|Process`.
+**`assembly_skeleton.json`** — *M1 실측 확정 · 어휘는 open vocabulary(§6.11)*:
+- 최상위 `nodes`는 **id-키 딕셔너리**(list 아님): `{"N0001": {…}}`. `JsonReader`는 list/dict 양쪽 수용. 엣지 배열 키는 `edges`(또는 동의어 `relationships`/`relations`/`links`/`rels` — store 가 정규화).
+- 노드: `id`(불변·무의미 N####), `canonical_name`, `category`(**값 자유 — open vocabulary**; 알려진 라벨=구조 **Process|Unit|Property** + 이벤트 **FailureMode|Cause** + 사내 **Defect** 등, allowlist 아님), `definition`, `aliases`[], `spec`(Property용, 필드), `status`(proposed|confirmed), `provenance`, 부착 **`attached_to`**(이벤트 노드는 null — causes/affects 로만 결합).
+- `edges`: `source`, `relation`(**값 자유 — open vocabulary**; 알려진 관계=구조 **part_of|precedes|has_property** + 이벤트 **causes|affects** + 사내 **mirrors** 등; **대소문자 무관**으로 의미 해석), `target`, `status`, `provenance`. 이벤트 의미: `Cause --causes--> FailureMode --affects--> Property|Unit|Process`.
+- **강제되는 모양(shape)**: 노드는 `id`(N####)+`canonical_name`, dict 키 == `id`; 엣지는 `source`/`relation`/`target` 필드명 고정 + 참조 무결성(존재하는 노드만). `category`/`relation` **값**은 강제 안 함(§6.11). status/엣지필드명/id형식의 잔여 강제는 §10 참조(점진 개방).
 - **발생/이력은 노드 아님 — 청크**(meta: date/line/lot) → `describes` FailureMode. (발생 노드화 금지)
 
 **`contents.json`**: `{chunks:[…], describes:[{source:"C0007", target:"N0003"}]}`
@@ -140,6 +142,7 @@ class ExternalScriptStage:        # 나중: 사내 스크립트 subprocess
 8. **안티 오버엔지니어링.** 측정/요구가 정당화하기 전 범위(§10) 선구현 금지.
 9. **업로드 ≠ 승인.** 수동 주입은 부트스트랩/테스트 로딩. 업로드된 `proposed`는 M3 승인 대상으로 보존. 신뢰된 운영자 경로(README 명시).
 10. **모든 skeleton 변경은 안전쓰기 경로(M2 `store.py`) 경유.** 백업→쓰기→전체 재검증→깨지면 자동 롤백. M3·M5 쓰기 전부 포함. **엣지 변이(M5)**: part_of 재지정/삭제/추가 시 노드 `attached_to` 와 반드시 동기화(어긋나면 안 됨). 없는 노드 참조는 재검증에서 막혀 롤백. 중복 엣지(동일 source-relation-target) 금지.
+11. **어휘 개방(open vocabulary) — `category`/`relation` 값은 *데이터*가 정한다(사내 핸드오프 정본).** 온톨로지 스키마(어떤 라벨·관계가 존재하는지)는 **사내 처리소(Cypher/온톨로지 구현 코드)가 정하는 정답**이고, platform 은 그 산출 JSON 의 **소비자(뷰어)**다. 따라서 **검증은 "모양(shape) + 참조 무결성"만 강제**하고 `category`/`relation` *값 자체*는 제약하지 않는다. §2 에 나열한 값(Process/Unit/Property/FailureMode/Cause/Defect · part_of/precedes/has_property/causes/affects/mirrors)은 **알려진 어휘(known/seed) — 색·의미기능 힌트일 뿐 allowlist 가 아니다.** 의미 기반 기능(계층 펼치기·공정 커버리지·이벤트 추적)은 **대소문자 무관 + 해당 라벨/관계가 있을 때만 동작(graceful degrade)** — 모르는 값은 일반 노드/엣지로 표시(거부 아님). 프론트 색은 모르는 라벨을 해시로 자동 배정, 카테고리/상태 필터는 데이터에서 동적 수집. **⚠️ 이 원칙을 enum 하드코딩(category/relation allowlist)으로 되돌리지 말 것** — "코드가 스펙에서 drift 했다"고 오인해 닫지 말 것. 이 개방이 **의도된 정본**이며, 닫으면 사내 JSON 이 다시 거부된다.
 
 ---
 
@@ -274,6 +277,10 @@ class ExternalScriptStage:        # 나중: 사내 스크립트 subprocess
 - orphan **자동 해소**(표시만; 수동 재연결은 M5 관계 추가로 가능) · 멀티유저/인증. (Neo4j 승격은 M7에서 완료.)
 - 외부 파이프라인 *구현*(파싱/뼈대/이벤트 코드) — 슬롯 인터페이스만(Mode C 포함, MockStage 데모).
 - 실 불량/원인 taxonomy·발생 meta 스키마 정밀화 — 실 샘플 도착 후. (이벤트 층 *스캐폴드*는 M12에서 완료.)
+- **잔여 어휘/형식 강제의 추가 개방** — §6.11 원칙은 `category`/`relation` *값*까지 적용됨. 아래 셋은 **아직 강제 중**이며, 사내 JSON 이 이를 어기면 거부된다. **지금 일괄로 풀지 말 것 — 실 사내 데이터가 실제로 무엇을 쓰는지 확인하고 하나씩 개방**(증상=검증 에러 `{path,msg}` 보고 판단):
+  - **`status`** — 값 있으면 `proposed|confirmed` 강제. 사내가 다른 값(`active`/`draft`/숫자/없음)이면 거부. (검수 status 필터·M3 승인 의미와 결합 — 풀면 그 흐름 graceful degrade 확인.)
+  - **엣지 *내부* 필드명** — `source`/`relation`/`target` 고정. Neo4j식 `start`/`end`/`type` 이면 거부. (배열 *키* relationships 등은 store 가 이미 정규화.)
+  - **노드 `id` 형식 `N\d{4,}` + dict 키 == id** — ⚠️ **주의: 쓰기경로가 신규 id 를 `N{max+1}` 로 mint(`mutations`)한다.** 사내 id 가 `N####` 가 아니면(예: UUID/`node_131`) 읽기·시각화는 풀 수 있어도 **승인 materialize 가 깨진다.** 형식을 풀려면 **mint 로직(id 발급 규칙)도 함께 재설계**해야 함 — read 개방과 write 개방을 분리해서 접근.
 
 > 단, **M2 백업/롤백 1회**·**M3·M5 안전쓰기 재검증**은 거버넌스 풀세트가 아니라 *파괴적/변경 연산의 최소 데이터 위생*이라 포함한다.
 
