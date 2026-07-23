@@ -1,14 +1,15 @@
 // 카테고리/상태 시각 규칙 (§화면2) — 한 곳에서 관리해 NVL/패널이 공유.
 import type { GraphNode, GraphRel } from "./api";
 
+// 파스텔 톤 — 채도를 낮춰 부드럽게. 카테고리 구분은 유지(색상 계열 동일).
 export const CATEGORY_COLOR: Record<string, string> = {
-  Process: "#2563eb", // 파랑
-  Unit: "#059669", // 초록
-  Property: "#d97706", // 주황
-  FailureMode: "#dc2626", // 빨강 (이벤트 층, M12)
-  Cause: "#7c3aed", // 보라 (이벤트 층, M12)
+  Process: "#8fb3e6", // 연한 파랑
+  Unit: "#86cbb0", // 연한 민트
+  Property: "#f0c48a", // 연한 살구
+  FailureMode: "#ec9d9d", // 연한 로즈 (이벤트 층, M12)
+  Cause: "#b9a7e4", // 연한 라벤더 (이벤트 층, M12)
 };
-const DEFAULT_COLOR = "#6b7280";
+const DEFAULT_COLOR = "#b8bec7";
 
 export function categoryColor(category: string): string {
   return CATEGORY_COLOR[category] ?? DEFAULT_COLOR;
@@ -36,8 +37,11 @@ export function toNvlNode(n: GraphNode, selectedId: string | null) {
     id: n.id,
     caption: n.caption,
     color: confirmed ? base : withAlpha(base, 0.4),
-    size: n.category === "Process" ? 34 : n.category === "Unit" ? 26
-      : n.category === "FailureMode" ? 24 : n.category === "Cause" ? 22 : 20,
+    // NVL 노드 캡션은 원 '안'에만 그려지고 글자가 원보다 넓으면 숨는다. 작은 노드
+    // (Property/Cause)의 긴 한글 이름이 잘리는 걸 줄이려 최소 크기를 키움(원 안 여유).
+    // 전체 이름은 노드 클릭 시 우측 상세 패널에 항상 표시(§3.5 캔버스는 라벨 보조).
+    size: n.category === "Process" ? 40 : n.category === "Unit" ? 34
+      : n.category === "FailureMode" ? 32 : n.category === "Cause" ? 32 : 30,
     selected: n.id === selectedId,
   };
 }
