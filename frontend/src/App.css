@@ -343,12 +343,56 @@
 /* ===== 화면3 — 검수 Workbench (M3) ===== */
 .workbench {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 50% 6px 50%; /* 가운데 6px = 드래그 구분선 */
   flex: 1;
   min-height: 0;
 }
-.wb-left { position: relative; background: var(--bg); border-right: 1px solid var(--border); min-width: 0; }
+.wb-left {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  min-width: 0;
+}
+.wb-canvas { position: relative; flex: 1; min-height: 0; }
 .wb-right { display: flex; flex-direction: column; overflow-y: auto; background: var(--panel); }
+
+/* 좌우 폭 조절 구분선 */
+.wb-splitter {
+  cursor: col-resize;
+  background: var(--border);
+  transition: background 0.12s;
+}
+.wb-splitter:hover { background: #2563eb; }
+body.col-resizing { cursor: col-resize; user-select: none; }
+
+/* 그래프 위 컴팩트 필터 바 (Neo4j식 노드/관계 토글) */
+.graph-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+  background: var(--panel);
+  font-size: 12px;
+}
+.gfb-group { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.gfb-label { color: var(--muted); font-weight: 600; margin-right: 2px; }
+.gfb-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 7px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  cursor: pointer;
+  user-select: none;
+}
+.gfb-chip.off { opacity: 0.4; }
+.gfb-chip input { margin: 0; }
+.gfb-dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+.gfb-line { width: 12px; height: 0; border-top: 2px solid #475569; display: inline-block; }
+.rel-line { width: 14px; height: 0; border-top: 2px solid #475569; display: inline-block; margin-right: 2px; }
 
 .queue-section { padding: 14px 16px; border-bottom: 1px solid var(--border); }
 .queue-head { display: flex; align-items: center; justify-content: space-between; }

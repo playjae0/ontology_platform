@@ -1,12 +1,14 @@
 // 화면3 — 검수/승인/편집 Workbench · 좌우 분할.
 // 좌(½) NVL 그래프(맥락) — 노드 클릭 → 우측 노드 편집폼.
 // 우(½) 리뷰 큐(일괄 승인) + 선택 항목 에디터(리뷰 항목 / 노드).
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchGraph, fetchReviewQueue, approveBatch } from "../api";
 import GraphCanvas from "../components/GraphCanvas";
+import GraphFilterBar from "../components/GraphFilterBar";
 import ReviewItemEditor from "../components/ReviewItemEditor";
 import NodeEditForm from "../components/NodeEditForm";
+import { applyGraphFilters, defaultFilters } from "../graphFilters";
 
 type Sel = { kind: "review"; rid: string } | { kind: "node"; id: string } | null;
 
@@ -14,6 +16,29 @@ export default function Workbench() {
   const qc = useQueryClient();
   const [sel, setSel] = useState<Sel>(null);
   const [checked, setChecked] = useState<Set<string>>(new Set());
+  const [filters, setFilters] = useState(defaultFilters());
+
+  // 좌우 분할 비율(%) — 드래그로 조절(드래그만; 새로고침 시 50:50 초기화).
+  const [leftPct, setLeftPct] = useState(50);
+  const wrapRef = useRef<HTMLDivElement>(null);
+  function startDrag(e: React.MouseEvent) {
+    e.preventDefault();
+    const el = wrapRef.current;
+    if (!el) return;
+    const move = (ev: MouseEvent) => {
+      const rect = el.getBoundingClientRect();
+      const pct = ((ev.clientX - rect.left) / rect.width) * 100;
+      setLeftPct(Math.min(80, Math.max(20, pct)));
+    };
+    const up = () => {
+      window.removeEventListener("mousemove", move);
+      window.removeEventListener("mouseup", up);
+      document.body.classList.remove("col-resizing");
+    };
+    document.body.classList.add("col-resizing");
+    window.addEventListener("mousemove", move);
+    window.addEventListener("mouseup", up);
+  }
 
   const graph = useQuery({ queryKey: ["graph", null], queryFn: () => fetchGraph(null) });
   const queue = useQuery({ queryKey: ["reviewQueue"], queryFn: fetchReviewQueue });
@@ -31,7 +56,12 @@ export default function Workbench() {
 
   const items = queue.data?.items ?? [];
   const orphans = queue.data?.orphans ?? [];
-  const nodes = graph.data?.nodes ?? [];
+  const nodes = graph.data?.nodes ?? []; // 편집폼·피커는 전체 노드 목록 필요(필터 무관)
+  // 캔버스 렌더에만 카테고리/관계 필터 적용(읽기 전용 표시 필터).
+  const canvasGraph = useMemo(
+    () => (graph.data ? applyGraphFilters(graph.data, filters) : undefined),
+    [graph.data, filters],
+  );
   const selItem = useMemo(
     () => (sel?.kind === "review" ? items.find((i) => i.rid === sel.rid) : undefined),
     [sel, items],
@@ -47,21 +77,40 @@ export default function Workbench() {
   const batchable = items.filter((i) => i.attach_to);
 
   return (
-    <div className="workbench">
+    <div
+      className="workbench"
+      ref={wrapRef}
+      style={{ gridTemplateColumns: `${leftPct}% 6px ${100 - leftPct}%` }}
+    >
       <div className="wb-left">
-        {graph.data && graph.data.nodes.length > 0 ? (
-          <GraphCanvas
-            data={graph.data}
-            selectedId={sel?.kind === "node" ? sel.id : null}
-            onSelect={(id) => setSel({ kind: "node", id })}
-          />
-        ) : (
-          <div className="center-msg">그래프 로딩…</div>
-        )}
+        <GraphFilterBar filters={filters} onChange={setFilters} />
+        <div className="wb-canvas">
+          {canvasGraph && graph.data && graph.data.nodes.length > 0 ? (
+            canvasGraph.nodes.length > 0 ? (
+              <GraphCanvas
+                data={canvasGraph}
+                selectedId={sel?.kind === "node" ? sel.id : null}
+                onSelect={(id) => setSel({ kind: "node", id })}
+              />
+            ) : (
+              <div className="center-msg">필터에 맞는 노드가 없습니다.</div>
+            )
+          ) : (
+            <div className="center-msg">그래프 로딩…</div>
+          )}
+        </div>
         <div className="legend">
           <span className="muted">노드 클릭 → 우측 편집 · 리뷰 항목은 우측 목록에서</span>
         </div>
       </div>
+
+      <div
+        className="wb-splitter"
+        onMouseDown={startDrag}
+        role="separator"
+        aria-orientation="vertical"
+        title="드래그해서 좌우 폭 조절"
+      />
 
       <div className="wb-right">
         <section className="queue-section">

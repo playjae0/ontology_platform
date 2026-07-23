@@ -7,6 +7,7 @@ import GraphCanvas from "../components/GraphCanvas";
 import NodePanel from "../components/NodePanel";
 import LeftPanel from "../components/LeftPanel";
 import type { Filters } from "../components/LeftPanel";
+import { applyGraphFilters, defaultFilters } from "../graphFilters";
 import { useBackend } from "../backend";
 import { egoView, computeEgoLayout } from "../ego";
 
@@ -20,10 +21,7 @@ export default function Explore({ focusNode }: { focusNode?: string | null }) {
   const { backend, recordMs } = useBackend();
   const [scope, setScope] = useState<string | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
-  const [filters, setFilters] = useState<Filters>({
-    categories: new Set(["Process", "Unit", "Property", "FailureMode", "Cause"]),
-    statuses: new Set(["confirmed", "proposed"]),
-  });
+  const [filters, setFilters] = useState<Filters>(defaultFilters());
   // 확장형 스코핑 상태
   const [flatView, setFlatView] = useState(false);
   const [focus, setFocus] = useState<string | null>(null);
@@ -56,14 +54,11 @@ export default function Explore({ focusNode }: { focusNode?: string | null }) {
     setFocus(scope ?? scopedGraph.data?.nodes[0]?.id ?? null);
   }, [scope, scopedGraph.data]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // 카테고리/status 필터 적용
+  // 카테고리(노드)/관계(엣지)/status 필터 적용
   const filtered: GraphData | undefined = useMemo(() => {
     const g = scopedGraph.data;
     if (!g) return undefined;
-    const keep = new Set(
-      g.nodes.filter((n) => filters.categories.has(n.category) && filters.statuses.has(n.status)).map((n) => n.id),
-    );
-    return { nodes: g.nodes.filter((n) => keep.has(n.id)), rels: g.rels.filter((r) => keep.has(r.from) && keep.has(r.to)) };
+    return applyGraphFilters(g, filters);
   }, [scopedGraph.data, filters]);
 
   const total = filtered?.nodes.length ?? 0;
