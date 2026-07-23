@@ -32,15 +32,12 @@ export default function GraphCanvas({
     [det, positions, data],
   );
 
+  // 좌표는 노드 객체에 싣지 않고 positions prop 으로만 주입한다. 이렇게 하면
+  // 선택(selected 속성) 변경으로 노드가 갱신돼도 NVL 이 좌표를 되돌리지 않아
+  // 사용자가 드래그로 옮긴 위치가 유지된다(스냅백 방지). det/force 공통.
   const nodes = useMemo(
-    () =>
-      data.nodes.map((n) => {
-        const base = toNvlNode(n, selectedId);
-        if (!det) return base; // force: 좌표는 워커가 산출
-        const p = pos.find((q) => q.id === n.id);
-        return p ? { ...base, x: p.x, y: p.y } : base;
-      }),
-    [data.nodes, pos, selectedId, det],
+    () => data.nodes.map((n) => toNvlNode(n, selectedId)),
+    [data.nodes, selectedId],
   );
   const rels = useMemo(() => data.rels.map(toNvlRel), [data.rels]);
 
@@ -71,10 +68,7 @@ export default function GraphCanvas({
           onNodeClick: (node) => onSelect(node.id),
           onPan: true,
           onZoom: true,
-          // onDrag 의도적으로 비활성: NVL DragNodeInteraction 은 이동량에
-          // window.devicePixelRatio 를 곱해(HiDPI 에서 2배) 노드를 잡으면 옆으로
-          // 튀는 드리프트가 난다. 읽기/검수 그래프는 결정적 좌표라 노드 재배치가
-          // 불필요 → 드래그를 끄면 클릭 선택·팬·줌만 남고 드리프트가 사라진다.
+          onDrag: true, // 노드 드래그 이동 허용
         }}
         style={{ width: "100%", height: "100%" }}
       />
