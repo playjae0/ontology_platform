@@ -391,6 +391,17 @@
 }
 .rel-pick:hover { background: #eff6ff; }
 
+/* 레이아웃 토글 바 (Explore 중앙 상단) */
+.layout-bar {
+  position: absolute; top: 8px; left: 50%; transform: translateX(-50%); z-index: 5;
+  display: flex; align-items: center; gap: 8px;
+  padding: 4px 8px; background: rgba(255,255,255,0.9);
+  border: 1px solid var(--border); border-radius: 8px; font-size: 12px;
+}
+.layout-bar .seg { display: inline-flex; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+.layout-bar .seg button { border: none; background: #fff; padding: 4px 10px; cursor: pointer; font-size: 12px; }
+.layout-bar .seg button.on { background: #2563eb; color: #fff; }
+
 /* 좌우 폭 조절 구분선 */
 .wb-splitter {
   cursor: col-resize;

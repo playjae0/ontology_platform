@@ -9,8 +9,14 @@ export interface Pos {
   y: number;
 }
 
-const Y_GAP = 210; // 깊이(계층) 간격 (노드 확대에 맞춰 넓힘)
-const X_GAP = 230; // 형제 간격 (초기 배치를 더 넓게 퍼지게)
+const Y_GAP = 280; // 깊이(계층) 간격 — 상·하위 노드를 세로로 더 멀리
+const X_GAP = 155; // 리프 1칸 폭(px)
+
+// 형제 서브트리 사이 추가 간격(리프 단위). 얕을수록(상위=공정) 크게 → 공정끼리 멀리.
+const SIB_GAP: Record<number, number> = { 1: 7, 2: 2.2, 3: 1.0 };
+const gapAt = (depth: number) => SIB_GAP[depth] ?? 0.7;
+// 밀집도 가중: 서브트리 리프 수가 많을수록 이웃과 더 벌어진다.
+const SIZE_W = 0.14;
 
 export function computeLayout(data: GraphData): Pos[] {
   const ids = new Set(data.nodes.map((n) => n.id));
@@ -55,22 +61,45 @@ export function computeLayout(data: GraphData): Pos[] {
 
   const roots = orderSiblings(data.nodes.map((n) => n.id).filter((id) => !parentOf.has(id)));
 
-  // 리프에 x 슬롯 부여(in-order DFS) → 내부 노드 x = 자식 평균. y = 깊이.
+  // 서브트리 리프 수(밀집도) — 큰 서브트리는 이웃과 더 벌린다.
+  const leafCount = new Map<string, number>();
+  const countLeaves = (id: string): number => {
+    const kids = childrenOf.get(id) ?? [];
+    const c = kids.length === 0 ? 1 : kids.reduce((s, k) => s + countLeaves(k), 0);
+    leafCount.set(id, c);
+    return c;
+  };
+  roots.forEach(countLeaves);
+
+  // in-order DFS: 리프는 커서를 전진시키며 좌표 획득(형제 사이 간격 삽입),
+  // 내부 노드 x = 자식들의 중앙. y = 깊이. 좌표는 리프-단위 → 마지막에 X_GAP 로 스케일.
   const pos = new Map<string, Pos>();
-  let slot = 0;
+  let cursor = 0;
   const dfs = (id: string, depth: number): number => {
     const kids = orderSiblings(childrenOf.get(id) ?? []);
     let x: number;
     if (kids.length === 0) {
-      x = slot++ * X_GAP;
+      x = cursor;
+      cursor += 1; // 리프 1칸
     } else {
-      const xs = kids.map((k) => dfs(k, depth + 1));
+      const xs: number[] = [];
+      kids.forEach((k, i) => {
+        if (i > 0) {
+          // 형제 간격 = 깊이 가중 + 양쪽 서브트리 크기 가중(밀집한 것끼리 더 멀리)
+          const sizeW = SIZE_W * ((leafCount.get(kids[i - 1]) ?? 1) + (leafCount.get(k) ?? 1));
+          cursor += gapAt(depth + 1) + sizeW;
+        }
+        xs.push(dfs(k, depth + 1));
+      });
       x = (xs[0] + xs[xs.length - 1]) / 2;
     }
-    pos.set(id, { id, x, y: depth * Y_GAP });
+    pos.set(id, { id, x: x * X_GAP, y: depth * Y_GAP });
     return x;
   };
-  roots.forEach((r) => dfs(r, 0));
+  roots.forEach((r, i) => {
+    if (i > 0) cursor += gapAt(1); // 분리된 트리(조립공정 vs 이벤트 노드) 사이 큰 간격
+    dfs(r, 0);
+  });
 
   return data.nodes.map((n) => pos.get(n.id) ?? { id: n.id, x: 0, y: 0 });
 }
