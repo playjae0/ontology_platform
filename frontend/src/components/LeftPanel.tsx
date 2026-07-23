@@ -1,4 +1,4 @@
-// 좌측 패널 (§화면2 좌): 공정 스코프 선택 + 카테고리/관계/status 필터 + 동의어 검색.
+// 좌측 패널 (§화면2 좌): 카테고리/관계/status 필터 + 동의어 검색.
 import { useMemo, useState } from "react";
 import type { GraphData } from "../api";
 import { categoryColor } from "../theme";
@@ -9,9 +9,7 @@ import type { GraphFilters } from "../graphFilters";
 export type { GraphFilters as Filters };
 
 interface Props {
-  full: GraphData | undefined; // 전체 그래프(스코프/검색 후보 산출용)
-  scope: string | null;
-  onScope: (id: string | null) => void;
+  full: GraphData | undefined; // 전체 그래프(검색 후보 산출용)
   filters: GraphFilters;
   onFilters: (f: GraphFilters) => void;
   onSelect: (id: string) => void;
@@ -21,18 +19,11 @@ const ALL_STATUS = ["confirmed", "proposed"];
 
 export default function LeftPanel({
   full,
-  scope,
-  onScope,
   filters,
   onFilters,
   onSelect,
 }: Props) {
   const [q, setQ] = useState("");
-
-  const processes = useMemo(
-    () => (full?.nodes ?? []).filter((n) => n.category === "Process"),
-    [full],
-  );
 
   // 동의어/이름 검색: caption(=canonical_name) 매칭. alias 는 노드 상세에 있으나
   // 그래프 노드 캡션 기준 간이 검색(§6.6: 검색이 alias를 누적하지 않음 — 읽기만).
@@ -46,25 +37,6 @@ export default function LeftPanel({
 
   return (
     <div className="left-panel">
-      <section>
-        <h3>공정 스코프</h3>
-        <button
-          className={`scope-btn ${scope === null ? "active" : ""}`}
-          onClick={() => onScope(null)}
-        >
-          전체 보기
-        </button>
-        {processes.map((p) => (
-          <button
-            key={p.id}
-            className={`scope-btn ${scope === p.id ? "active" : ""}`}
-            onClick={() => onScope(p.id)}
-          >
-            {p.caption}
-          </button>
-        ))}
-      </section>
-
       <section>
         <h3>카테고리 (노드)</h3>
         {ALL_CATEGORIES.map((c) => (

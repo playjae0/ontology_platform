@@ -71,7 +71,10 @@ export default function GraphCanvas({
           onNodeClick: (node) => onSelect(node.id),
           onPan: true,
           onZoom: true,
-          onDrag: true,
+          // onDrag 의도적으로 비활성: NVL DragNodeInteraction 은 이동량에
+          // window.devicePixelRatio 를 곱해(HiDPI 에서 2배) 노드를 잡으면 옆으로
+          // 튀는 드리프트가 난다. 읽기/검수 그래프는 결정적 좌표라 노드 재배치가
+          // 불필요 → 드래그를 끄면 클릭 선택·팬·줌만 남고 드리프트가 사라진다.
         }}
         style={{ width: "100%", height: "100%" }}
       />
