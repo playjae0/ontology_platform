@@ -73,11 +73,11 @@ export default function Explore({ focusNode }: { focusNode?: string | null }) {
 function Legend() {
   return (
     <div className="legend">
-      <span><i className="lg" style={{ background: "#2563eb" }} />Process</span>
-      <span><i className="lg" style={{ background: "#059669" }} />Unit</span>
-      <span><i className="lg" style={{ background: "#d97706" }} />Property</span>
-      <span><i className="lg" style={{ background: "#dc2626" }} />FailureMode</span>
-      <span><i className="lg" style={{ background: "#7c3aed" }} />Cause</span>
+      <span><i className="lg" style={{ background: "#8fb3e6" }} />Process</span>
+      <span><i className="lg" style={{ background: "#86cbb0" }} />Unit</span>
+      <span><i className="lg" style={{ background: "#f0c48a" }} />Property</span>
+      <span><i className="lg" style={{ background: "#ec9d9d" }} />FailureMode</span>
+      <span><i className="lg" style={{ background: "#b9a7e4" }} />Cause</span>
       <span className="muted">흐림=proposed · 진함=confirmed</span>
     </div>
   );

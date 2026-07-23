@@ -1,14 +1,15 @@
 // 카테고리/상태 시각 규칙 (§화면2) — 한 곳에서 관리해 NVL/패널이 공유.
 import type { GraphNode, GraphRel } from "./api";
 
+// 파스텔 톤 — 채도를 낮춰 부드럽게. 카테고리 구분은 유지(색상 계열 동일).
 export const CATEGORY_COLOR: Record<string, string> = {
-  Process: "#2563eb", // 파랑
-  Unit: "#059669", // 초록
-  Property: "#d97706", // 주황
-  FailureMode: "#dc2626", // 빨강 (이벤트 층, M12)
-  Cause: "#7c3aed", // 보라 (이벤트 층, M12)
+  Process: "#8fb3e6", // 연한 파랑
+  Unit: "#86cbb0", // 연한 민트
+  Property: "#f0c48a", // 연한 살구
+  FailureMode: "#ec9d9d", // 연한 로즈 (이벤트 층, M12)
+  Cause: "#b9a7e4", // 연한 라벤더 (이벤트 층, M12)
 };
-const DEFAULT_COLOR = "#6b7280";
+const DEFAULT_COLOR = "#b8bec7";
 
 export function categoryColor(category: string): string {
   return CATEGORY_COLOR[category] ?? DEFAULT_COLOR;
