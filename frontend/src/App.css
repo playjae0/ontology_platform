@@ -376,6 +376,21 @@
 .dm-export { margin-top: 18px; }
 .dm-export .dm-ops { flex-wrap: wrap; gap: 8px; }
 
+/* 관계 편집: 그래프 클릭 픽 모드 */
+.wb-left.picking .wb-canvas { outline: 2px solid #2563eb; outline-offset: -2px; cursor: crosshair; }
+.pick-banner {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 10px; margin-bottom: 8px;
+  background: #eff6ff; border: 1px solid #2563eb; border-radius: 6px;
+  font-size: 13px; color: #1d4ed8;
+}
+.pick-banner .x { margin-left: auto; border: none; background: none; cursor: pointer; color: #1d4ed8; font-weight: 600; }
+.rel-pick {
+  padding: 2px 7px; border: 1px solid #2563eb; background: #fff; color: #2563eb;
+  border-radius: 5px; cursor: pointer; font-size: 13px; line-height: 1;
+}
+.rel-pick:hover { background: #eff6ff; }
+
 /* 좌우 폭 조절 구분선 */
 .wb-splitter {
   cursor: col-resize;
