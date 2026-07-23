@@ -9,8 +9,8 @@ export interface Pos {
   y: number;
 }
 
-const Y_GAP = 150; // 깊이(계층) 간격
-const X_GAP = 130; // 형제 간격
+const Y_GAP = 210; // 깊이(계층) 간격 (노드 확대에 맞춰 넓힘)
+const X_GAP = 230; // 형제 간격 (초기 배치를 더 넓게 퍼지게)
 
 export function computeLayout(data: GraphData): Pos[] {
   const ids = new Set(data.nodes.map((n) => n.id));

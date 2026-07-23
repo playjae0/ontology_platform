@@ -3,7 +3,7 @@
 // 우(½) 리뷰 큐(일괄 승인) + 선택 항목 에디터(리뷰 항목 / 노드).
 import { useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { fetchGraph, fetchReviewQueue, approveBatch } from "../api";
+import { fetchGraph, fetchReviewQueue, approveBatch, API_BASE } from "../api";
 import GraphCanvas from "../components/GraphCanvas";
 import GraphFilterBar from "../components/GraphFilterBar";
 import ReviewItemEditor from "../components/ReviewItemEditor";
@@ -17,6 +17,12 @@ export default function Workbench() {
   const [sel, setSel] = useState<Sel>(null);
   const [checked, setChecked] = useState<Set<string>>(new Set());
   const [filters, setFilters] = useState(defaultFilters());
+  // 그래프 클릭으로 관계 대상 선택하는 "픽 모드": 활성 시 그래프 클릭이 콜백으로 라우팅.
+  const [pickCb, setPickCb] = useState<((id: string) => void) | null>(null);
+  const onGraphSelect = (id: string) => {
+    if (pickCb) { pickCb(id); setPickCb(null); }
+    else setSel({ kind: "node", id });
+  };
 
   // 좌우 분할 비율(%) — 드래그로 조절(드래그만; 새로고침 시 50:50 초기화).
   const [leftPct, setLeftPct] = useState(50);
@@ -82,7 +88,7 @@ export default function Workbench() {
       ref={wrapRef}
       style={{ gridTemplateColumns: `${leftPct}% 6px ${100 - leftPct}%` }}
     >
-      <div className="wb-left">
+      <div className={`wb-left${pickCb ? " picking" : ""}`}>
         <GraphFilterBar filters={filters} onChange={setFilters} />
         <div className="wb-canvas">
           {canvasGraph && graph.data && graph.data.nodes.length > 0 ? (
@@ -90,7 +96,7 @@ export default function Workbench() {
               <GraphCanvas
                 data={canvasGraph}
                 selectedId={sel?.kind === "node" ? sel.id : null}
-                onSelect={(id) => setSel({ kind: "node", id })}
+                onSelect={onGraphSelect}
               />
             ) : (
               <div className="center-msg">필터에 맞는 노드가 없습니다.</div>
@@ -116,12 +122,16 @@ export default function Workbench() {
         <section className="queue-section">
           <div className="queue-head">
             <h3>리뷰 큐 ({items.length})</h3>
-            <button
-              disabled={checked.size === 0 || batchM.isPending}
-              onClick={() => batchM.mutate([...checked])}
-            >
-              일괄 승인 ({checked.size})
-            </button>
+            <div className="qh-actions">
+              <a className="btn-link sm" href={`${API_BASE}/export/skeleton`} download
+                 title="편집 결과가 반영된 뼈대 JSON 내려받기">편집 JSON ↓</a>
+              <button
+                disabled={checked.size === 0 || batchM.isPending}
+                onClick={() => batchM.mutate([...checked])}
+              >
+                일괄 승인 ({checked.size})
+              </button>
+            </div>
           </div>
           {batchM.data && (
             <div className="result-ok">
@@ -181,7 +191,10 @@ export default function Workbench() {
             <ReviewItemEditor item={selItem} nodes={nodes} onDone={() => setSel(null)} />
           )}
           {sel?.kind === "node" && (
-            <NodeEditForm nodeId={sel.id} nodes={nodes} onDone={() => { /* 유지 */ }} />
+            <NodeEditForm nodeId={sel.id} nodes={nodes} onDone={() => { /* 유지 */ }}
+              requestPick={(cb) => setPickCb(() => cb)}
+              picking={pickCb !== null}
+              cancelPick={() => setPickCb(null)} />
           )}
           {!sel && <div className="panel-empty">리뷰 항목 또는 그래프 노드를 선택하세요.</div>}
         </section>

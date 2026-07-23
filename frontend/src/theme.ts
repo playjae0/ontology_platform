@@ -21,13 +21,8 @@ function withAlpha(hex: string, alpha: number): string {
   return `${hex}${a}`;
 }
 
-const REL_STYLE: Record<string, { width: number; dashed: boolean }> = {
-  part_of: { width: 3, dashed: false }, // 계층
-  precedes: { width: 2, dashed: false }, // 순서
-  has_property: { width: 1.5, dashed: true }, // 부착
-  causes: { width: 2, dashed: false }, // 이벤트: 원인→불량 (M12)
-  affects: { width: 1.5, dashed: true }, // 이벤트: 불량→영향 (M12)
-};
+// 연결선 굵기는 모든 관계 동일(얇게). 관계 구분은 엣지 캡션(라벨)으로.
+const REL_WIDTH = 1;
 
 // 백엔드 그래프 노드 → NVL 노드
 export function toNvlNode(n: GraphNode, selectedId: string | null) {
@@ -48,14 +43,13 @@ export function toNvlNode(n: GraphNode, selectedId: string | null) {
 
 // 백엔드 그래프 엣지 → NVL 관계
 export function toNvlRel(r: GraphRel) {
-  const style = REL_STYLE[r.relation] ?? { width: 1.5, dashed: false };
   const confirmed = r.status === "confirmed";
   return {
     id: r.id,
     from: r.from,
     to: r.to,
     caption: r.caption,
-    width: style.width,
+    width: REL_WIDTH,
     color: confirmed ? "#475569" : "#cbd5e1",
   };
 }

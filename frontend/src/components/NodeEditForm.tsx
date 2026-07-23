@@ -9,9 +9,12 @@ interface Props {
   nodeId: string;
   nodes: GraphNode[];
   onDone: () => void;
+  requestPick?: (cb: (id: string) => void) => void;
+  picking?: boolean;
+  cancelPick?: () => void;
 }
 
-export default function NodeEditForm({ nodeId, nodes, onDone }: Props) {
+export default function NodeEditForm({ nodeId, nodes, onDone, requestPick, picking, cancelPick }: Props) {
   const qc = useQueryClient();
   const node = useQuery({ queryKey: ["node", nodeId], queryFn: () => fetchNode(nodeId) });
 
@@ -117,7 +120,8 @@ export default function NodeEditForm({ nodeId, nodes, onDone }: Props) {
 
       {msg && <div className={msg.startsWith("✓") ? "result-ok" : "result-bad"}>{msg}</div>}
 
-      <RelationEditor node={n} nodes={nodes} />
+      <RelationEditor node={n} nodes={nodes}
+        requestPick={requestPick} picking={picking} cancelPick={cancelPick} />
     </div>
   );
 }

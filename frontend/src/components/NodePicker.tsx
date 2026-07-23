@@ -12,6 +12,7 @@ interface Props {
   nodes: GraphNode[]; // 현재 값 라벨 표시용(이름/category)
   exclude?: string; // 후보에서 제외할 id(자기 자신 등)
   placeholder?: string;
+  filterCats?: string[]; // 지정 시 이 카테고리 노드만 후보(유효 대상만 선택 가능)
 }
 
 export default function NodePicker({
@@ -20,6 +21,7 @@ export default function NodePicker({
   nodes,
   exclude,
   placeholder = "노드 검색 (이름·별칭·id)",
+  filterCats,
 }: Props) {
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
@@ -30,7 +32,9 @@ export default function NodePicker({
     enabled: open && q.trim().length > 0,
     staleTime: 5_000,
   });
-  const results = (search.data ?? []).filter((n) => n.id !== exclude);
+  const results = (search.data ?? [])
+    .filter((n) => n.id !== exclude)
+    .filter((n) => !filterCats || filterCats.includes(n.category));
 
   const selected = nodes.find((n) => n.id === value);
   const label = selected

@@ -1,0 +1,15 @@
+diff --git a/node_modules/@neo4j-nvl/interaction-handlers/lib/interaction-handlers/drag-node-interaction.js b/node_modules/@neo4j-nvl/interaction-handlers/lib/interaction-handlers/drag-node-interaction.js
+index d2599c5..ca368ce 100644
+--- a/node_modules/@neo4j-nvl/interaction-handlers/lib/interaction-handlers/drag-node-interaction.js
++++ b/node_modules/@neo4j-nvl/interaction-handlers/lib/interaction-handlers/drag-node-interaction.js
+@@ -64,8 +64,8 @@ export class DragNodeInteraction extends BaseInteraction {
+             this.isDragging = true;
+         }
+         const zoom = this.nvlInstance.getScale();
+-        const dx = ((evt.clientX - this.mousePosition.x) / zoom) * window.devicePixelRatio;
+-        const dy = ((evt.clientY - this.mousePosition.y) / zoom) * window.devicePixelRatio;
++        const dx = (evt.clientX - this.mousePosition.x) / zoom;
++        const dy = (evt.clientY - this.mousePosition.y) / zoom;
+         if (this.moveSelectedNodes) {
+             this.nvlInstance.setNodePositions(this.selectedNodes.map((node) => ({ id: node.id, x: node.x + dx, y: node.y + dy, pinned: true })), true);
+             this.callCallbackIfRegistered('onDrag', this.selectedNodes, evt);
