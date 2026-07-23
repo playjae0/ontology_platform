@@ -37,8 +37,11 @@ export function toNvlNode(n: GraphNode, selectedId: string | null) {
     id: n.id,
     caption: n.caption,
     color: confirmed ? base : withAlpha(base, 0.4),
-    size: n.category === "Process" ? 34 : n.category === "Unit" ? 26
-      : n.category === "FailureMode" ? 24 : n.category === "Cause" ? 22 : 20,
+    // NVL 노드 캡션은 원 '안'에만 그려지고 글자가 원보다 넓으면 숨는다. 작은 노드
+    // (Property/Cause)의 긴 한글 이름이 잘리는 걸 줄이려 최소 크기를 키움(원 안 여유).
+    // 전체 이름은 노드 클릭 시 우측 상세 패널에 항상 표시(§3.5 캔버스는 라벨 보조).
+    size: n.category === "Process" ? 40 : n.category === "Unit" ? 34
+      : n.category === "FailureMode" ? 32 : n.category === "Cause" ? 32 : 30,
     selected: n.id === selectedId,
   };
 }
