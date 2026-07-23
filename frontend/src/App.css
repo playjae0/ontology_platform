@@ -401,6 +401,8 @@
 .layout-bar .seg { display: inline-flex; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
 .layout-bar .seg button { border: none; background: #fff; padding: 4px 10px; cursor: pointer; font-size: 12px; }
 .layout-bar .seg button.on { background: #2563eb; color: #fff; }
+.layout-bar .spread-btn { border: 1px solid var(--border); border-radius: 6px; background: #fff; padding: 4px 10px; cursor: pointer; font-size: 12px; }
+.layout-bar .spread-btn.on { background: #2563eb; color: #fff; border-color: #2563eb; }
 
 /* 좌우 폭 조절 구분선 */
 .wb-splitter {

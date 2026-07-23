@@ -9,11 +9,13 @@ import GraphFilterBar from "../components/GraphFilterBar";
 import ReviewItemEditor from "../components/ReviewItemEditor";
 import NodeEditForm from "../components/NodeEditForm";
 import { applyGraphFilters, defaultFilters } from "../graphFilters";
+import { useLayout, LayoutControls } from "../layout-mode";
 
 type Sel = { kind: "review"; rid: string } | { kind: "node"; id: string } | null;
 
 export default function Workbench() {
   const qc = useQueryClient();
+  const { layoutMode, spread } = useLayout();
   const [sel, setSel] = useState<Sel>(null);
   const [checked, setChecked] = useState<Set<string>>(new Set());
   const [filters, setFilters] = useState(defaultFilters());
@@ -91,10 +93,14 @@ export default function Workbench() {
       <div className={`wb-left${pickCb ? " picking" : ""}`}>
         <GraphFilterBar filters={filters} onChange={setFilters} />
         <div className="wb-canvas">
+          <LayoutControls />
           {canvasGraph && graph.data && graph.data.nodes.length > 0 ? (
             canvasGraph.nodes.length > 0 ? (
               <GraphCanvas
+                key={`${layoutMode}-${spread}`}
                 data={canvasGraph}
+                layoutMode={layoutMode}
+                spread={spread}
                 selectedId={sel?.kind === "node" ? sel.id : null}
                 onSelect={onGraphSelect}
               />

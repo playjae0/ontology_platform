@@ -10,6 +10,7 @@ import Ingest from "./views/Ingest";
 import Eval from "./views/Eval";
 import Documents from "./views/Documents";
 import { BackendProvider, BackendToggle } from "./backend";
+import { LayoutProvider } from "./layout-mode";
 import "./App.css";
 
 type View = "explore" | "workbench" | "data" | "dashboard" | "ingest" | "eval" | "docs";
@@ -17,7 +18,9 @@ type View = "explore" | "workbench" | "data" | "dashboard" | "ingest" | "eval" |
 export default function App() {
   return (
     <BackendProvider>
-      <AppShell />
+      <LayoutProvider>
+        <AppShell />
+      </LayoutProvider>
     </BackendProvider>
   );
 }

@@ -11,13 +11,13 @@ import LeftPanel from "../components/LeftPanel";
 import type { Filters } from "../components/LeftPanel";
 import { applyGraphFilters, defaultFilters } from "../graphFilters";
 import { useBackend } from "../backend";
+import { useLayout, LayoutControls } from "../layout-mode";
 
 export default function Explore({ focusNode }: { focusNode?: string | null }) {
   const { backend, recordMs } = useBackend();
+  const { layoutMode, spread } = useLayout();
   const [selected, setSelected] = useState<string | null>(null);
   const [filters, setFilters] = useState<Filters>(defaultFilters());
-  // 레이아웃: 계층형(결정적) ↔ 분산형(force). 분산형은 밀집 클러스터를 서로 밀어내 Neo4j 처럼 공정별로 벌어진다.
-  const [layoutMode, setLayoutMode] = useState<"deterministic" | "force">("deterministic");
 
   const graph = useQuery({
     queryKey: ["graph", null, backend],
@@ -52,15 +52,7 @@ export default function Explore({ focusNode }: { focusNode?: string | null }) {
       </aside>
 
       <main className="pane-center">
-        <div className="layout-bar">
-          <span className="muted">배치</span>
-          <div className="seg">
-            <button className={layoutMode === "deterministic" ? "on" : ""}
-              onClick={() => setLayoutMode("deterministic")}>계층형</button>
-            <button className={layoutMode === "force" ? "on" : ""}
-              onClick={() => setLayoutMode("force")}>분산형 (force)</button>
-          </div>
-        </div>
+        <LayoutControls />
         {graph.isLoading && <div className="center-msg">그래프 로딩…</div>}
         {graph.isError && (
           <div className="center-msg error">백엔드 연결 실패 — uvicorn(8077) 확인.</div>
@@ -69,9 +61,9 @@ export default function Explore({ focusNode }: { focusNode?: string | null }) {
           <div className="center-msg">필터에 맞는 노드가 없습니다.</div>
         )}
         {filtered && filtered.nodes.length > 0 && (
-          // key 에 layoutMode 포함 → 배치 전환 시 NVL 재마운트(force 워커가 새로 계산).
-          <GraphCanvas key={layoutMode} data={filtered} selectedId={selected} onSelect={setSelected}
-            layoutMode={layoutMode} />
+          // key 에 배치/스프레드 포함 → 전환 시 NVL 재마운트(force 워커·스케일 새로 계산).
+          <GraphCanvas key={`${layoutMode}-${spread}`} data={filtered} selectedId={selected}
+            onSelect={setSelected} layoutMode={layoutMode} spread={spread} />
         )}
         <Legend />
       </main>
