@@ -3,7 +3,7 @@
 // 우(½) 리뷰 큐(일괄 승인) + 선택 항목 에디터(리뷰 항목 / 노드).
 import { useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { fetchGraph, fetchReviewQueue, approveBatch } from "../api";
+import { fetchGraph, fetchReviewQueue, approveBatch, API_BASE } from "../api";
 import GraphCanvas from "../components/GraphCanvas";
 import GraphFilterBar from "../components/GraphFilterBar";
 import ReviewItemEditor from "../components/ReviewItemEditor";
@@ -116,12 +116,16 @@ export default function Workbench() {
         <section className="queue-section">
           <div className="queue-head">
             <h3>리뷰 큐 ({items.length})</h3>
-            <button
-              disabled={checked.size === 0 || batchM.isPending}
-              onClick={() => batchM.mutate([...checked])}
-            >
-              일괄 승인 ({checked.size})
-            </button>
+            <div className="qh-actions">
+              <a className="btn-link sm" href={`${API_BASE}/export/skeleton`} download
+                 title="편집 결과가 반영된 뼈대 JSON 내려받기">편집 JSON ↓</a>
+              <button
+                disabled={checked.size === 0 || batchM.isPending}
+                onClick={() => batchM.mutate([...checked])}
+              >
+                일괄 승인 ({checked.size})
+              </button>
+            </div>
           </div>
           {batchM.data && (
             <div className="result-ok">

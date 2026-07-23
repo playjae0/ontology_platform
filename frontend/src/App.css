@@ -356,6 +356,25 @@
 }
 .wb-canvas { position: relative; flex: 1; min-height: 0; }
 .wb-right { display: flex; flex-direction: column; overflow-y: auto; background: var(--panel); }
+.qh-actions { display: flex; align-items: center; gap: 8px; }
+
+/* JSON 내보내기 링크(버튼형) */
+.btn-link {
+  display: inline-block;
+  padding: 6px 12px;
+  border: 1px solid #2563eb;
+  border-radius: 6px;
+  background: #2563eb;
+  color: #fff;
+  text-decoration: none;
+  font-size: 13px;
+  cursor: pointer;
+}
+.btn-link:hover { background: #1d4ed8; }
+.btn-link.sm { padding: 3px 8px; font-size: 12px; background: #fff; color: #2563eb; }
+.btn-link.sm:hover { background: #eff6ff; }
+.dm-export { margin-top: 18px; }
+.dm-export .dm-ops { flex-wrap: wrap; gap: 8px; }
 
 /* 좌우 폭 조절 구분선 */
 .wb-splitter {

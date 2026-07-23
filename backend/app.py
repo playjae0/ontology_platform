@@ -17,6 +17,7 @@ from typing import Any
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse, JSONResponse
 
 from pydantic import BaseModel
 
@@ -480,6 +481,36 @@ def edge_edit(body: EdgeBody):
         store, body.op, body.source, body.relation, body.target,
         new_source=body.new_source, new_relation=body.new_relation,
         new_target=body.new_target))
+
+
+# ---- SSOT JSON 내보내기(다운로드) ----
+# 편집 결과물인 current/ JSON 을 그대로 내려받는다. 읽기 전용(파일 스트리밍, 쓰기 없음).
+# 편집(store.commit)이 매번 갱신하는 바로 그 파일 → "수정 기준 새 JSON" 을 UI 에서 회수.
+_EXPORT_FILE = {"skeleton": "assembly_skeleton.json", "contents": "contents.json"}
+
+
+@app.get("/export/{slot}")
+def export_slot(slot: str):
+    """편집된 SSOT JSON 파일 다운로드 (slot: skeleton|contents)."""
+    fname = _EXPORT_FILE.get(slot)
+    if fname is None:
+        raise HTTPException(400, f"export 불가 slot: {slot} (skeleton|contents 만 가능)")
+    p = store.current / fname
+    if not p.exists():
+        raise HTTPException(404, f"{fname} 없음")
+    return FileResponse(str(p), media_type="application/json", filename=fname)
+
+
+@app.get("/export")
+def export_bundle():
+    """skeleton+contents+review_queue 를 한 파일로 묶어 다운로드(스냅샷)."""
+    bundle = {
+        "assembly_skeleton": store.load_skeleton(),
+        "contents": store.load_contents(),
+        "review_queue": store.load_queue(),
+    }
+    headers = {"Content-Disposition": 'attachment; filename="ontology_export.json"'}
+    return JSONResponse(bundle, headers=headers)
 
 
 # ---- 프로덕션 단일포트: 빌드된 프론트(frontend/dist)가 있으면 SPA 서빙 ----

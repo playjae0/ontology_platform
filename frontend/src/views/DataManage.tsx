@@ -1,7 +1,7 @@
 // 화면1 — 데이터 관리 + 수동 주입 (§4 M2) + 스테이지 슬롯 (M4).
 import { useState } from "react";
 import { useQueryClient, useQuery, useMutation } from "@tanstack/react-query";
-import { fetchStatus, rollback, resetMock, fetchStageConfig, runStage } from "../api";
+import { fetchStatus, rollback, resetMock, fetchStageConfig, runStage, API_BASE } from "../api";
 import SlotUpload from "../components/SlotUpload";
 import type { Slot } from "../api";
 
@@ -71,6 +71,25 @@ export default function DataManage() {
             </div>
           </>
         )}
+      </section>
+
+      <section className="dm-export">
+        <h2>JSON 내보내기</h2>
+        <p className="muted">
+          검수·편집 결과가 반영된 현재 SSOT(§2 계약)를 그대로 내려받습니다. 편집할 때마다
+          갱신되는 바로 그 JSON입니다.
+        </p>
+        <div className="dm-ops">
+          <a className="btn-link" href={`${API_BASE}/export/skeleton`} download>
+            뼈대 JSON (assembly_skeleton.json)
+          </a>
+          <a className="btn-link" href={`${API_BASE}/export/contents`} download>
+            콘텐츠 JSON (contents.json)
+          </a>
+          <a className="btn-link" href={`${API_BASE}/export`} download>
+            전체 묶음 (skeleton+contents+queue)
+          </a>
+        </div>
       </section>
 
       <section className="dm-inject">
