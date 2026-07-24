@@ -19,18 +19,20 @@ interface Props {
   layoutMode?: "deterministic" | "force";
   positions?: Pos[]; // deterministic 일 때 부모가 좌표 주입(ego 등). 없으면 computeLayout.
   webgl?: boolean;
+  spread?: number; // 좌표 스케일(>1 이면 더 멀리 벌린다). 기본 1.
 }
 
 export default function GraphCanvas({
-  data, selectedId, onSelect, layoutMode = "deterministic", positions, webgl = false,
+  data, selectedId, onSelect, layoutMode = "deterministic", positions, webgl = false, spread = 1,
 }: Props) {
   const nvlRef = useRef<NVL | null>(null);
   const det = layoutMode === "deterministic";
 
-  const pos = useMemo(
-    () => (det ? positions ?? computeLayout(data) : []),
-    [det, positions, data],
-  );
+  const pos = useMemo(() => {
+    if (!det) return [];
+    const base = positions ?? computeLayout(data);
+    return spread === 1 ? base : base.map((p) => ({ ...p, x: p.x * spread, y: p.y * spread }));
+  }, [det, positions, data, spread]);
 
   // 좌표는 노드 객체에 싣지 않고 positions prop 으로만 주입한다. 이렇게 하면
   // 선택(selected 속성) 변경으로 노드가 갱신돼도 NVL 이 좌표를 되돌리지 않아
@@ -47,9 +49,22 @@ export default function GraphCanvas({
     [data.nodes, layoutMode],
   );
   useEffect(() => {
-    const id = setTimeout(() => nvlRef.current?.fit(data.nodes.map((n) => n.id)), det ? 200 : 900);
+    const ids = data.nodes.map((n) => n.id);
+    const id = setTimeout(() => {
+      const nvl = nvlRef.current;
+      // force + 더 멀리: 워커 정착 후 좌표를 중심에서 바깥으로 스케일(간격 옵션 미노출 대응).
+      if (nvl && !det && spread !== 1) {
+        const ps = nvl.getNodePositions();
+        if (ps.length) {
+          const cx = ps.reduce((s, p) => s + p.x, 0) / ps.length;
+          const cy = ps.reduce((s, p) => s + p.y, 0) / ps.length;
+          nvl.setNodePositions(ps.map((p) => ({ id: p.id, x: cx + (p.x - cx) * spread, y: cy + (p.y - cy) * spread })));
+        }
+      }
+      nvl?.fit(ids);
+    }, det ? 200 : 1600);
     return () => clearTimeout(id);
-  }, [fitKey]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [fitKey, spread]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="nvl-host" data-layout-mode={layoutMode} data-renderer={webgl ? "webgl" : "canvas"}

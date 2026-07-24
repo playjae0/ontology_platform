@@ -31,3 +31,6 @@ frontend/m10_dashboard.png
 frontend/m11_eval.png
 frontend/m12_event.png
 frontend/m13_docs.png
+
+# 공유용 HTML 생성물(tools/gen_share_html.py 출력)
+ontology_share.html

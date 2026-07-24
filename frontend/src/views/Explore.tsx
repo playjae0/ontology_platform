@@ -11,9 +11,11 @@ import LeftPanel from "../components/LeftPanel";
 import type { Filters } from "../components/LeftPanel";
 import { applyGraphFilters, defaultFilters } from "../graphFilters";
 import { useBackend } from "../backend";
+import { useLayout, LayoutControls } from "../layout-mode";
 
 export default function Explore({ focusNode }: { focusNode?: string | null }) {
   const { backend, recordMs } = useBackend();
+  const { layoutMode, spread } = useLayout();
   const [selected, setSelected] = useState<string | null>(null);
   const [filters, setFilters] = useState<Filters>(defaultFilters());
 
@@ -50,6 +52,7 @@ export default function Explore({ focusNode }: { focusNode?: string | null }) {
       </aside>
 
       <main className="pane-center">
+        <LayoutControls />
         {graph.isLoading && <div className="center-msg">그래프 로딩…</div>}
         {graph.isError && (
           <div className="center-msg error">백엔드 연결 실패 — uvicorn(8077) 확인.</div>
@@ -58,7 +61,9 @@ export default function Explore({ focusNode }: { focusNode?: string | null }) {
           <div className="center-msg">필터에 맞는 노드가 없습니다.</div>
         )}
         {filtered && filtered.nodes.length > 0 && (
-          <GraphCanvas data={filtered} selectedId={selected} onSelect={setSelected} />
+          // key 에 배치/스프레드 포함 → 전환 시 NVL 재마운트(force 워커·스케일 새로 계산).
+          <GraphCanvas key={`${layoutMode}-${spread}`} data={filtered} selectedId={selected}
+            onSelect={setSelected} layoutMode={layoutMode} spread={spread} />
         )}
         <Legend />
       </main>

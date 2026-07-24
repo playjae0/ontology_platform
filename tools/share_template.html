@@ -1,0 +1,407 @@
+<title>2차전지 제조 온톨로지 · 지식 그래프</title>
+<style>
+  * { box-sizing: border-box; }
+  :root {
+    --bg: #f7f9fc; --panel: #ffffff; --ink: #1b2431; --muted: #69748a;
+    --border: #e5e9f1; --accent: #2563eb; --accent-soft: #eef3fe;
+    --edge: #9aa6ba; --edge-faint: #cdd5e2; --shadow: 0 1px 3px rgba(20,30,60,.06), 0 8px 24px rgba(20,30,60,.06);
+    --c-Process:#8fb3e6; --c-Unit:#86cbb0; --c-Property:#f0c48a; --c-FailureMode:#ec9d9d; --c-Cause:#b9a7e4;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg:#0f1420; --panel:#161d2c; --ink:#e7ecf5; --muted:#8b96ab;
+      --border:#26303f; --accent:#7aa5f0; --accent-soft:#1b263c;
+      --edge:#59667e; --edge-faint:#333e52; --shadow: 0 1px 3px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="light"] {
+    --bg:#f7f9fc; --panel:#ffffff; --ink:#1b2431; --muted:#69748a;
+    --border:#e5e9f1; --accent:#2563eb; --accent-soft:#eef3fe; --edge:#9aa6ba; --edge-faint:#cdd5e2;
+    --shadow:0 1px 3px rgba(20,30,60,.06), 0 8px 24px rgba(20,30,60,.06);
+  }
+  :root[data-theme="dark"] {
+    --bg:#0f1420; --panel:#161d2c; --ink:#e7ecf5; --muted:#8b96ab;
+    --border:#26303f; --accent:#7aa5f0; --accent-soft:#1b263c; --edge:#59667e; --edge-faint:#333e52;
+    --shadow:0 1px 3px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
+  }
+  html, body { margin: 0; height: 100%; }
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+    background: var(--bg); color: var(--ink); -webkit-font-smoothing: antialiased;
+  }
+  .mono { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-variant-numeric: tabular-nums; }
+  .app { display: grid; grid-template-rows: auto 1fr; height: 100vh; }
+
+  header {
+    display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
+    padding: 12px 20px; border-bottom: 1px solid var(--border); background: var(--panel);
+  }
+  header h1 { font-size: 15px; margin: 0; font-weight: 650; letter-spacing: -.01em; }
+  header .sub { color: var(--muted); font-size: 12px; }
+  header .counts { color: var(--muted); font-size: 12px; margin-left: auto; }
+  .legend { display: flex; gap: 12px; flex-wrap: wrap; font-size: 12px; }
+  .legend span { display: inline-flex; align-items: center; gap: 5px; color: var(--muted); }
+  .legend i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+
+  main { display: grid; grid-template-columns: 232px 1fr 320px; min-height: 0; }
+  aside { background: var(--panel); overflow-y: auto; }
+  .left { border-right: 1px solid var(--border); padding: 16px; }
+  .right { border-left: 1px solid var(--border); }
+  .center { position: relative; min-width: 0; background:
+      radial-gradient(circle at 1px 1px, var(--border) 1px, transparent 0) 0 0 / 26px 26px; }
+
+  .grp { margin-bottom: 20px; }
+  .grp h3 { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 0 0 8px; }
+  label.row { display: flex; align-items: center; gap: 8px; padding: 3px 0; font-size: 13px; cursor: pointer; user-select: none; }
+  label.row input { accent-color: var(--accent); }
+  .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+  .rel-swatch { width: 14px; height: 0; border-top: 2px solid var(--edge); display: inline-block; }
+  .search { width: 100%; padding: 7px 9px; border: 1px solid var(--border); border-radius: 7px;
+            background: var(--bg); color: var(--ink); font-size: 13px; }
+  .search::placeholder { color: var(--muted); }
+  .hits { margin-top: 6px; display: flex; flex-direction: column; gap: 2px; }
+  .hits button { text-align: left; background: none; border: none; color: var(--ink); font-size: 13px;
+                 padding: 4px 6px; border-radius: 6px; cursor: pointer; }
+  .hits button:hover { background: var(--accent-soft); }
+  .hits .id { color: var(--muted); font-size: 11px; }
+
+  .toolbar { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); z-index: 4;
+    display: flex; align-items: center; gap: 10px; background: color-mix(in srgb, var(--panel) 90%, transparent);
+    border: 1px solid var(--border); border-radius: 10px; padding: 6px 12px; box-shadow: var(--shadow);
+    backdrop-filter: blur(6px); font-size: 12px; }
+  .toolbar label { color: var(--muted); display: inline-flex; align-items: center; gap: 8px; }
+  .toolbar input[type=range] { accent-color: var(--accent); width: 120px; }
+  .toolbar button { border: 1px solid var(--border); background: var(--panel); color: var(--ink);
+    border-radius: 6px; padding: 4px 9px; font-size: 12px; cursor: pointer; }
+  .toolbar button:hover { border-color: var(--accent); color: var(--accent); }
+
+  svg { width: 100%; height: 100%; display: block; cursor: grab; }
+  svg.grabbing { cursor: grabbing; }
+  .link { stroke: var(--edge-faint); stroke-width: 1; }
+  .link.on { stroke: var(--accent); stroke-width: 1.6; }
+  .node circle { stroke: var(--panel); stroke-width: 2; cursor: pointer; transition: filter .12s; }
+  .node.dim { opacity: .18; }
+  .node.sel circle { stroke: var(--accent); stroke-width: 3; }
+  .node text { font-size: 11px; fill: var(--ink); text-anchor: middle; pointer-events: none;
+               paint-order: stroke; stroke: var(--panel); stroke-width: 3px; }
+  .elabel { font-size: 9px; fill: var(--muted); text-anchor: middle; pointer-events: none; }
+
+  .detail { padding: 18px; }
+  .empty { color: var(--muted); font-size: 13px; padding: 40px 18px; text-align: center; }
+  .d-head { display: flex; align-items: center; gap: 8px; margin-bottom: 2px; }
+  .d-head .dot { width: 13px; height: 13px; }
+  .d-head h2 { font-size: 17px; margin: 0; font-weight: 650; }
+  .badge { font-size: 11px; padding: 1px 8px; border-radius: 20px; border: 1px solid var(--border); color: var(--muted); }
+  .badge.confirmed { background: color-mix(in srgb, var(--c-Unit) 22%, transparent); color: inherit; border: none; }
+  .badge.proposed { background: color-mix(in srgb, var(--c-Property) 26%, transparent); color: inherit; border: none; }
+  .d-sub { color: var(--muted); font-size: 12px; margin-bottom: 14px; }
+  .kv { display: grid; grid-template-columns: 78px 1fr; gap: 4px 10px; font-size: 13px; margin-bottom: 14px; }
+  .kv .k { color: var(--muted); }
+  .chips { display: flex; flex-wrap: wrap; gap: 5px; }
+  .chip { font-size: 11px; padding: 2px 8px; border-radius: 20px; background: var(--bg); border: 1px solid var(--border); }
+  .sec-h { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted);
+           margin: 16px 0 8px; border-top: 1px solid var(--border); padding-top: 12px; }
+  .adj { display: flex; flex-direction: column; gap: 4px; }
+  .adj button { display: flex; align-items: center; gap: 7px; text-align: left; width: 100%;
+    background: none; border: none; color: var(--ink); font-size: 13px; padding: 4px 6px; border-radius: 6px; cursor: pointer; }
+  .adj button:hover { background: var(--accent-soft); }
+  .adj .rel { font-size: 10px; color: var(--muted); font-family: ui-monospace, monospace;
+    background: var(--bg); border: 1px solid var(--border); border-radius: 5px; padding: 0 5px; white-space: nowrap; }
+  .chunk { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 11px; margin-bottom: 8px; }
+  .chunk .meta { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .chunk .txt { font-size: 12.5px; line-height: 1.5; }
+  .footer-note { padding: 10px 20px; font-size: 11px; color: var(--muted); border-top: 1px solid var(--border);
+    background: var(--panel); text-align: center; }
+
+  @media (max-width: 880px) {
+    main { grid-template-columns: 1fr; grid-template-rows: auto 60vh auto; }
+    .left { border-right: none; border-bottom: 1px solid var(--border); }
+    .right { border-left: none; border-top: 1px solid var(--border); }
+  }
+</style>
+
+<div class="app">
+  <header>
+    <h1>2차전지 제조 온톨로지</h1>
+    <span class="sub">파우치셀 조립공정 지식 그래프 · 읽기 전용 스냅샷</span>
+    <div class="legend" id="legend"></div>
+    <span class="counts" id="counts"></span>
+  </header>
+  <main>
+    <aside class="left">
+      <div class="grp">
+        <h3>검색</h3>
+        <input class="search" id="search" placeholder="이름 · 별칭 · id" autocomplete="off">
+        <div class="hits" id="hits"></div>
+      </div>
+      <div class="grp"><h3>카테고리 (노드)</h3><div id="cat-filters"></div></div>
+      <div class="grp"><h3>관계 (엣지)</h3><div id="rel-filters"></div></div>
+      <div class="grp"><h3>상태</h3><div id="status-filters"></div></div>
+    </aside>
+    <div class="center">
+      <div class="toolbar">
+        <label>간격 <input type="range" id="spread" min="0.9" max="2.6" step="0.05" value="1.45"></label>
+        <button id="reset">재배치</button>
+        <button id="fit">화면맞춤</button>
+      </div>
+      <svg id="svg"><g id="vp">
+        <g id="links"></g><g id="elabels"></g><g id="nodes"></g>
+      </g></svg>
+    </div>
+    <aside class="right"><div id="detail" class="detail"><div class="empty">노드를 클릭하면 상세와 근거 자료가 표시됩니다.</div></div></aside>
+  </main>
+  <div class="footer-note">노드 드래그로 재배치 · 휠 확대/축소 · 빈 곳 드래그로 이동 · 좌측 필터로 카테고리·관계 표시 제어</div>
+</div>
+
+<script>
+/*__DATA__*/
+
+const CATS = ["Process","Unit","Property","FailureMode","Cause"];
+const RELS = ["part_of","precedes","has_property","causes","affects"];
+const CATCOLOR = id => getComputedStyle(document.documentElement).getPropertyValue("--c-"+id).trim();
+const SIZE = {Process:22, Unit:18, FailureMode:17, Cause:17, Property:15};
+
+// ---- 데이터 준비 ----
+const idMap = new Map(DATA.nodes.map(n => [n.id, n]));
+const R0 = 260;
+DATA.nodes.forEach((n,i) => {
+  const a = (i / DATA.nodes.length) * Math.PI * 2;
+  n.x = Math.cos(a) * R0 * (0.5 + (i % 5) / 8);
+  n.y = Math.sin(a) * R0 * (0.5 + (i % 5) / 8);
+  n.vx = 0; n.vy = 0; n.fx = null; n.fy = null;
+});
+const links = DATA.links.filter(l => idMap.has(l.s) && idMap.has(l.t))
+  .map(l => ({ r: l.r, st: l.st, s: idMap.get(l.s), t: idMap.get(l.t) }));
+const chunkMap = new Map(DATA.chunks.map(c => [c.cid, c]));
+const evidence = new Map();
+DATA.describes.forEach(d => { const c = chunkMap.get(d.s); if (!c) return;
+  if (!evidence.has(d.t)) evidence.set(d.t, []); evidence.get(d.t).push(c); });
+const adj = new Map(DATA.nodes.map(n => [n.id, []]));
+links.forEach(l => { adj.get(l.s.id).push({dir:"out",rel:l.r,other:l.t});
+                     adj.get(l.t.id).push({dir:"in",rel:l.r,other:l.s}); });
+
+// ---- 상태 ----
+const catOn = new Set(CATS), relOn = new Set(RELS), stOn = new Set(["confirmed","proposed"]);
+let spread = 1.45, selected = null;
+const view = { x: 0, y: 0, k: 1 };
+
+// ---- 필터 UI ----
+const legend = document.getElementById("legend");
+CATS.forEach(c => { const s = document.createElement("span");
+  s.innerHTML = '<i style="background:'+CATCOLOR(c)+'"></i>'+c; legend.appendChild(s); });
+document.getElementById("counts").textContent =
+  "노드 " + DATA.nodes.length + " · 엣지 " + links.length + " · 청크 " + DATA.chunks.length;
+
+function makeChecks(host, items, set, swatch) {
+  items.forEach(v => {
+    const lab = document.createElement("label"); lab.className = "row";
+    const cb = document.createElement("input"); cb.type = "checkbox"; cb.checked = true;
+    cb.onchange = () => { cb.checked ? set.add(v) : set.delete(v); reheat(0.35); applyFilter(); };
+    lab.appendChild(cb);
+    if (swatch === "cat") { const d = document.createElement("span"); d.className = "dot";
+      d.style.background = CATCOLOR(v); lab.appendChild(d); }
+    else if (swatch === "rel") { const d = document.createElement("span"); d.className = "rel-swatch"; lab.appendChild(d); }
+    lab.appendChild(document.createTextNode(v));
+    host.appendChild(lab);
+  });
+}
+makeChecks(document.getElementById("cat-filters"), CATS, catOn, "cat");
+makeChecks(document.getElementById("rel-filters"), RELS, relOn, "rel");
+makeChecks(document.getElementById("status-filters"), ["confirmed","proposed"], stOn, null);
+
+// ---- SVG 요소 생성 ----
+const NS = "http://www.w3.org/2000/svg";
+const gLinks = document.getElementById("links");
+const gEl = document.getElementById("elabels");
+const gNodes = document.getElementById("nodes");
+const svg = document.getElementById("svg");
+const vp = document.getElementById("vp");
+
+const linkEls = links.map(l => {
+  const ln = document.createElementNS(NS, "line"); ln.setAttribute("class", "link");
+  gLinks.appendChild(ln);
+  const tx = document.createElementNS(NS, "text"); tx.setAttribute("class", "elabel");
+  tx.textContent = l.r; gEl.appendChild(tx);
+  return { l, ln, tx };
+});
+const nodeEls = DATA.nodes.map(n => {
+  const g = document.createElementNS(NS, "g"); g.setAttribute("class", "node");
+  const c = document.createElementNS(NS, "circle");
+  c.setAttribute("r", SIZE[n.cat] || 15);
+  c.setAttribute("fill", CATCOLOR(n.cat));
+  if (n.status !== "confirmed") c.setAttribute("fill-opacity", "0.5");
+  const t = document.createElementNS(NS, "text");
+  t.setAttribute("dy", (SIZE[n.cat] || 15) + 12); t.textContent = n.name;
+  g.appendChild(c); g.appendChild(t); gNodes.appendChild(g);
+  g.addEventListener("pointerdown", e => startDrag(e, n));
+  return { n, g, c, t };
+});
+
+// ---- 힘 시뮬레이션 ----
+let alpha = 1;
+function reheat(a) { alpha = Math.max(alpha, a == null ? 0.7 : a); }
+function visibleNode(n) { return catOn.has(n.cat) && stOn.has(n.status); }
+function visibleLink(l) { return relOn.has(l.r) && visibleNode(l.s) && visibleNode(l.t); }
+
+function tick() {
+  const vis = DATA.nodes.filter(visibleNode);
+  const vl = links.filter(visibleLink);
+  const REP = 4200 * spread * spread;
+  const LD = 66 * spread;
+  const K = 0.045, GRAV = 0.012, DAMP = 0.85;
+  for (let i = 0; i < vis.length; i++) for (let j = i + 1; j < vis.length; j++) {
+    const a = vis[i], b = vis[j]; let dx = a.x - b.x, dy = a.y - b.y;
+    let d2 = dx*dx + dy*dy; if (d2 < 1) { d2 = 1; dx = Math.random()-0.5; dy = Math.random()-0.5; }
+    const f = (REP / d2) * alpha; const d = Math.sqrt(d2);
+    const fx = dx/d*f, fy = dy/d*f; a.vx += fx; a.vy += fy; b.vx -= fx; b.vy -= fy;
+  }
+  for (const l of vl) { const a = l.s, b = l.t; let dx = b.x-a.x, dy = b.y-a.y;
+    let d = Math.hypot(dx, dy) || 1; const f = (d - LD) * K * alpha;
+    const fx = dx/d*f, fy = dy/d*f; a.vx += fx; a.vy += fy; b.vx -= fx; b.vy -= fy; }
+  for (const n of vis) { n.vx += -n.x * GRAV * alpha; n.vy += -n.y * GRAV * alpha; }
+  for (const n of vis) {
+    if (n.fx != null) { n.x = n.fx; n.y = n.fy; n.vx = 0; n.vy = 0; continue; }
+    n.vx *= DAMP; n.vy *= DAMP;
+    n.x += Math.max(-30, Math.min(30, n.vx)); n.y += Math.max(-30, Math.min(30, n.vy));
+  }
+  alpha *= 0.985; if (alpha < 0.02) alpha = 0.02;
+}
+function render() {
+  for (const e of linkEls) {
+    e.ln.setAttribute("x1", e.l.s.x); e.ln.setAttribute("y1", e.l.s.y);
+    e.ln.setAttribute("x2", e.l.t.x); e.ln.setAttribute("y2", e.l.t.y);
+    e.tx.setAttribute("x", (e.l.s.x + e.l.t.x)/2); e.tx.setAttribute("y", (e.l.s.y + e.l.t.y)/2 - 2);
+  }
+  for (const e of nodeEls) e.g.setAttribute("transform", "translate(" + e.n.x + "," + e.n.y + ")");
+}
+function loop() { tick(); render(); requestAnimationFrame(loop); }
+
+// ---- 뷰(pan/zoom) ----
+function applyView() { vp.setAttribute("transform",
+  "translate(" + view.x + "," + view.y + ") scale(" + view.k + ")"); }
+function fit() {
+  const vis = DATA.nodes.filter(visibleNode); if (!vis.length) return;
+  let minx=1e9,miny=1e9,maxx=-1e9,maxy=-1e9;
+  vis.forEach(n => { minx=Math.min(minx,n.x); miny=Math.min(miny,n.y); maxx=Math.max(maxx,n.x); maxy=Math.max(maxy,n.y); });
+  const pad = 80, w = svg.clientWidth, h = svg.clientHeight;
+  const k = Math.min(w/(maxx-minx+pad*2), h/(maxy-miny+pad*2), 1.6);
+  view.k = k; view.x = w/2 - (minx+maxx)/2*k; view.y = h/2 - (miny+maxy)/2*k; applyView();
+}
+svg.addEventListener("wheel", e => { e.preventDefault();
+  const r = svg.getBoundingClientRect(); const mx = e.clientX-r.left, my = e.clientY-r.top;
+  const gx = (mx-view.x)/view.k, gy = (my-view.y)/view.k;
+  view.k = Math.max(0.2, Math.min(4, view.k * (e.deltaY < 0 ? 1.12 : 0.89)));
+  view.x = mx - gx*view.k; view.y = my - gy*view.k; applyView();
+}, { passive: false });
+
+// ---- 드래그(노드 & 배경) ----
+let drag = null;
+function toGraph(e) { const r = svg.getBoundingClientRect();
+  return { x: (e.clientX-r.left-view.x)/view.k, y: (e.clientY-r.top-view.y)/view.k }; }
+function startDrag(e, n) { e.stopPropagation(); e.preventDefault();
+  const p = toGraph(e); drag = { n, dx: n.x-p.x, dy: n.y-p.y, moved: false };
+  n.fx = n.x; n.fy = n.y; reheat(0.5); svg.setPointerCapture(e.pointerId);
+}
+svg.addEventListener("pointerdown", e => { if (drag) return;
+  drag = { pan: true, sx: e.clientX, sy: e.clientY, vx: view.x, vy: view.y, moved: false };
+  svg.classList.add("grabbing"); svg.setPointerCapture(e.pointerId);
+});
+svg.addEventListener("pointermove", e => {
+  if (!drag) return;
+  if (drag.pan) { view.x = drag.vx + (e.clientX-drag.sx); view.y = drag.vy + (e.clientY-drag.sy);
+    if (Math.abs(e.clientX-drag.sx)+Math.abs(e.clientY-drag.sy) > 3) drag.moved = true; applyView(); return; }
+  const p = toGraph(e); drag.n.fx = p.x + drag.dx; drag.n.fy = p.y + drag.dy; drag.moved = true; reheat(0.4);
+});
+svg.addEventListener("pointerup", e => {
+  if (drag && !drag.pan && !drag.moved) select(drag.n);   // 클릭(이동 없음) = 선택
+  if (drag && !drag.pan && drag.moved) { /* 드래그 후 고정 유지 */ }
+  svg.classList.remove("grabbing"); drag = null;
+});
+
+// ---- 선택 / 상세 ----
+function select(n) {
+  selected = n ? n.id : null;
+  const nb = new Set(); if (n) (adj.get(n.id)||[]).forEach(a => nb.add(a.other.id));
+  nodeEls.forEach(e => { e.g.classList.toggle("sel", e.n.id === selected);
+    e.g.classList.toggle("dim", selected && e.n.id !== selected && !nb.has(e.n.id)); });
+  linkEls.forEach(e => e.ln.classList.toggle("on", selected && (e.l.s.id === selected || e.l.t.id === selected)));
+  renderDetail(n);
+}
+function esc(s){ return (s==null?"":String(s)).replace(/[&<>]/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;"}[m])); }
+function renderDetail(n) {
+  const box = document.getElementById("detail");
+  if (!n) { box.innerHTML = '<div class="empty">노드를 클릭하면 상세와 근거 자료가 표시됩니다.</div>'; return; }
+  const parent = n.attached_to ? idMap.get(n.attached_to) : null;
+  const evs = evidence.get(n.id) || [];
+  const rows = (adj.get(n.id) || []).slice().sort((a,b) => a.rel.localeCompare(b.rel));
+  let html = "";
+  html += '<div class="d-head"><span class="dot" style="background:'+CATCOLOR(n.cat)+'"></span>';
+  html += '<h2>'+esc(n.name)+'</h2><span class="badge '+n.status+'">'+n.status+'</span></div>';
+  html += '<div class="d-sub mono">'+esc(n.id)+' · '+esc(n.cat)+'</div>';
+  html += '<div class="kv">';
+  if (n.def) html += '<span class="k">정의</span><span>'+esc(n.def)+'</span>';
+  if (n.spec) html += '<span class="k">spec</span><span class="mono">'+esc(n.spec)+'</span>';
+  if (parent) html += '<span class="k">부착</span><span>'+esc(parent.name)+' <span class="mono" style="color:var(--muted)">'+esc(parent.id)+'</span></span>';
+  if (n.doc) html += '<span class="k">출처 문서</span><span class="mono">'+esc(n.doc)+'</span>';
+  html += '</div>';
+  if (n.aliases && n.aliases.length) {
+    html += '<div class="sec-h">동의어</div><div class="chips">';
+    n.aliases.forEach(a => html += '<span class="chip">'+esc(a)+'</span>'); html += '</div>';
+  }
+  if (rows.length) {
+    html += '<div class="sec-h">인접 관계 ('+rows.length+')</div><div class="adj" id="adjbox"></div>';
+  }
+  if (evs.length) {
+    html += '<div class="sec-h">근거 자료 ('+evs.length+')</div>';
+    evs.forEach(c => { const m = c.meta || {};
+      const metaParts = [c.cid, c.doc, c.section].filter(Boolean).join(" · ");
+      const extra = [m.date, m.line, m.lot].filter(Boolean).join(" · ");
+      html += '<div class="chunk"><div class="meta mono">'+esc(metaParts)+(extra?" · "+esc(extra):"")+'</div>';
+      html += '<div class="txt">'+esc(c.text)+'</div></div>';
+    });
+  }
+  box.innerHTML = html;
+  const ab = document.getElementById("adjbox");
+  if (ab) rows.forEach(a => { const b = document.createElement("button");
+    const arrow = a.dir === "out" ? "→" : "←";
+    b.innerHTML = '<span class="rel">'+esc(a.rel)+' '+arrow+'</span><span class="dot" style="background:'+CATCOLOR(a.other.cat)+'"></span>'+esc(a.other.name);
+    b.onclick = () => { select(a.other); }; ab.appendChild(b); });
+}
+
+// ---- 검색 ----
+const searchEl = document.getElementById("search"), hitsEl = document.getElementById("hits");
+searchEl.addEventListener("input", () => {
+  const q = searchEl.value.trim().toLowerCase(); hitsEl.innerHTML = "";
+  if (!q) return;
+  DATA.nodes.filter(n => n.name.toLowerCase().includes(q) || n.id.toLowerCase().includes(q)
+      || (n.aliases||[]).some(a => a.toLowerCase().includes(q))).slice(0, 10)
+    .forEach(n => { const b = document.createElement("button");
+      b.innerHTML = esc(n.name) + ' <span class="id mono">' + esc(n.id) + '</span>';
+      b.onclick = () => { select(n); centerOn(n); }; hitsEl.appendChild(b); });
+});
+function centerOn(n) { const w = svg.clientWidth, h = svg.clientHeight;
+  view.x = w/2 - n.x*view.k; view.y = h/2 - n.y*view.k; applyView(); }
+
+// ---- 필터 적용(표시/숨김) ----
+function applyFilter() {
+  nodeEls.forEach(e => e.g.style.display = visibleNode(e.n) ? "" : "none");
+  linkEls.forEach(e => { e.ln.style.display = visibleLink(e.l) ? "" : "none";
+    e.tx.style.display = visibleLink(e.l) ? "" : "none"; });
+  if (selected && !visibleNode(idMap.get(selected))) select(null);
+}
+
+// ---- 툴바 ----
+document.getElementById("spread").addEventListener("input", e => { spread = +e.target.value; reheat(0.6); });
+document.getElementById("reset").addEventListener("click", () => {
+  DATA.nodes.forEach((n,i) => { const a = (i/DATA.nodes.length)*Math.PI*2;
+    n.fx = null; n.fy = null; n.x = Math.cos(a)*R0*(0.5+(i%5)/8); n.y = Math.sin(a)*R0*(0.5+(i%5)/8); n.vx=0; n.vy=0; });
+  reheat(1); setTimeout(fit, 900);
+});
+document.getElementById("fit").addEventListener("click", fit);
+
+// ---- 시작 ----
+applyFilter();
+loop();
+setTimeout(fit, 700);
+window.addEventListener("resize", () => applyView());
+</script>
