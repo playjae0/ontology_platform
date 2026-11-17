@@ -82,8 +82,8 @@
   .node circle { stroke: var(--panel); stroke-width: 2; cursor: pointer; transition: filter .12s; }
   .node.dim { opacity: .18; }
   .node.sel circle { stroke: var(--accent); stroke-width: 3; }
-  .node text { font-size: 11px; fill: var(--ink); text-anchor: middle; pointer-events: none;
-               paint-order: stroke; stroke: var(--panel); stroke-width: 3px; }
+  .node text { font-size: 10.5px; fill: var(--ink); text-anchor: middle; dominant-baseline: central;
+               pointer-events: none; paint-order: stroke; stroke: var(--panel); stroke-width: 2.5px; font-weight: 500; }
   .elabel { font-size: 9px; fill: var(--muted); text-anchor: middle; pointer-events: none; }
 
   .detail { padding: 18px; }
@@ -140,7 +140,7 @@
     </aside>
     <div class="center">
       <div class="toolbar">
-        <label>간격 <input type="range" id="spread" min="0.9" max="2.6" step="0.05" value="1.45"></label>
+        <label>간격 <input type="range" id="spread" min="0.9" max="2.6" step="0.05" value="1.7"></label>
         <button id="reset">재배치</button>
         <button id="fit">화면맞춤</button>
       </div>
@@ -159,7 +159,7 @@
 const CATS = ["Process","Unit","Property","FailureMode","Cause"];
 const RELS = ["part_of","precedes","has_property","causes","affects"];
 const CATCOLOR = id => getComputedStyle(document.documentElement).getPropertyValue("--c-"+id).trim();
-const SIZE = {Process:22, Unit:18, FailureMode:17, Cause:17, Property:15};
+const SIZE = {Process:32, Unit:27, FailureMode:26, Cause:26, Property:25};
 
 // ---- 데이터 준비 ----
 const idMap = new Map(DATA.nodes.map(n => [n.id, n]));
@@ -182,7 +182,7 @@ links.forEach(l => { adj.get(l.s.id).push({dir:"out",rel:l.r,other:l.t});
 
 // ---- 상태 ----
 const catOn = new Set(CATS), relOn = new Set(RELS), stOn = new Set(["confirmed","proposed"]);
-let spread = 1.45, selected = null;
+let spread = 1.7, selected = null;
 const view = { x: 0, y: 0, k: 1 };
 
 // ---- 필터 UI ----
@@ -231,7 +231,7 @@ const nodeEls = DATA.nodes.map(n => {
   c.setAttribute("fill", CATCOLOR(n.cat));
   if (n.status !== "confirmed") c.setAttribute("fill-opacity", "0.5");
   const t = document.createElementNS(NS, "text");
-  t.setAttribute("dy", (SIZE[n.cat] || 15) + 12); t.textContent = n.name;
+  t.setAttribute("dy", 0); t.textContent = n.name;   // 노드 원 안 중앙(플랫폼과 동일)
   g.appendChild(c); g.appendChild(t); gNodes.appendChild(g);
   g.addEventListener("pointerdown", e => startDrag(e, n));
   return { n, g, c, t };
@@ -246,8 +246,8 @@ function visibleLink(l) { return relOn.has(l.r) && visibleNode(l.s) && visibleNo
 function tick() {
   const vis = DATA.nodes.filter(visibleNode);
   const vl = links.filter(visibleLink);
-  const REP = 4200 * spread * spread;
-  const LD = 66 * spread;
+  const REP = 5800 * spread * spread;
+  const LD = 90 * spread;
   const K = 0.045, GRAV = 0.012, DAMP = 0.85;
   for (let i = 0; i < vis.length; i++) for (let j = i + 1; j < vis.length; j++) {
     const a = vis[i], b = vis[j]; let dx = a.x - b.x, dy = a.y - b.y;
@@ -313,10 +313,14 @@ svg.addEventListener("pointermove", e => {
   const p = toGraph(e); drag.n.fx = p.x + drag.dx; drag.n.fy = p.y + drag.dy; drag.moved = true; reheat(0.4);
 });
 svg.addEventListener("pointerup", e => {
-  if (drag && !drag.pan && !drag.moved) select(drag.n);   // 클릭(이동 없음) = 선택
-  if (drag && !drag.pan && drag.moved) { /* 드래그 후 고정 유지 */ }
+  if (drag && !drag.pan && !drag.moved) {
+    select(selected === drag.n.id ? null : drag.n);   // 같은 노드 재클릭 = 선택 해제
+  } else if (drag && drag.pan && !drag.moved) {
+    select(null);   // 빈 곳 클릭 = 선택 해제
+  }
   svg.classList.remove("grabbing"); drag = null;
 });
+window.addEventListener("keydown", e => { if (e.key === "Escape") select(null); });   // ESC = 선택 해제
 
 // ---- 선택 / 상세 ----
 function select(n) {
